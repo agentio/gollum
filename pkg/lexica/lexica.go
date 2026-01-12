@@ -33,13 +33,12 @@ func (lexica *Lexica) LoadFile(path string) error {
 	if err != nil {
 		return err
 	}
-	log.Infof("%s (%d)", path, len(b))
 	var lexicon Lexicon
 	err = json.Unmarshal(b, &lexicon)
 	if err != nil {
 		return err
 	}
-	log.Debugf("%+v", lexicon)
+	log.Debugf("%s %+v", path, lexicon)
 	lexicon.Validate(path)
 	return nil
 }
@@ -65,10 +64,70 @@ func (lexicon *Lexicon) Validate(path string) error {
 		log.Warnf("%s has no defs", path)
 	}
 	log.Infof("%s has %d defs", path, defCount)
+	for k, v := range lexicon.Defs {
+		v.Validate(path + ":" + k)
+	}
 	return nil
 }
 
 type Def struct {
 	Type        string `json:"type"`
 	Description string `json:"description"`
+
+	// object
+	Required   []string            `json:"required"`
+	Properties map[string]Property `json:"properties"`
+
+	// query
+	Parameters Parameters `json:"parameters"`
+	Output     Output     `json:"output"`
+}
+
+func (def *Def) Validate(path string) error {
+	log.Infof("%s has type %s", path, def.Type)
+	switch def.Type {
+	case "boolean":
+	case "integer":
+	case "string":
+	case "bytes":
+	case "cid-link":
+	case "blob":
+	case "array":
+	case "object":
+	case "params":
+	case "permission":
+	case "token":
+	case "ref":
+	case "union":
+	case "unknown":
+	case "record":
+	case "query":
+	case "procedure":
+	case "subscription":
+	case "permission-set":
+	default:
+		log.Warnf("%s has unrecognized type: %s", path, def.Type)
+	}
+	return nil
+}
+
+type Parameters struct {
+	Type       string              `json:"type"`
+	Properties map[string]Property `json:"properties"`
+}
+
+type Output struct {
+	Encoding string `json:"encoding"`
+	Schema   Schema `json:"schema"`
+}
+
+type Schema struct {
+	Type       string              `json:"type"`
+	Required   []string            `json:"required"`
+	Properties map[string]Property `json:"properties"`
+}
+
+type Property struct {
+	Type string `json:"type"`
+	Ref  string `json:"ref"`
 }
