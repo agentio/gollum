@@ -11,6 +11,7 @@ import (
 )
 
 type Lexica struct {
+	Lexicons []Lexicon
 }
 
 func (lexica *Lexica) LoadTree(root string) error {
@@ -40,6 +41,7 @@ func (lexica *Lexica) LoadFile(path string) error {
 	}
 	log.Debugf("%s %+v", path, lexicon)
 	lexicon.Validate(path)
+	lexica.Lexicons = append(lexica.Lexicons, lexicon)
 	return nil
 }
 
@@ -84,7 +86,7 @@ type Def struct {
 }
 
 func (def *Def) Validate(path string) error {
-	log.Infof("%s has type %s", path, def.Type)
+	log.Debugf("%s has type %s", path, def.Type)
 	switch def.Type {
 	case "boolean":
 	case "integer":

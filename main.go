@@ -29,7 +29,15 @@ func cmd() *cobra.Command {
 			log.SetLevel(ll)
 			lex := &lexica.Lexica{}
 			rootDir := "lexicons"
-			return lex.LoadTree(rootDir)
+			err = lex.LoadTree(rootDir)
+			if err != nil {
+				return err
+			}
+			err = lex.Generate("api")
+			if err != nil {
+				return err
+			}
+			return nil
 		},
 	}
 	cmd.Flags().StringVarP(&logLevel, "log-level", "l", "info", "log level (debug, info, warn, error, fatal)")
