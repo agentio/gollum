@@ -1,6 +1,7 @@
 package lexica
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"slices"
@@ -137,6 +138,16 @@ func generatefile(filename, packagename string, lexicon *Lexicon) error {
 		case "string":
 			s += "type " + defname + " string\n"
 		}
+	}
+
+	if true { // append lexicon source to generated file
+		filter := func(s string) string {
+			return strings.ReplaceAll(s, "*/*", "[ANY]")
+		}
+		b, _ := json.MarshalIndent(lexicon, "", "  ")
+		s += "/*\n"
+		s += filter(string(b)) + "\n"
+		s += "*/\n"
 	}
 
 	formatted, err := imports.Process(filename, []byte(s), nil)
