@@ -56,7 +56,7 @@ func generatefile(filename, packagename string, lexicon *Lexicon) error {
 
 	s += "// " + lexicon.Id + "\n\n"
 
-	s += `import "github.com/agentio/gollum/pkg/xrpc"` + "\n"
+	s += `import "github.com/agentio/slink/pkg/xrpc"` + "\n"
 
 	prefix := codeprefix(lexicon.Id)
 

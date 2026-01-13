@@ -1,4 +1,4 @@
-gollum:
+slink:
 	go install ./...
 
 all:

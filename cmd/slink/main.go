@@ -3,8 +3,8 @@ package main
 import (
 	"os"
 
-	"github.com/agentio/gollum/cmd/bootstrap/generate"
-	"github.com/agentio/gollum/cmd/gollum/atproto"
+	"github.com/agentio/slink/cmd/bootstrap/generate"
+	"github.com/agentio/slink/cmd/slink/atproto"
 	"github.com/spf13/cobra"
 )
 
@@ -15,7 +15,7 @@ func main() {
 }
 func cmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "gollum",
+		Use:   "slink",
 		Short: "my precious",
 	}
 	cmd.AddCommand(atproto.Cmd())

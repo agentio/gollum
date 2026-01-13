@@ -3,8 +3,8 @@ package getaccountinvitecodes
 import (
 	"log"
 
-	"github.com/agentio/gollum/gen/com_atproto"
-	xrpc_local "github.com/agentio/gollum/pkg/xrpc/local"
+	"github.com/agentio/slink/gen/com_atproto"
+	xrpc_local "github.com/agentio/slink/pkg/xrpc/local"
 	"github.com/spf13/cobra"
 )
 

@@ -1,4 +1,4 @@
-module github.com/agentio/gollum
+module github.com/agentio/slink
 
 go 1.25.1
 

@@ -1,7 +1,7 @@
 package generate
 
 import (
-	"github.com/agentio/gollum/pkg/lexica"
+	"github.com/agentio/slink/pkg/lexica"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 )

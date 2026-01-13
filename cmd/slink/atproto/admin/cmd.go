@@ -1,7 +1,7 @@
 package admin
 
 import (
-	"github.com/agentio/gollum/cmd/gollum/atproto/admin/getinvitecodes"
+	"github.com/agentio/slink/cmd/slink/atproto/admin/getinvitecodes"
 	"github.com/spf13/cobra"
 )
 

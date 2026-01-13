@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/agentio/gollum/cmd/bootstrap/generate"
+	"github.com/agentio/slink/cmd/bootstrap/generate"
 )
 
 func main() {

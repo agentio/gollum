@@ -8,8 +8,8 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/agentio/gollum/pkg/xrpc"
-	"github.com/agentio/gollum/pkg/xrpc/common"
+	"github.com/agentio/slink/pkg/xrpc"
+	"github.com/agentio/slink/pkg/xrpc/common"
 )
 
 type Client struct {
