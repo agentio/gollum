@@ -42,13 +42,13 @@ func names(id string) (string, string) {
 		return "", ""
 	}
 
-	d := "api" + "/" + parts[0] + "/" + parts[1]
+	d := "api" + "/" + parts[0] + "_" + parts[1]
 
 	os.MkdirAll(d, 0755)
 
 	filename := d + "/" + parts[2] + "_" + parts[3] + ".go"
 
-	packagename := parts[1]
+	packagename := parts[0] + "_" + parts[1]
 
 	return packagename, filename
 }
@@ -108,10 +108,16 @@ func generatefile(filename, packagename string, lexicon *Lexicon) error {
 				s += "}\n"
 			}
 
+		case "procedure":
+			s += fmt.Sprintf("// %+v\n", def)
+
 		case "object":
 			s += "type " + defname + " struct {\n"
 			s += renderproperties(lexicon, def.Properties, def.Required)
 			s += "}\n"
+
+		case "string":
+			s += "type " + defname + " string\n"
 		}
 	}
 
@@ -126,7 +132,7 @@ func generatefile(filename, packagename string, lexicon *Lexicon) error {
 func parseParameters(parameters Parameters) (string, bool) {
 	var parms []string
 	var parameterNames []string
-	for parameterName, _ := range parameters.Properties {
+	for parameterName := range parameters.Properties {
 		parameterNames = append(parameterNames, parameterName)
 	}
 	sort.Strings(parameterNames)
@@ -138,6 +144,8 @@ func parseParameters(parameters Parameters) (string, bool) {
 			declaration += "int64"
 		case "string":
 			declaration += "string"
+		case "boolean":
+			declaration += "bool"
 		default:
 			return "/* FIXME */", false
 		}
@@ -217,6 +225,30 @@ func resolveItemsType(lexicon *Lexicon, items Items) string {
 			}
 			typename := capitalize(parts[2]) + capitalize(parts[3]) + "_" + capitalize(ref[1:])
 			return "*" + typename
+		} else {
+			parts := strings.Split(ref, "#")
+			if len(parts) != 2 {
+				return "/* FIXME " + fmt.Sprintf("%+v", ref) + " */ string"
+			}
+			id := parts[0]
+			tag := parts[1]
+			idparts := strings.Split(id, ".")
+			if len(idparts) != 4 {
+				return "/* FIXME " + fmt.Sprintf("%+v", ref) + " */ string"
+			}
+			name := capitalize(idparts[2]) + capitalize(idparts[3])
+			if tag != "main" {
+				name += "_" + capitalize(tag)
+			}
+			// is the ref target in the same package as the lexicon?
+			// if not, we need to add the package name prefix
+
+			if !strings.HasPrefix(lexicon.Id, idparts[0]+"."+idparts[1]+".") {
+				prefix := idparts[0] + "_" + idparts[1]
+				name = prefix + "." + name
+			}
+
+			return "*" + name + "/* " + lexicon.Id + " " + ref + " */"
 		}
 	default:
 	}
