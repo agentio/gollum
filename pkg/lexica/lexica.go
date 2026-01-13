@@ -39,7 +39,6 @@ func (lexica *Lexica) LoadFile(path string) error {
 	if err != nil {
 		return err
 	}
-	log.Debugf("%s %+v", path, lexicon)
 	lexicon.Validate(path)
 	lexica.Lexicons = append(lexica.Lexicons, lexicon)
 	return nil
@@ -65,7 +64,6 @@ func (lexicon *Lexicon) Validate(path string) error {
 	if defCount == 0 {
 		log.Warnf("%s has no defs", path)
 	}
-	log.Infof("%s has %d defs", path, defCount)
 	for k, v := range lexicon.Defs {
 		v.Validate(path + ":" + k)
 	}
@@ -89,7 +87,6 @@ type Def struct {
 }
 
 func (def *Def) Validate(path string) error {
-	log.Debugf("%s has type %s", path, def.Type)
 	switch def.Type {
 	case "boolean":
 	case "integer":

@@ -22,7 +22,7 @@ func (lexica *Lexica) Generate(root string) error {
 	for _, lexicon := range lexica.Lexicons {
 		wg.Go(func() {
 			packagename, filename := names(root, lexicon.Id)
-			log.Infof("%s %s", lexicon.Id, filename)
+			log.Debugf("%s %s", lexicon.Id, filename)
 			if packagename != "" && filename != "" {
 				generatefile(filename, packagename, &lexicon)
 			}
@@ -36,7 +36,7 @@ func (lexica *Lexica) Generate(root string) error {
 func names(root, id string) (string, string) {
 	parts := strings.Split(id, ".")
 	if len(parts) != 4 {
-		log.Errorf("wtf %s", id)
+		log.Warnf("skipping three-segment name %s", id)
 		return "", ""
 	}
 
@@ -61,7 +61,6 @@ func generatefile(filename, packagename string, lexicon *Lexicon) error {
 	prefix := codeprefix(lexicon.Id)
 
 	for name, def := range lexicon.Defs {
-		log.Infof("%s %s", name, def.Type)
 
 		var defname string
 		if name == "main" {
@@ -134,6 +133,9 @@ func generatefile(filename, packagename string, lexicon *Lexicon) error {
 
 		case "string":
 			s += "type " + defname + " string\n"
+
+		default:
+			log.Warnf("skipping %s.%s (type %s)", lexicon.Id, name, def.Type)
 		}
 	}
 
