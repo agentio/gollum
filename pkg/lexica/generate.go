@@ -58,7 +58,7 @@ func generatefile(filename, packagename string, lexicon *Lexicon) error {
 
 	s += "// " + lexicon.Id + "\n\n"
 
-	s += `import "github.com/agentio/atiquette/pkg/xrpc"` + "\n"
+	s += `import "github.com/agentio/gollum/pkg/xrpc"` + "\n"
 
 	prefix := codeprefix(lexicon.Id)
 
@@ -73,15 +73,13 @@ func generatefile(filename, packagename string, lexicon *Lexicon) error {
 		}
 
 		switch def.Type {
-
 		case "query":
 			if def.Output.Encoding == "application/json" {
-
+				// output
 				s += "type " + defname + "_Output struct {\n"
 				s += renderproperties(lexicon, def.Output.Schema.Properties, def.Output.Schema.Required)
-				s += "}\n"
-
-				// let's get the parameters
+				s += "}\n\n"
+				// parameters
 				params := ""
 				paramsok := false
 				if def.Parameters.Type == "params" {
@@ -89,10 +87,9 @@ func generatefile(filename, packagename string, lexicon *Lexicon) error {
 					params, paramsok = parseParameters(def.Parameters)
 					s += "// " + params + "\n"
 				}
-
+				// func
 				s += "func " + defname + "(ctx context.Context, c xrpc.Client" + params + ") (*" + defname + "_Output" + ", error) {\n"
 				s += "  var output " + defname + "_Output" + "\n"
-
 				s += "params := map[string]interface{}{\n"
 				if paramsok {
 					for parameterName, _ := range def.Parameters.Properties {
@@ -103,18 +100,39 @@ func generatefile(filename, packagename string, lexicon *Lexicon) error {
 				s += `if err := c.Do(ctx, xrpc.Query, "", "` + lexicon.Id + `", params, nil, &output); err != nil {` + "\n"
 				s += "return nil, err\n"
 				s += "}\n"
-
 				s += "  return &output, nil\n"
-				s += "}\n"
+				s += "}\n\n"
+			} else {
+				s += fmt.Sprintf("// FIXME (query) %+v\n", def)
 			}
 
 		case "procedure":
-			s += fmt.Sprintf("// %+v\n", def)
+			if def.Output.Encoding == "application/json" || def.Input.Encoding == "application/json" {
+				// input
+				s += "type " + defname + "_Input struct {\n"
+				s += renderproperties(lexicon, def.Input.Schema.Properties, def.Input.Schema.Required)
+				s += "}\n\n"
+				// output
+				s += "type " + defname + "_Output struct {\n"
+				s += renderproperties(lexicon, def.Output.Schema.Properties, def.Output.Schema.Required)
+				s += "}\n\n"
+				// func
+				s += "// " + def.Description + "\n"
+				s += "func " + defname + "(ctx context.Context, c xrpc.Client, input *" + defname + "_Input) (*" + defname + "_Output" + ", error) {\n"
+				s += "  var output " + defname + "_Output" + "\n"
+				s += `if err := c.Do(ctx, xrpc.Procedure, "application/json", "` + lexicon.Id + `", nil, input, &output); err != nil {` + "\n"
+				s += "return nil, err\n"
+				s += "}\n"
+				s += "  return &output, nil\n"
+				s += "}\n\n"
+			} else {
+				s += fmt.Sprintf("// FIXME (procedure) %+v\n", def)
+			}
 
 		case "object":
 			s += "type " + defname + " struct {\n"
 			s += renderproperties(lexicon, def.Properties, def.Required)
-			s += "}\n"
+			s += "}\n\n"
 
 		case "string":
 			s += "type " + defname + " string\n"
@@ -186,19 +204,19 @@ func renderproperties(lexicon *Lexicon, properties map[string]Property, required
 			if required {
 				s += capitalize(propname) + " bool `json:" + `"` + propname + `"` + "`\n"
 			} else {
-				s += capitalize(propname) + " *bool `json:" + `"` + propname + `"` + "`\n"
+				s += capitalize(propname) + " *bool `json:" + `"` + propname + `,omitempty"` + "`\n"
 			}
 		case "integer":
 			if required {
 				s += capitalize(propname) + " int64 `json:" + `"` + propname + `"` + "`\n"
 			} else {
-				s += capitalize(propname) + " *int64 `json:" + `"` + propname + `"` + "`\n"
+				s += capitalize(propname) + " *int64 `json:" + `"` + propname + `,omitempty"` + "`\n"
 			}
 		case "string":
 			if required {
 				s += capitalize(propname) + " string `json:" + `"` + propname + `"` + "`\n"
 			} else {
-				s += capitalize(propname) + " *string `json:" + `"` + propname + `"` + "`\n"
+				s += capitalize(propname) + " *string `json:" + `"` + propname + `,omitempty"` + "`\n"
 			}
 		case "array":
 			itemstype := resolveItemsType(lexicon, property.Items)

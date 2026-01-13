@@ -83,6 +83,9 @@ type Def struct {
 	// query
 	Parameters Parameters `json:"parameters"`
 	Output     Output     `json:"output"`
+
+	// procedure
+	Input Input `json:"input"`
 }
 
 func (def *Def) Validate(path string) error {
@@ -119,6 +122,11 @@ type Parameters struct {
 }
 
 type Output struct {
+	Encoding string `json:"encoding"`
+	Schema   Schema `json:"schema"`
+}
+
+type Input struct {
 	Encoding string `json:"encoding"`
 	Schema   Schema `json:"schema"`
 }

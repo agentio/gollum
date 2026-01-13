@@ -1,9 +1,10 @@
 module github.com/agentio/gollum
 
-go 1.25
+go 1.25.1
 
 require (
 	github.com/agentio/atiquette v0.0.0-20250519003452-9d778dfd2d16
+	github.com/agentio/sidecar v0.1.16
 	github.com/charmbracelet/log v0.4.2
 	github.com/spf13/cobra v1.10.2
 	golang.org/x/tools v0.41.0
@@ -23,10 +24,13 @@ require (
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/muesli/termenv v0.16.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
-	github.com/spf13/pflag v1.0.9 // indirect
+	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d // indirect
 	golang.org/x/mod v0.32.0 // indirect
+	golang.org/x/net v0.49.0 // indirect
 	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/sys v0.40.0 // indirect
+	golang.org/x/text v0.33.0 // indirect
+	google.golang.org/protobuf v1.36.10 // indirect
 )
