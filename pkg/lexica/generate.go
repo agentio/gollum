@@ -1,40 +1,224 @@
 package lexica
 
 import (
+	"fmt"
 	"os"
+	"slices"
+	"sort"
 	"strings"
+	"sync"
 
 	"github.com/charmbracelet/log"
+	"golang.org/x/tools/imports"
 )
 
 func (lexica *Lexica) Generate(root string) error {
 
 	os.RemoveAll("api")
 
-	for _, lexicon := range lexica.Lexicons {
-		log.Infof("%s %s", lexicon.Id, filename(lexicon.Id))
+	var wg sync.WaitGroup
 
+	for _, lexicon := range lexica.Lexicons {
+		wg.Go(func() {
+			packagename, filename := names(lexicon.Id)
+			log.Infof("%s %s", lexicon.Id, filename)
+
+			if packagename != "" && filename != "" {
+
+				generatefile(filename, packagename, &lexicon)
+
+			}
+		})
 	}
 
+	wg.Wait()
 	return nil
 }
 
-func filename(id string) string {
+func names(id string) (string, string) {
 	parts := strings.Split(id, ".")
 	if len(parts) != 4 {
 		log.Errorf("wtf %s", id)
-		return ""
+		return "", ""
 	}
 
-	d := "api" + "/" + parts[0] + "_" + parts[1]
+	d := "api" + "/" + parts[0] + "/" + parts[1]
 
 	os.MkdirAll(d, 0755)
 
-	f := d + "/" + parts[2] + "" + parts[3] + ".go"
+	filename := d + "/" + parts[2] + "_" + parts[3] + ".go"
 
-	b := []byte("package " + parts[0] + "_" + parts[1] + "\n")
+	packagename := parts[1]
 
-	os.WriteFile(f, b, 0644)
+	return packagename, filename
+}
 
-	return f
+func generatefile(filename, packagename string, lexicon *Lexicon) error {
+	s := "package " + packagename + "\n\n"
+
+	s += "// " + lexicon.Id + "\n\n"
+
+	s += `import "github.com/agentio/atiquette/pkg/xrpc"` + "\n"
+
+	prefix := codeprefix(lexicon.Id)
+
+	for name, def := range lexicon.Defs {
+		log.Infof("%s %s", name, def.Type)
+
+		var defname string
+		if name == "main" {
+			defname = prefix
+		} else {
+			defname = prefix + "_" + capitalize(name)
+		}
+
+		switch def.Type {
+
+		case "query":
+			if def.Output.Encoding == "application/json" {
+
+				s += "type " + defname + "_Output struct {\n"
+				s += renderproperties(lexicon, def.Output.Schema.Properties, def.Output.Schema.Required)
+				s += "}\n"
+
+				// let's get the parameters
+				params := ""
+				paramsok := false
+				if def.Parameters.Type == "params" {
+					s += "// " + fmt.Sprintf("%+v\n", def.Parameters)
+					params, paramsok = parseParameters(def.Parameters)
+					s += "// " + params + "\n"
+				}
+
+				s += "func " + defname + "(ctx context.Context, c xrpc.Client" + params + ") (*" + defname + "_Output" + ", error) {\n"
+				s += "  var output " + defname + "_Output" + "\n"
+
+				s += "params := map[string]interface{}{\n"
+				if paramsok {
+					for parameterName, _ := range def.Parameters.Properties {
+						s += `"` + parameterName + `":` + parameterName + ",\n"
+					}
+				}
+				s += "}\n"
+				s += `if err := c.Do(ctx, xrpc.Query, "", "` + lexicon.Id + `", params, nil, &output); err != nil {` + "\n"
+				s += "return nil, err\n"
+				s += "}\n"
+
+				s += "  return &output, nil\n"
+				s += "}\n"
+			}
+
+		case "object":
+			s += "type " + defname + " struct {\n"
+			s += renderproperties(lexicon, def.Properties, def.Required)
+			s += "}\n"
+		}
+	}
+
+	formatted, err := imports.Process(filename, []byte(s), nil)
+	if err != nil {
+		log.Fatalf("failed to run goimports: %v\n%s", err, s)
+	}
+
+	return os.WriteFile(filename, []byte(formatted), 0644)
+}
+
+func parseParameters(parameters Parameters) (string, bool) {
+	var parms []string
+	var parameterNames []string
+	for parameterName, _ := range parameters.Properties {
+		parameterNames = append(parameterNames, parameterName)
+	}
+	sort.Strings(parameterNames)
+	for _, parameterName := range parameterNames {
+		parameterValue := parameters.Properties[parameterName]
+		declaration := parameterName + " "
+		switch parameterValue.Type {
+		case "integer":
+			declaration += "int64"
+		case "string":
+			declaration += "string"
+		default:
+			return "/* FIXME */", false
+		}
+		parms = append(parms, declaration)
+	}
+	return ", " + strings.Join(parms, ", "), true
+}
+
+func codeprefix(id string) string {
+	parts := strings.Split(id, ".")
+
+	if len(parts) != 4 {
+		return ""
+	}
+
+	return capitalize(parts[2]) + capitalize(parts[3])
+
+}
+
+func capitalize(s string) string {
+	return strings.ToUpper(s[0:1]) + s[1:]
+}
+
+func renderproperties(lexicon *Lexicon, properties map[string]Property, required []string) string {
+	var s string
+
+	var propnames []string
+	for propname, _ := range properties {
+		propnames = append(propnames, propname)
+	}
+	sort.Strings(propnames)
+
+	for _, propname := range propnames {
+		property := properties[propname]
+		required := slices.Contains(required, propname)
+		switch property.Type {
+		case "boolean":
+			if required {
+				s += capitalize(propname) + " bool `json:" + `"` + propname + `"` + "`\n"
+			} else {
+				s += capitalize(propname) + " *bool `json:" + `"` + propname + `"` + "`\n"
+			}
+		case "integer":
+			if required {
+				s += capitalize(propname) + " int64 `json:" + `"` + propname + `"` + "`\n"
+			} else {
+				s += capitalize(propname) + " *int64 `json:" + `"` + propname + `"` + "`\n"
+			}
+		case "string":
+			if required {
+				s += capitalize(propname) + " string `json:" + `"` + propname + `"` + "`\n"
+			} else {
+				s += capitalize(propname) + " *string `json:" + `"` + propname + `"` + "`\n"
+			}
+		case "array":
+			itemstype := resolveItemsType(lexicon, property.Items)
+			if required {
+				s += capitalize(propname) + " []" + itemstype + " `json:" + `"` + propname + `"` + "`\n"
+			} else {
+				s += "// FIXME: skipping optional array\n"
+			}
+		default:
+			s += "// FIXME: " + propname + " " + fmt.Sprintf("required=%t %+v", required, property) + "\n"
+		}
+	}
+	return s
+}
+
+func resolveItemsType(lexicon *Lexicon, items Items) string {
+	switch items.Type {
+	case "ref":
+		ref := items.Ref
+		if ref[0] == '#' {
+			parts := strings.Split(lexicon.Id, ".")
+			if len(parts) != 4 {
+				return "/* FIXME: i can't parse this " + lexicon.Id + " */ string"
+			}
+			typename := capitalize(parts[2]) + capitalize(parts[3]) + "_" + capitalize(ref[1:])
+			return "*" + typename
+		}
+	default:
+	}
+	return "/* FIXME */ string"
 }

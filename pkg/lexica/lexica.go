@@ -130,6 +130,12 @@ type Schema struct {
 }
 
 type Property struct {
+	Type  string `json:"type"`
+	Ref   string `json:"ref"`
+	Items Items  `json:"items"`
+}
+
+type Items struct {
 	Type string `json:"type"`
 	Ref  string `json:"ref"`
 }
