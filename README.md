@@ -7,4 +7,4 @@
 To install `gollum` on any system with Go installed:
 1. clone the repo.
 2. copy lexicons into a top-level directory called `lexicons`.
-3. run `make`.
+3. run `make all`.

@@ -1,4 +1,6 @@
+gollum:
+	go install ./...
+
 all:
-	go install ./cmd/generate-gollum
-	generate-gollum
+	go run ./cmd/bootstrap
 	go install ./...

@@ -15,19 +15,16 @@ import (
 
 func (lexica *Lexica) Generate(root string) error {
 
-	os.RemoveAll("api")
+	os.RemoveAll(root)
 
 	var wg sync.WaitGroup
 
 	for _, lexicon := range lexica.Lexicons {
 		wg.Go(func() {
-			packagename, filename := names(lexicon.Id)
+			packagename, filename := names(root, lexicon.Id)
 			log.Infof("%s %s", lexicon.Id, filename)
-
 			if packagename != "" && filename != "" {
-
 				generatefile(filename, packagename, &lexicon)
-
 			}
 		})
 	}
@@ -36,14 +33,14 @@ func (lexica *Lexica) Generate(root string) error {
 	return nil
 }
 
-func names(id string) (string, string) {
+func names(root, id string) (string, string) {
 	parts := strings.Split(id, ".")
 	if len(parts) != 4 {
 		log.Errorf("wtf %s", id)
 		return "", ""
 	}
 
-	d := "api" + "/" + parts[0] + "_" + parts[1]
+	d := root + "/" + parts[0] + "_" + parts[1]
 
 	os.MkdirAll(d, 0755)
 

@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/agentio/gollum/cmd/generate-gollum/generate"
+	"github.com/agentio/gollum/cmd/bootstrap/generate"
 	"github.com/agentio/gollum/cmd/gollum/atproto"
 	"github.com/spf13/cobra"
 )

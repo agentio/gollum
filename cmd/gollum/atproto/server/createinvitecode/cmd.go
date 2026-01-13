@@ -3,7 +3,7 @@ package createinvitecode
 import (
 	"encoding/json"
 
-	"github.com/agentio/gollum/api/com_atproto"
+	"github.com/agentio/gollum/gen/com_atproto"
 	xrpc_local "github.com/agentio/gollum/pkg/xrpc/local"
 	"github.com/spf13/cobra"
 )
