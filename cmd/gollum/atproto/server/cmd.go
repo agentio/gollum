@@ -1,8 +1,8 @@
 package server
 
 import (
-	"github.com/agentio/gollum/cmd/atproto/server/createinvitecode"
-	"github.com/agentio/gollum/cmd/atproto/server/getaccountinvitecodes"
+	"github.com/agentio/gollum/cmd/gollum/atproto/server/createinvitecode"
+	"github.com/agentio/gollum/cmd/gollum/atproto/server/getaccountinvitecodes"
 	"github.com/spf13/cobra"
 )
 

@@ -1,0 +1,13 @@
+package main
+
+import (
+	"os"
+
+	"github.com/agentio/gollum/cmd/gollum/generate"
+)
+
+func main() {
+	if err := generate.Cmd().Execute(); err != nil {
+		os.Exit(1)
+	}
+}

@@ -1,7 +1,7 @@
 package sync
 
 import (
-	"github.com/agentio/gollum/cmd/atproto/sync/listrepos"
+	"github.com/agentio/gollum/cmd/gollum/atproto/sync/listrepos"
 	"github.com/spf13/cobra"
 )
 

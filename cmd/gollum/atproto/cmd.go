@@ -1,9 +1,9 @@
 package atproto
 
 import (
-	"github.com/agentio/gollum/cmd/atproto/admin"
-	"github.com/agentio/gollum/cmd/atproto/server"
-	"github.com/agentio/gollum/cmd/atproto/sync"
+	"github.com/agentio/gollum/cmd/gollum/atproto/admin"
+	"github.com/agentio/gollum/cmd/gollum/atproto/server"
+	"github.com/agentio/gollum/cmd/gollum/atproto/sync"
 	"github.com/spf13/cobra"
 )
 
