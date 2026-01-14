@@ -67,7 +67,7 @@ func generatefile(filename, packagename string, lexicon *Lexicon) error {
 
 		switch def.Type {
 		case "query":
-			if def.Output.Encoding == "application/json" {
+			if def.Output != nil && def.Output.Encoding == "application/json" {
 				// output
 				s += "type " + defname + "_Output struct {\n"
 				s += renderproperties(lexicon, def.Output.Schema.Properties, def.Output.Schema.Required)
@@ -75,7 +75,7 @@ func generatefile(filename, packagename string, lexicon *Lexicon) error {
 				// parameters
 				params := ""
 				paramsok := false
-				if def.Parameters.Type == "params" {
+				if def.Parameters != nil && def.Parameters.Type == "params" {
 					s += "// " + fmt.Sprintf("%+v\n", def.Parameters)
 					params, paramsok = parseParameters(def.Parameters)
 					s += "// " + params + "\n"
@@ -100,7 +100,8 @@ func generatefile(filename, packagename string, lexicon *Lexicon) error {
 			}
 
 		case "procedure":
-			if def.Output.Encoding == "application/json" || def.Input.Encoding == "application/json" {
+			if def.Output != nil && def.Output.Encoding == "application/json" &&
+				def.Input != nil && def.Input.Encoding == "application/json" {
 				// input
 				s += "type " + defname + "_Input struct {\n"
 				s += renderproperties(lexicon, def.Input.Schema.Properties, def.Input.Schema.Required)
@@ -162,7 +163,7 @@ func generatefile(filename, packagename string, lexicon *Lexicon) error {
 	return os.WriteFile(filename, []byte(formatted), 0644)
 }
 
-func parseParameters(parameters Parameters) (string, bool) {
+func parseParameters(parameters *Parameters) (string, bool) {
 	var parms []string
 	var parameterNames []string
 	for parameterName := range parameters.Properties {

@@ -62,10 +62,10 @@ func Lookup(id string) *Lexicon {
 
 // https://atproto.com/specs/lexicon#lexicon-files
 type Lexicon struct {
-	Lexicon     int            `json:"lexicon"`
-	Id          string         `json:"id"`
-	Description string         `json:"description"`
-	Defs        map[string]Def `json:"defs"`
+	Lexicon     int             `json:"lexicon"`
+	Id          string          `json:"id"`
+	Description string          `json:"description"`
+	Defs        map[string]*Def `json:"defs"`
 }
 
 func (lexicon *Lexicon) Lookup(id string) *Def {
@@ -73,8 +73,9 @@ func (lexicon *Lexicon) Lookup(id string) *Def {
 	if !ok {
 		return nil
 	}
-	return &d
+	return d
 }
+
 func (lexicon *Lexicon) Validate(path string) error {
 	if lexicon.Lexicon != 1 {
 		log.Warnf("%s unexpected value for lexicon version: %d", path, lexicon.Lexicon)
@@ -98,16 +99,17 @@ type Def struct {
 	Description string `json:"description"`
 
 	// object
-	Required   []string            `json:"required"`
-	Properties map[string]Property `json:"properties"`
+	Required   []string            `json:"required,omitempty"`
+	Properties map[string]Property `json:"properties,omitempty"`
 
 	// query
-	Parameters Parameters `json:"parameters"`
-	Output     Output     `json:"output"`
+	Parameters *Parameters `json:"parameters,omitempty"`
+	Output     *Output     `json:"output,omitempty"`
 
 	// procedure
-	Input Input `json:"input"`
+	Input *Input `json:"input,omitempty"`
 
+	// array
 	Items *Items `json:"items,omitempty"`
 }
 
