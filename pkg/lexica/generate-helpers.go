@@ -1,214 +1,11 @@
 package lexica
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
 	"slices"
 	"sort"
 	"strings"
-	"sync"
-
-	"github.com/charmbracelet/log"
-	"golang.org/x/tools/imports"
 )
-
-func (lexica *Lexica) Generate(root string) error {
-	os.RemoveAll(root)
-	var wg sync.WaitGroup
-	for _, lexicon := range lexica.Lexicons {
-		wg.Go(func() {
-			packagename, filename := names(root, lexicon.Id)
-			log.Debugf("%s %s", lexicon.Id, filename)
-			if packagename != "" && filename != "" {
-				generatefile(filename, packagename, lexicon)
-			}
-		})
-	}
-	wg.Wait()
-	return nil
-}
-
-func names(root, id string) (string, string) {
-	parts := strings.Split(id, ".")
-	if len(parts) != 4 {
-		log.Warnf("skipping three-segment name %s", id)
-		return "", ""
-	}
-
-	d := root + "/" + parts[0] + "_" + parts[1]
-
-	os.MkdirAll(d, 0755)
-
-	filename := d + "/" + parts[2] + "_" + parts[3] + ".go"
-
-	packagename := parts[0] + "_" + parts[1]
-
-	return packagename, filename
-}
-
-func generatefile(filename, packagename string, lexicon *Lexicon) error {
-	s := "package " + packagename + "\n\n"
-
-	s += "// " + lexicon.Id + "\n\n"
-
-	s += `import "github.com/agentio/slink/pkg/xrpc"` + "\n"
-
-	s += `import "github.com/agentio/slink/gen/com_atproto"` + "\n"
-	s += `import "github.com/agentio/slink/gen/app_bsky"` + "\n"
-
-	prefix := codeprefix(lexicon.Id)
-
-	for name, def := range lexicon.Defs {
-
-		var defname string
-		if name == "main" {
-			defname = prefix
-		} else {
-			defname = prefix + "_" + capitalize(name)
-		}
-
-		switch def.Type {
-		case "query":
-			if def.Output != nil && def.Output.Encoding == "application/json" {
-				// output
-				s += "type " + defname + "_Output struct {\n"
-				s += renderProperties(lexicon, defname+"_Output", def.Output.Schema.Properties, def.Output.Schema.Required)
-				s += "}\n\n"
-				s += renderDependentTypes(lexicon, defname+"_Output", def.Output.Schema.Properties, def.Output.Schema.Required)
-				// parameters
-				params := ""
-				paramsok := false
-				if def.Parameters != nil && def.Parameters.Type == "params" {
-					params, paramsok = parseParameters(def.Parameters)
-				}
-				// func
-				s += "// " + def.Description + "\n"
-				s += "func " + defname + "(ctx context.Context, c xrpc.Client" + params + ") (*" + defname + "_Output" + ", error) {\n"
-				s += "  var output " + defname + "_Output" + "\n"
-				s += "params := map[string]interface{}{\n"
-				if paramsok {
-					for parameterName, _ := range def.Parameters.Properties {
-						s += `"` + parameterName + `":` + parameterName + ",\n"
-					}
-				}
-				s += "}\n"
-				s += `if err := c.Do(ctx, xrpc.Query, "", "` + lexicon.Id + `", params, nil, &output); err != nil {` + "\n"
-				s += "return nil, err\n"
-				s += "}\n"
-				s += "  return &output, nil\n"
-				s += "}\n\n"
-			} else if def.Output != nil {
-				s += fmt.Sprintf("// FIXME (query, output type %s)\n", def.Output.Encoding)
-			} else {
-				s += fmt.Sprintf("// FIXME (query, no output) %+v\n", def)
-			}
-
-		case "procedure":
-			if def.Output != nil && def.Output.Encoding == "application/json" &&
-				def.Input != nil && def.Input.Encoding == "application/json" {
-				// input
-				s += "type " + defname + "_Input struct {\n"
-				s += renderProperties(lexicon, defname+"_Input", def.Input.Schema.Properties, def.Input.Schema.Required)
-				s += "}\n\n"
-				s += renderDependentTypes(lexicon, defname+"_Input", def.Input.Schema.Properties, def.Input.Schema.Required)
-				// output
-				s += "type " + defname + "_Output struct {\n"
-				s += renderProperties(lexicon, defname+"_Output", def.Output.Schema.Properties, def.Output.Schema.Required)
-				s += "}\n\n"
-				s += renderDependentTypes(lexicon, defname+"_Output", def.Output.Schema.Properties, def.Output.Schema.Required)
-				// func
-				s += "// " + def.Description + "\n"
-				s += "func " + defname + "(ctx context.Context, c xrpc.Client, input *" + defname + "_Input) (*" + defname + "_Output" + ", error) {\n"
-				s += "  var output " + defname + "_Output" + "\n"
-				s += `if err := c.Do(ctx, xrpc.Procedure, "application/json", "` + lexicon.Id + `", nil, input, &output); err != nil {` + "\n"
-				s += "return nil, err\n"
-				s += "}\n"
-				s += "  return &output, nil\n"
-				s += "}\n\n"
-			} else if def.Input == nil && def.Output != nil && def.Output.Encoding == "application/json" {
-				// output
-				s += "type " + defname + "_Output struct {\n"
-				s += renderProperties(lexicon, defname+"_Output", def.Output.Schema.Properties, def.Output.Schema.Required)
-				s += "}\n\n"
-				s += renderDependentTypes(lexicon, defname+"_Output", def.Output.Schema.Properties, def.Output.Schema.Required)
-				// func
-				s += "// " + def.Description + "\n"
-				s += "func " + defname + "(ctx context.Context, c xrpc.Client) (*" + defname + "_Output" + ", error) {\n"
-				s += "  var output " + defname + "_Output" + "\n"
-				s += `if err := c.Do(ctx, xrpc.Procedure, "application/json", "` + lexicon.Id + `", nil, nil, &output); err != nil {` + "\n"
-				s += "return nil, err\n"
-				s += "}\n"
-				s += "  return &output, nil\n"
-				s += "}\n\n"
-			} else if def.Output == nil && def.Input != nil && def.Input.Encoding == "application/json" {
-				// input
-				s += "type " + defname + "_Input struct {\n"
-				s += renderProperties(lexicon, defname+"_Input", def.Input.Schema.Properties, def.Input.Schema.Required)
-				s += "}\n\n"
-				s += renderDependentTypes(lexicon, defname+"_Input", def.Input.Schema.Properties, def.Input.Schema.Required)
-				// func
-				s += "// " + def.Description + "\n"
-				s += "func " + defname + "(ctx context.Context, c xrpc.Client, input *" + defname + "_Input) error {\n"
-				s += `return c.Do(ctx, xrpc.Procedure, "", "` + lexicon.Id + `", nil, input, nil)` + "\n"
-				s += "}\n\n"
-			} else if def.Output == nil && def.Input == nil {
-				// func
-				s += "// " + def.Description + "\n"
-				s += "func " + defname + "(ctx context.Context, c xrpc.Client) error {\n"
-				s += `return c.Do(ctx, xrpc.Procedure, "", "` + lexicon.Id + `", nil, nil, nil)` + "\n"
-				s += "}\n\n"
-			} else {
-				s += "// FIXME (procedure with unhandled types)\n"
-			}
-
-		case "object":
-			s += "// " + def.Description + "\n"
-			s += "type " + defname + " struct {\n"
-			s += renderProperties(lexicon, defname, def.Properties, def.Required)
-			s += "}\n\n"
-			s += renderDependentTypes(lexicon, defname, def.Properties, def.Required)
-
-		case "string":
-			s += "type " + defname + " string\n"
-
-		case "record":
-			s += "// " + def.Description + "\n"
-			s += "type " + defname + " struct {\n"
-			s += renderProperties(lexicon, defname, def.Properties, def.Required)
-			s += "}\n\n"
-			s += renderDependentTypes(lexicon, defname, def.Properties, def.Required)
-
-		case "array":
-			s += "type " + defname + "_Elem struct {\n"
-			s += "}\n\n"
-
-		case "token":
-			s += "// " + def.Description + "\n"
-			s += "const " + defname + " string = " + `"` + name + `"` + "\n\n"
-
-		default:
-			log.Warnf("skipping %s.%s (type %s)", lexicon.Id, name, def.Type)
-		}
-	}
-
-	if false { // append lexicon source to generated file
-		filter := func(s string) string {
-			return strings.ReplaceAll(s, "*/*", "[ANY]")
-		}
-		b, _ := json.MarshalIndent(lexicon, "", "  ")
-		s += "/*\n"
-		s += filter(string(b)) + "\n"
-		s += "*/\n"
-	}
-
-	formatted, err := imports.Process(filename, []byte(s), nil)
-	if err != nil {
-		log.Fatalf("failed to run goimports: %v\n%s", err, s)
-	}
-
-	return os.WriteFile(filename, []byte(formatted), 0644)
-}
 
 func parseParameters(parameters *Parameters) (string, bool) {
 	var parms []string
@@ -243,13 +40,10 @@ func parseParameters(parameters *Parameters) (string, bool) {
 
 func codeprefix(id string) string {
 	parts := strings.Split(id, ".")
-
 	if len(parts) != 4 {
 		return ""
 	}
-
 	return capitalize(parts[2]) + capitalize(parts[3])
-
 }
 
 func capitalize(s string) string {

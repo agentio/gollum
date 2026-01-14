@@ -21,11 +21,10 @@ func Cmd() *cobra.Command {
 			}
 			log.SetLevel(ll)
 			lex := lexica.NewLexica()
-			err = lex.LoadTree(input)
-			if err != nil {
+			if err = lex.LoadSources(input); err != nil {
 				return err
 			}
-			err = lex.Generate(output)
+			err = lex.GenerateCode(output)
 			if err != nil {
 				return err
 			}
