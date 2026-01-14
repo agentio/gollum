@@ -11,7 +11,14 @@ import (
 )
 
 type Lexica struct {
-	Lexicons []Lexicon
+	Lexicons []*Lexicon
+}
+
+var _lexica *Lexica
+
+func NewLexica() *Lexica {
+	_lexica = &Lexica{}
+	return _lexica
 }
 
 func (lexica *Lexica) LoadTree(root string) error {
@@ -40,7 +47,16 @@ func (lexica *Lexica) LoadFile(path string) error {
 		return err
 	}
 	lexicon.Validate(path)
-	lexica.Lexicons = append(lexica.Lexicons, lexicon)
+	lexica.Lexicons = append(lexica.Lexicons, &lexicon)
+	return nil
+}
+
+func Lookup(id string) *Lexicon {
+	for _, lexicon := range _lexica.Lexicons {
+		if lexicon.Id == id {
+			return lexicon
+		}
+	}
 	return nil
 }
 
@@ -52,6 +68,13 @@ type Lexicon struct {
 	Defs        map[string]Def `json:"defs"`
 }
 
+func (lexicon *Lexicon) Lookup(id string) *Def {
+	d, ok := lexicon.Defs[id]
+	if !ok {
+		return nil
+	}
+	return &d
+}
 func (lexicon *Lexicon) Validate(path string) error {
 	if lexicon.Lexicon != 1 {
 		log.Warnf("%s unexpected value for lexicon version: %d", path, lexicon.Lexicon)
@@ -84,6 +107,8 @@ type Def struct {
 
 	// procedure
 	Input Input `json:"input"`
+
+	Items *Items `json:"items,omitempty"`
 }
 
 func (def *Def) Validate(path string) error {
@@ -135,12 +160,13 @@ type Schema struct {
 }
 
 type Property struct {
-	Type  string `json:"type"`
-	Ref   string `json:"ref"`
-	Items Items  `json:"items"`
+	Type  string `json:"type,omitempty"`
+	Ref   string `json:"ref,omitempty"`
+	Items *Items `json:"items,omitempty"`
 }
 
 type Items struct {
-	Type string `json:"type"`
-	Ref  string `json:"ref"`
+	Type string   `json:"type,omitempty"`
+	Ref  string   `json:"ref,omitempty"`
+	Refs []string `json:"refs,omitempty"`
 }

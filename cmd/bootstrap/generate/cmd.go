@@ -20,7 +20,7 @@ func Cmd() *cobra.Command {
 				return err
 			}
 			log.SetLevel(ll)
-			lex := &lexica.Lexica{}
+			lex := lexica.NewLexica()
 			err = lex.LoadTree(input)
 			if err != nil {
 				return err

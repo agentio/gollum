@@ -14,21 +14,17 @@ import (
 )
 
 func (lexica *Lexica) Generate(root string) error {
-
 	os.RemoveAll(root)
-
 	var wg sync.WaitGroup
-
 	for _, lexicon := range lexica.Lexicons {
 		wg.Go(func() {
 			packagename, filename := names(root, lexicon.Id)
 			log.Debugf("%s %s", lexicon.Id, filename)
 			if packagename != "" && filename != "" {
-				generatefile(filename, packagename, &lexicon)
+				generatefile(filename, packagename, lexicon)
 			}
 		})
 	}
-
 	wg.Wait()
 	return nil
 }
@@ -134,6 +130,15 @@ func generatefile(filename, packagename string, lexicon *Lexicon) error {
 		case "string":
 			s += "type " + defname + " string\n"
 
+		case "record":
+			s += "type " + defname + " struct {\n"
+			s += renderproperties(lexicon, def.Properties, def.Required)
+			s += "}\n\n"
+
+		case "array":
+			s += "type " + defname + "_Elem struct {\n"
+			s += "}\n\n"
+
 		default:
 			log.Warnf("skipping %s.%s (type %s)", lexicon.Id, name, def.Type)
 		}
@@ -235,6 +240,9 @@ func renderproperties(lexicon *Lexicon, properties map[string]Property, required
 			} else {
 				s += "// FIXME: skipping optional array\n"
 			}
+		case "ref":
+			reftype := resolveRefType(lexicon, property.Ref)
+			s += capitalize(propname) + reftype + "\n"
 		default:
 			s += "// FIXME: " + propname + " " + fmt.Sprintf("required=%t %+v", required, property) + "\n"
 		}
@@ -242,8 +250,10 @@ func renderproperties(lexicon *Lexicon, properties map[string]Property, required
 	return s
 }
 
-func resolveItemsType(lexicon *Lexicon, items Items) string {
+func resolveItemsType(lexicon *Lexicon, items *Items) string {
 	switch items.Type {
+	case "string":
+		return "string"
 	case "ref":
 		ref := items.Ref
 		if ref[0] == '#' {
@@ -276,9 +286,58 @@ func resolveItemsType(lexicon *Lexicon, items Items) string {
 				name = prefix + "." + name
 			}
 
-			return "*" + name + "/* " + lexicon.Id + " " + ref + " */"
+			return "*" + name + "/* lexicon=" + lexicon.Id + " ref=" + ref + " */"
 		}
 	default:
 	}
 	return "/* FIXME */ string"
+}
+
+func resolveRefType(lexicon *Lexicon, ref string) string {
+	if ref[0] == '#' {
+		parts := strings.Split(lexicon.Id, ".")
+		if len(parts) != 4 {
+			return "/* FIXME: i can't parse this " + lexicon.Id + " */ string"
+		}
+		typename := capitalize(parts[2]) + capitalize(parts[3]) + "_" + capitalize(ref[1:])
+		return "*" + typename
+	} else {
+		parts := strings.Split(ref, "#")
+		if len(parts) != 2 {
+			return "/* FIXME " + fmt.Sprintf("%+v", ref) + " */ string"
+		}
+		id := parts[0]
+		tag := parts[1]
+
+		var reftype string
+		reflexicon := Lookup(id)
+		if reflexicon != nil {
+			refdef := reflexicon.Lookup(tag)
+			if refdef != nil {
+				reftype = refdef.Type
+			}
+		}
+
+		idparts := strings.Split(id, ".")
+		if len(idparts) != 4 {
+			return "/* FIXME " + fmt.Sprintf("%+v", ref) + " */ string"
+		}
+		name := capitalize(idparts[2]) + capitalize(idparts[3])
+		if tag != "main" {
+			name += "_" + capitalize(tag)
+		}
+		// is the ref target in the same package as the lexicon?
+		// if not, we need to add the package name prefix
+
+		if !strings.HasPrefix(lexicon.Id, idparts[0]+"."+idparts[1]+".") {
+			prefix := idparts[0] + "_" + idparts[1]
+			name = prefix + "." + name
+		}
+
+		if reftype == "array" {
+			return "[]" + name + "_Elem"
+		}
+
+		return "*" + name + "/* lexicon=" + lexicon.Id + " ref=" + ref + " type=" + reftype + " */"
+	}
 }
