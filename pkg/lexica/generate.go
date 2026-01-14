@@ -98,8 +98,10 @@ func generatefile(filename, packagename string, lexicon *Lexicon) error {
 				s += "}\n"
 				s += "  return &output, nil\n"
 				s += "}\n\n"
+			} else if def.Output != nil {
+				s += fmt.Sprintf("// FIXME (query, output type %s)\n", def.Output.Encoding)
 			} else {
-				s += fmt.Sprintf("// FIXME (query) %+v\n", def)
+				s += fmt.Sprintf("// FIXME (query, no output) %+v\n", def)
 			}
 
 		case "procedure":
@@ -124,8 +126,43 @@ func generatefile(filename, packagename string, lexicon *Lexicon) error {
 				s += "}\n"
 				s += "  return &output, nil\n"
 				s += "}\n\n"
+			} else if def.Input != nil && def.Input.Encoding == "application/json" && def.Output == nil {
+				// input
+				s += "type " + defname + "_Input struct {\n"
+				s += renderproperties(lexicon, defname+"_Input", def.Input.Schema.Properties, def.Input.Schema.Required)
+				s += "}\n\n"
+				s += renderunions(lexicon, defname+"_Input", def.Input.Schema.Properties, def.Input.Schema.Required)
+				// func
+				s += "// " + def.Description + "\n"
+				s += "func " + defname + "(ctx context.Context, c xrpc.Client, input *" + defname + "_Input) error {\n"
+				s += `if err := c.Do(ctx, xrpc.Procedure, "application/json", "` + lexicon.Id + `", nil, input, nil); err != nil {` + "\n"
+				s += "return err\n"
+				s += "}\n"
+				s += "  return nil\n"
+				s += "}\n\n"
+			} else if def.Output != nil && def.Output.Encoding == "application/json" && def.Input == nil {
+				// output
+				s += "type " + defname + "_Output struct {\n"
+				s += renderproperties(lexicon, defname+"_Output", def.Output.Schema.Properties, def.Output.Schema.Required)
+				s += "}\n\n"
+				s += renderunions(lexicon, defname+"_Output", def.Output.Schema.Properties, def.Output.Schema.Required)
+				// func
+				s += "// " + def.Description + "\n"
+				s += "func " + defname + "(ctx context.Context, c xrpc.Client) (*" + defname + "_Output" + ", error) {\n"
+				s += "  var output " + defname + "_Output" + "\n"
+				s += `if err := c.Do(ctx, xrpc.Procedure, "application/json", "` + lexicon.Id + `", nil, nil, &output); err != nil {` + "\n"
+				s += "return nil, err\n"
+				s += "}\n"
+				s += "  return &output, nil\n"
+				s += "}\n\n"
+			} else if def.Output == nil && def.Input == nil {
+				// func
+				s += "// " + def.Description + "\n"
+				s += "func " + defname + "(ctx context.Context, c xrpc.Client) error {\n"
+				s += `return c.Do(ctx, xrpc.Procedure, "application/json", "` + lexicon.Id + `", nil, nil, nil)` + "\n"
+				s += "}\n\n"
 			} else {
-				s += fmt.Sprintf("// FIXME (procedure) %+v\n", def)
+				s += "// FIXME (procedure with unhandled types)\n"
 			}
 
 		case "object":
