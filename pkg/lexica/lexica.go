@@ -162,9 +162,10 @@ type Schema struct {
 }
 
 type Property struct {
-	Type  string `json:"type,omitempty"`
-	Ref   string `json:"ref,omitempty"`
-	Items *Items `json:"items,omitempty"`
+	Type  string   `json:"type,omitempty"`
+	Ref   string   `json:"ref,omitempty"`
+	Refs  []string `json:"refs,omitempty"`
+	Items *Items   `json:"items,omitempty"`
 }
 
 type Items struct {
