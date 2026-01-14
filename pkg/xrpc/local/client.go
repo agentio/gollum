@@ -20,7 +20,9 @@ type Client struct {
 }
 
 func NewClient() *Client {
-	return &Client{}
+	return &Client{
+		Host: "http://localhost:5050",
+	}
 }
 
 func (c *Client) Do(

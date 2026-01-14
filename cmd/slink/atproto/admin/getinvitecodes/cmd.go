@@ -18,7 +18,6 @@ func Cmd() *cobra.Command {
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client := xrpc_local.NewClient()
-			client.Host = "http://localhost:5050"
 			response, err := com_atproto.AdminGetInviteCodes(cmd.Context(),
 				client,
 				cursor,
