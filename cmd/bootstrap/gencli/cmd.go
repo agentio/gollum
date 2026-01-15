@@ -1,7 +1,6 @@
-package generate
+package gencli
 
 import (
-	"github.com/agentio/slink/cmd/bootstrap/gencli"
 	"github.com/agentio/slink/pkg/lexica"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
@@ -12,8 +11,8 @@ func Cmd() *cobra.Command {
 	var output string
 	var logLevel string
 	var cmd = &cobra.Command{
-		Use:   "generate",
-		Short: "Generate api handlers for lexicons",
+		Use:   "cli",
+		Short: "Generate CLI for lexicons",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 			ll, err := log.ParseLevel(logLevel)
@@ -25,16 +24,15 @@ func Cmd() *cobra.Command {
 			if err = catalog.Load(input); err != nil {
 				return err
 			}
-			err = catalog.GenerateSupportCode(output)
+			err = catalog.GenerateCLI(output)
 			if err != nil {
 				return err
 			}
 			return nil
 		},
 	}
-	cmd.AddCommand(gencli.Cmd())
 	cmd.Flags().StringVarP(&input, "input", "i", "lexicons", "input directory")
-	cmd.Flags().StringVarP(&output, "output", "o", "api", "output directory")
+	cmd.Flags().StringVarP(&output, "output", "o", "cli", "output directory")
 	cmd.Flags().StringVarP(&logLevel, "log-level", "l", "info", "log level (debug, info, warn, error, fatal)")
 	return cmd
 }

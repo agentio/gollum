@@ -1,4 +1,5 @@
 bootstrap:
+	go install ./cmd/bootstrap
 	go run ./cmd/bootstrap
 
 slink:

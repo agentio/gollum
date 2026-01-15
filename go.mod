@@ -6,6 +6,7 @@ require (
 	github.com/agentio/atiquette v0.0.0-20250519003452-9d778dfd2d16
 	github.com/agentio/sidecar v0.1.16
 	github.com/charmbracelet/log v0.4.2
+	github.com/iancoleman/strcase v0.3.0
 	github.com/spf13/cobra v1.10.2
 	golang.org/x/tools v0.41.0
 )
