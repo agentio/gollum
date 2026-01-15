@@ -45,14 +45,13 @@ func (lexicon *Lexicon) resolveRefType(ref string) string {
 				tag = "main"
 			}
 			var refType string
-			refLexicon := Lookup(id)
+			refLexicon := LookupLexicon(id)
 			if refLexicon != nil {
 				refDef := refLexicon.Lookup(tag)
 				if refDef != nil {
 					refType = refDef.Type
 				}
 			}
-
 			idparts := strings.Split(id, ".")
 			if len(idparts) != 4 {
 				return "/* FIXME " + fmt.Sprintf("%+v", ref) + " */ string"
@@ -63,16 +62,13 @@ func (lexicon *Lexicon) resolveRefType(ref string) string {
 			}
 			// is the ref target in the same package as the lexicon?
 			// if not, we need to add the package name prefix
-
 			if !strings.HasPrefix(lexicon.Id, idparts[0]+"."+idparts[1]+".") {
 				prefix := idparts[0] + "_" + idparts[1]
 				name = prefix + "." + name
 			}
-
 			if refType == "array" {
 				return "[]" + name + "_Elem"
 			}
-
 			return "*" + name
 		} else {
 			return "/* FIXME ref " + fmt.Sprintf("%+v", ref) + " */ string"

@@ -7,24 +7,23 @@ import (
 )
 
 func (lexicon *Lexicon) generateStruct(defname, description string, properties map[string]Property, required []string) string {
-	var s string
-	s += "// " + description + "\n"
-	s += lexicon.renderStruct(defname, properties, required)
-	s += lexicon.renderDependencies(defname, properties, required)
-	return s
+	var s strings.Builder
+	s.WriteString("// " + description + "\n")
+	s.WriteString(lexicon.renderStruct(defname, properties, required))
+	s.WriteString(lexicon.renderDependencies(defname, properties, required))
+	return s.String()
 }
 
 func (lexicon *Lexicon) renderStruct(defname string, properties map[string]Property, required []string) string {
 	var s string
 	s += "type " + defname + " struct {\n"
-	propertyNames := sortedPropertyNames(properties)
-	for _, propertyName := range propertyNames {
-		property := properties[propertyName]
+	for _, propertyName := range sortedPropertyNames(properties) {
 		required := slices.Contains(required, propertyName)
+		property := properties[propertyName]
 		switch property.Type {
 		case "boolean":
 			if required {
-				s += capitalize(propertyName) + " bool `json:" + `"` + propertyName + `"` + "`\n"
+				s += capitalize(propertyName) + " bool `json:" + `"` + propertyName + `,omitempty"` + "`\n"
 			} else {
 				s += capitalize(propertyName) + " *bool `json:" + `"` + propertyName + `,omitempty"` + "`\n"
 			}
@@ -42,11 +41,7 @@ func (lexicon *Lexicon) renderStruct(defname string, properties map[string]Prope
 			}
 		case "array":
 			itemstype := lexicon.resolveItemsType(defname, propertyName, property.Items)
-			if required {
-				s += capitalize(propertyName) + " []" + itemstype + " `json:" + `"` + propertyName + `,omitempty"` + "`\n"
-			} else {
-				s += capitalize(propertyName) + " []" + itemstype + " `json:" + `"` + propertyName + `,omitempty"` + "`\n"
-			}
+			s += capitalize(propertyName) + " []" + itemstype + " `json:" + `"` + propertyName + `,omitempty"` + "`\n"
 		case "ref":
 			reftype := lexicon.resolveRefType(property.Ref)
 			s += capitalize(propertyName) + reftype + " `json:" + `"` + propertyName + `,omitempty"` + "`\n"
@@ -86,34 +81,34 @@ func (lexicon *Lexicon) renderStruct(defname string, properties map[string]Prope
 }
 
 func (lexicon *Lexicon) renderDependencies(defname string, properties map[string]Property, required []string) string {
-	var s string
+	var s strings.Builder
 	propertyNames := sortedPropertyNames(properties)
 	for _, propertyName := range propertyNames {
 		property := properties[propertyName]
 		switch property.Type {
 		case "union":
 			uniontype := lexicon.resolveUnionType(defname, propertyName)
-			s += "type " + uniontype + " struct {\n"
+			s.WriteString("type " + uniontype + " struct {\n")
 			for _, ref := range property.Refs {
 				fieldname := lexicon.unionFieldName(ref)
 				fieldtype := lexicon.unionFieldType(ref)
-				s += fieldname + " " + fieldtype + "\n"
+				s.WriteString(fieldname + " " + fieldtype + "\n")
 			}
-			s += "}\n\n"
+			s.WriteString("}\n\n")
 		case "array":
 			if property.Items.Type == "union" {
 				uniontype := lexicon.resolveUnionType(defname, propertyName) + "_Elem"
-				s += "type " + uniontype + " struct {\n"
+				s.WriteString("type " + uniontype + " struct {\n")
 				for _, ref := range property.Items.Refs {
 					fieldname := lexicon.unionFieldName(ref)
 					fieldtype := lexicon.unionFieldType(ref)
-					s += fieldname + " " + fieldtype + "\n"
+					s.WriteString(fieldname + " " + fieldtype + "\n")
 				}
-				s += "}\n\n"
+				s.WriteString("}\n\n")
 			}
 		}
 	}
-	return s
+	return s.String()
 }
 
 func (lexicon *Lexicon) unionFieldName(ref string) string {
@@ -132,7 +127,7 @@ func (lexicon *Lexicon) unionFieldName(ref string) string {
 			id = lexicon.Id
 		}
 		var reftype string
-		reflexicon := Lookup(id)
+		reflexicon := LookupLexicon(id)
 		if reflexicon != nil {
 			refdef := reflexicon.Lookup(tag)
 			if refdef != nil {
@@ -172,7 +167,7 @@ func (lexicon *Lexicon) unionFieldType(ref string) string {
 			id = lexicon.Id
 		}
 		var reftype string
-		reflexicon := Lookup(id)
+		reflexicon := LookupLexicon(id)
 		if reflexicon != nil {
 			refdef := reflexicon.Lookup(tag)
 			if refdef != nil {

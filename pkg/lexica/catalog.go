@@ -7,24 +7,24 @@ import (
 	"path/filepath"
 )
 
-type Lexica struct {
+type Catalog struct {
 	Lexicons []*Lexicon
 }
 
-var _lexica *Lexica
+var _catalog *Catalog
 
-func NewLexica() *Lexica {
-	_lexica = &Lexica{}
-	return _lexica
+func NewCatalog() *Catalog {
+	_catalog = &Catalog{}
+	return _catalog
 }
 
-func (lexica *Lexica) LoadSources(root string) error {
+func (catalog *Catalog) Load(root string) error {
 	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 		if !d.IsDir() && filepath.Ext(path) == ".json" {
-			if err := lexica.LoadFile(path); err != nil {
+			if err := catalog.LoadLexicon(path); err != nil {
 				return err
 			}
 		}
@@ -33,7 +33,7 @@ func (lexica *Lexica) LoadSources(root string) error {
 	return err
 }
 
-func (lexica *Lexica) LoadFile(path string) error {
+func (catalog *Catalog) LoadLexicon(path string) error {
 	b, err := os.ReadFile(path)
 	if err != nil {
 		return err
@@ -44,12 +44,12 @@ func (lexica *Lexica) LoadFile(path string) error {
 		return err
 	}
 	lexicon.Validate(path)
-	lexica.Lexicons = append(lexica.Lexicons, &lexicon)
+	catalog.Lexicons = append(catalog.Lexicons, &lexicon)
 	return nil
 }
 
-func Lookup(id string) *Lexicon {
-	for _, lexicon := range _lexica.Lexicons {
+func LookupLexicon(id string) *Lexicon {
+	for _, lexicon := range _catalog.Lexicons {
 		if lexicon.Id == id {
 			return lexicon
 		}

@@ -4,23 +4,10 @@ import (
 	"encoding/json"
 	"os"
 	"strings"
-	"sync"
 
 	"github.com/charmbracelet/log"
 	"golang.org/x/tools/imports"
 )
-
-func (lexica *Lexica) GenerateCode(root string) error {
-	os.RemoveAll(root)
-	var wg sync.WaitGroup
-	for _, lexicon := range lexica.Lexicons {
-		wg.Go(func() {
-			lexicon.generateLexiconSourceFile(root)
-		})
-	}
-	wg.Wait()
-	return nil
-}
 
 func (lexicon *Lexicon) generateLexiconSourceFile(root string) {
 	filename := lexiconFileName(root, lexicon.Id)

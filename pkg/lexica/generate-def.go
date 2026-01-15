@@ -5,14 +5,12 @@ import (
 )
 
 func (lexicon *Lexicon) generateDef(def *Def, name string, prefix string) string {
-
 	var defname string
 	if name == "main" {
 		defname = prefix
 	} else {
 		defname = prefix + "_" + capitalize(name)
 	}
-
 	var s string
 	switch def.Type {
 	case "query":

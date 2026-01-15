@@ -20,11 +20,11 @@ func Cmd() *cobra.Command {
 				return err
 			}
 			log.SetLevel(ll)
-			lex := lexica.NewLexica()
-			if err = lex.LoadSources(input); err != nil {
+			catalog := lexica.NewCatalog()
+			if err = catalog.Load(input); err != nil {
 				return err
 			}
-			err = lex.GenerateCode(output)
+			err = catalog.GenerateCode(output)
 			if err != nil {
 				return err
 			}
