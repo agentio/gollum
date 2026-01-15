@@ -57,6 +57,9 @@ type Def struct {
 
 	// array
 	Items *Items `json:"items,omitempty"`
+
+	// permission-set
+	Permissions []*Permission `json:"permissions,omitempty`
 }
 
 func (def *Def) Validate(path string) error {
@@ -118,4 +121,13 @@ type Items struct {
 	Type string   `json:"type,omitempty"`
 	Ref  string   `json:"ref,omitempty"`
 	Refs []string `json:"refs,omitempty"`
+}
+
+type Permission struct {
+	Type           string   `json:"type,omitempty"`
+	Resource       string   `json:"resource,omitempty"`
+	Actions        []string `json:"action,omitempty"`
+	Collections    []string `json:"collection,omitempty"`
+	InheritAud     bool     `json:"inheritAud,omitempty"`
+	LexiconMethods []string `json:"lxm,omitempty"`
 }

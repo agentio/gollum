@@ -23,15 +23,11 @@ func (lexicon *Lexicon) resolveItemsType(defname, propname string, items *Items)
 		return "*" + lexicon.resolveUnionType(defname, propname) + "_Elem"
 	default:
 	}
-	return "/* FIXME unsupported items type: " + items.Type + " */ string"
+	return "/* FIXME defaulting on unsupported items type: " + items.Type + " */ string"
 }
 
 func (lexicon *Lexicon) resolveRefType(ref string) string {
 	if ref[0] == '#' {
-		parts := strings.Split(lexicon.Id, ".")
-		if len(parts) != 4 {
-			return "/* FIXME: i can't parse this " + lexicon.Id + " */ string"
-		}
 		typename := codePrefix(lexicon.Id) + "_" + capitalize(ref[1:])
 		return "*" + typename
 	} else {
@@ -61,7 +57,7 @@ func (lexicon *Lexicon) resolveRefType(ref string) string {
 			}
 			return "*" + name
 		} else {
-			return "/* FIXME ref " + fmt.Sprintf("%+v", ref) + " */ string"
+			return "/* FIXME defaulting on unparseable ref " + fmt.Sprintf("%+v", ref) + " */ string"
 		}
 	}
 }

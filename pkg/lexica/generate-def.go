@@ -31,6 +31,10 @@ func (lexicon *Lexicon) generateDef(def *Def, name string, prefix string) string
 	case "token":
 		s.WriteString("// " + def.Description + "\n")
 		s.WriteString("const " + defname + " string = " + `"` + name + `"` + "\n\n")
+	case "permission-set":
+		s.WriteString("// FIXME skipping permission set " + defname + "\n")
+	case "subscription":
+		s.WriteString("// FIXME skipping subscription " + defname + "\n")
 	default:
 		log.Warnf("skipping %s.%s (type %s)", lexicon.Id, name, def.Type)
 	}

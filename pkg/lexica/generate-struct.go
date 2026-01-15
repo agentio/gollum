@@ -73,7 +73,7 @@ func (lexicon *Lexicon) renderStruct(defname string, properties map[string]Prope
 				s.WriteString(capitalize(propertyName) + " *string `json:" + `"` + propertyName + `,omitempty"` + "`\n")
 			}
 		default:
-			s.WriteString("// FIXME: unsupported property type " + propertyName + " " + property.Type + " " + fmt.Sprintf("required=%t %+v", required, property) + "\n")
+			s.WriteString("// FIXME skipping unsupported property type " + propertyName + " " + property.Type + " " + fmt.Sprintf("required=%t %+v", required, property) + "\n")
 		}
 	}
 	s.WriteString("}\n\n")
@@ -136,7 +136,7 @@ func (lexicon *Lexicon) unionFieldName(ref string) string {
 		}
 		idparts := strings.Split(id, ".")
 		if len(idparts) != 4 {
-			return "/* FIXME " + fmt.Sprintf("%+v", ref) + " */ string"
+			return "/* FIXME skipping union field with invalid id " + fmt.Sprintf("%+v", ref) + " */ string"
 		}
 		name := capitalize(idparts[2]) + capitalize(idparts[3])
 		if tag != "main" {
@@ -147,7 +147,7 @@ func (lexicon *Lexicon) unionFieldName(ref string) string {
 		}
 		return name
 	} else {
-		return "/* FIXME union field ref " + fmt.Sprintf("%+v", ref) + " */ string"
+		return "/* FIXME defaulting on unparseable union field ref " + fmt.Sprintf("%+v", ref) + " */ string"
 	}
 }
 
@@ -174,10 +174,6 @@ func (lexicon *Lexicon) unionFieldType(ref string) string {
 				reftype = refdef.Type
 			}
 		}
-		idparts := strings.Split(id, ".")
-		if len(idparts) != 4 {
-			return "/* FIXME " + fmt.Sprintf("%+v", ref) + " */ string"
-		}
 		name := codePrefix(id)
 		if tag != "main" {
 			name += "_" + capitalize(tag)
@@ -187,6 +183,6 @@ func (lexicon *Lexicon) unionFieldType(ref string) string {
 		}
 		return "*" + name
 	} else {
-		return "/* FIXME union field ref " + fmt.Sprintf("%+v", ref) + " */ string"
+		return "/* FIXME defaulting on unparsable union field ref " + fmt.Sprintf("%+v", ref) + " */ string"
 	}
 }

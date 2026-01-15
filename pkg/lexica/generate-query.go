@@ -30,9 +30,9 @@ func (lexicon *Lexicon) generateQuery(defname string, def *Def) string {
 		s.WriteString("return &output, nil\n")
 		s.WriteString("}\n\n")
 	} else if def.Output != nil {
-		s.WriteString(fmt.Sprintf("// FIXME (query, output type %s)\n", def.Output.Encoding))
+		s.WriteString(fmt.Sprintf("// FIXME skipping query with output type %s\n", def.Output.Encoding))
 	} else {
-		s.WriteString(fmt.Sprintf("// FIXME (query, no output) %+v\n", def))
+		s.WriteString(fmt.Sprintf("// FIXME skipping query with no output %+v\n", def))
 	}
 	return s.String()
 }
@@ -54,10 +54,10 @@ func parseQueryParameters(parameters *Parameters) (string, bool) {
 			if propertyValue.Items.Type == "string" {
 				declaration += "[]string"
 			} else {
-				return "/* FIXME unsupported parameter array value type: " + propertyValue.Items.Type + " */", false
+				return "/* FIXME failing on unsupported parameter array value type: " + propertyValue.Items.Type + " */", false
 			}
 		default:
-			return "/* FIXME unsupported parameter value type: " + propertyValue.Type + "*/", false
+			return "/* FIXME failing on unsupported parameter value type: " + propertyValue.Type + "*/", false
 		}
 		parms = append(parms, declaration)
 	}

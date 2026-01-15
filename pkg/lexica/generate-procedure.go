@@ -40,7 +40,7 @@ func (lexicon *Lexicon) generateProcedure(defname string, def *Def) string {
 		s.WriteString(`return c.Do(ctx, xrpc.Procedure, "", "` + lexicon.Id + `", nil, nil, nil)` + "\n")
 		s.WriteString("}\n\n")
 	} else {
-		s.WriteString("// FIXME (procedure with unhandled types)\n")
+		s.WriteString("// FIXME skipping procedure with unhandled types\n")
 	}
 	return s.String()
 }
