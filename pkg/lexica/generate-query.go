@@ -6,36 +6,35 @@ import (
 )
 
 func (lexicon *Lexicon) generateQuery(defname string, def *Def) string {
-	var s string
+	var s strings.Builder
 	if def.Output != nil && def.Output.Encoding == "application/json" {
-		s += lexicon.generateStruct(defname+"_Output", "", def.Output.Schema.Properties, def.Output.Schema.Required)
+		s.WriteString(lexicon.generateStruct(defname+"_Output", "", def.Output.Schema.Properties, def.Output.Schema.Required))
 		params := ""
 		paramsok := false
 		if def.Parameters != nil && def.Parameters.Type == "params" {
 			params, paramsok = parseQueryParameters(def.Parameters)
 		}
-		s += "// " + def.Description + "\n"
-		s += "func " + defname + "(ctx context.Context, c xrpc.Client" + params + ") (*" + defname + "_Output" + ", error) {\n"
-		s += "var output " + defname + "_Output" + "\n"
-		s += "params := map[string]interface{}{\n"
+		s.WriteString("// " + def.Description + "\n")
+		s.WriteString("func " + defname + "(ctx context.Context, c xrpc.Client" + params + ") (*" + defname + "_Output" + ", error) {\n")
+		s.WriteString("var output " + defname + "_Output" + "\n")
+		s.WriteString("params := map[string]interface{}{\n")
 		if paramsok {
 			for parameterName := range def.Parameters.Properties {
-				s += `"` + parameterName + `":` + parameterName + ",\n"
+				s.WriteString(`"` + parameterName + `":` + parameterName + ",\n")
 			}
 		}
-		s += "}\n"
-		s += `if err := c.Do(ctx, xrpc.Query, "", "` + lexicon.Id + `", params, nil, &output); err != nil {` + "\n"
-		s += "return nil, err\n"
-		s += "}\n"
-		s += "return &output, nil\n"
-		s += "}\n\n"
+		s.WriteString("}\n")
+		s.WriteString(`if err := c.Do(ctx, xrpc.Query, "", "` + lexicon.Id + `", params, nil, &output); err != nil {` + "\n")
+		s.WriteString("return nil, err\n")
+		s.WriteString("}\n")
+		s.WriteString("return &output, nil\n")
+		s.WriteString("}\n\n")
 	} else if def.Output != nil {
-		s += fmt.Sprintf("// FIXME (query, output type %s)\n", def.Output.Encoding)
+		s.WriteString(fmt.Sprintf("// FIXME (query, output type %s)\n", def.Output.Encoding))
 	} else {
-		s += fmt.Sprintf("// FIXME (query, no output) %+v\n", def)
+		s.WriteString(fmt.Sprintf("// FIXME (query, no output) %+v\n", def))
 	}
-
-	return s
+	return s.String()
 }
 
 func parseQueryParameters(parameters *Parameters) (string, bool) {

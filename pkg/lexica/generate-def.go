@@ -1,6 +1,8 @@
 package lexica
 
 import (
+	"strings"
+
 	"github.com/charmbracelet/log"
 )
 
@@ -11,26 +13,26 @@ func (lexicon *Lexicon) generateDef(def *Def, name string, prefix string) string
 	} else {
 		defname = prefix + "_" + capitalize(name)
 	}
-	var s string
+	var s strings.Builder
 	switch def.Type {
 	case "query":
-		s += lexicon.generateQuery(defname, def)
+		s.WriteString(lexicon.generateQuery(defname, def))
 	case "procedure":
-		s += lexicon.generateProcedure(defname, def)
+		s.WriteString(lexicon.generateProcedure(defname, def))
 	case "object":
-		s += lexicon.generateStruct(defname, def.Description, def.Properties, def.Required)
+		s.WriteString(lexicon.generateStruct(defname, def.Description, def.Properties, def.Required))
 	case "string":
-		s += "type " + defname + " string\n"
+		s.WriteString("type " + defname + " string\n")
 	case "record":
-		s += lexicon.generateStruct(defname, def.Description, def.Properties, def.Required)
+		s.WriteString(lexicon.generateStruct(defname, def.Description, def.Properties, def.Required))
 	case "array":
-		s += "type " + defname + "_Elem struct {\n"
-		s += "}\n\n"
+		s.WriteString("type " + defname + "_Elem struct {\n")
+		s.WriteString("}\n\n")
 	case "token":
-		s += "// " + def.Description + "\n"
-		s += "const " + defname + " string = " + `"` + name + `"` + "\n\n"
+		s.WriteString("// " + def.Description + "\n")
+		s.WriteString("const " + defname + " string = " + `"` + name + `"` + "\n\n")
 	default:
 		log.Warnf("skipping %s.%s (type %s)", lexicon.Id, name, def.Type)
 	}
-	return s
+	return s.String()
 }

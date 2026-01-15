@@ -15,69 +15,69 @@ func (lexicon *Lexicon) generateStruct(defname, description string, properties m
 }
 
 func (lexicon *Lexicon) renderStruct(defname string, properties map[string]Property, required []string) string {
-	var s string
-	s += "type " + defname + " struct {\n"
+	var s strings.Builder
+	s.WriteString("type " + defname + " struct {\n")
 	for _, propertyName := range sortedPropertyNames(properties) {
 		required := slices.Contains(required, propertyName)
 		property := properties[propertyName]
 		switch property.Type {
 		case "boolean":
 			if required {
-				s += capitalize(propertyName) + " bool `json:" + `"` + propertyName + `,omitempty"` + "`\n"
+				s.WriteString(capitalize(propertyName) + " bool `json:" + `"` + propertyName + `,omitempty"` + "`\n")
 			} else {
-				s += capitalize(propertyName) + " *bool `json:" + `"` + propertyName + `,omitempty"` + "`\n"
+				s.WriteString(capitalize(propertyName) + " *bool `json:" + `"` + propertyName + `,omitempty"` + "`\n")
 			}
 		case "integer":
 			if required {
-				s += capitalize(propertyName) + " int64 `json:" + `"` + propertyName + `,omitempty"` + "`\n"
+				s.WriteString(capitalize(propertyName) + " int64 `json:" + `"` + propertyName + `,omitempty"` + "`\n")
 			} else {
-				s += capitalize(propertyName) + " *int64 `json:" + `"` + propertyName + `,omitempty"` + "`\n"
+				s.WriteString(capitalize(propertyName) + " *int64 `json:" + `"` + propertyName + `,omitempty"` + "`\n")
 			}
 		case "string":
 			if required {
-				s += capitalize(propertyName) + " string `json:" + `"` + propertyName + `,omitempty"` + "`\n"
+				s.WriteString(capitalize(propertyName) + " string `json:" + `"` + propertyName + `,omitempty"` + "`\n")
 			} else {
-				s += capitalize(propertyName) + " *string `json:" + `"` + propertyName + `,omitempty"` + "`\n"
+				s.WriteString(capitalize(propertyName) + " *string `json:" + `"` + propertyName + `,omitempty"` + "`\n")
 			}
 		case "array":
 			itemstype := lexicon.resolveItemsType(defname, propertyName, property.Items)
-			s += capitalize(propertyName) + " []" + itemstype + " `json:" + `"` + propertyName + `,omitempty"` + "`\n"
+			s.WriteString(capitalize(propertyName) + " []" + itemstype + " `json:" + `"` + propertyName + `,omitempty"` + "`\n")
 		case "ref":
 			reftype := lexicon.resolveRefType(property.Ref)
-			s += capitalize(propertyName) + reftype + " `json:" + `"` + propertyName + `,omitempty"` + "`\n"
+			s.WriteString(capitalize(propertyName) + reftype + " `json:" + `"` + propertyName + `,omitempty"` + "`\n")
 		case "unknown":
 			if required {
-				s += capitalize(propertyName) + " interface{} `json:" + `"` + propertyName + `,omitempty"` + "`\n"
+				s.WriteString(capitalize(propertyName) + " interface{} `json:" + `"` + propertyName + `,omitempty"` + "`\n")
 			} else {
-				s += capitalize(propertyName) + " *interface{} `json:" + `"` + propertyName + `,omitempty"` + "`\n"
+				s.WriteString(capitalize(propertyName) + " *interface{} `json:" + `"` + propertyName + `,omitempty"` + "`\n")
 			}
 		case "blob":
 			if required {
-				s += capitalize(propertyName) + " []byte `json:" + `"` + propertyName + `"` + "`\n"
+				s.WriteString(capitalize(propertyName) + " []byte `json:" + `"` + propertyName + `"` + "`\n")
 			} else {
-				s += capitalize(propertyName) + " *[]byte `json:" + `"` + propertyName + `,omitempty"` + "`\n"
+				s.WriteString(capitalize(propertyName) + " *[]byte `json:" + `"` + propertyName + `,omitempty"` + "`\n")
 			}
 		case "union":
 			uniontype := lexicon.resolveUnionType(defname, propertyName)
-			s += capitalize(propertyName) + " " + uniontype + " `json:" + `"` + propertyName + `,omitempty"` + "`\n"
+			s.WriteString(capitalize(propertyName) + " " + uniontype + " `json:" + `"` + propertyName + `,omitempty"` + "`\n")
 		case "bytes":
 			if required {
-				s += capitalize(propertyName) + " []byte `json:" + `"` + propertyName + `"` + "`\n"
+				s.WriteString(capitalize(propertyName) + " []byte `json:" + `"` + propertyName + `"` + "`\n")
 			} else {
-				s += capitalize(propertyName) + " *[]byte `json:" + `"` + propertyName + `,omitempty"` + "`\n"
+				s.WriteString(capitalize(propertyName) + " *[]byte `json:" + `"` + propertyName + `,omitempty"` + "`\n")
 			}
 		case "cid-link":
 			if required {
-				s += capitalize(propertyName) + " string `json:" + `"` + propertyName + `,omitempty"` + "`\n"
+				s.WriteString(capitalize(propertyName) + " string `json:" + `"` + propertyName + `,omitempty"` + "`\n")
 			} else {
-				s += capitalize(propertyName) + " *string `json:" + `"` + propertyName + `,omitempty"` + "`\n"
+				s.WriteString(capitalize(propertyName) + " *string `json:" + `"` + propertyName + `,omitempty"` + "`\n")
 			}
 		default:
-			s += "// FIXME: unsupported property type " + propertyName + " " + property.Type + " " + fmt.Sprintf("required=%t %+v", required, property) + "\n"
+			s.WriteString("// FIXME: unsupported property type " + propertyName + " " + property.Type + " " + fmt.Sprintf("required=%t %+v", required, property) + "\n")
 		}
 	}
-	s += "}\n\n"
-	return s
+	s.WriteString("}\n\n")
+	return s.String()
 }
 
 func (lexicon *Lexicon) renderDependencies(defname string, properties map[string]Property, required []string) string {
@@ -178,7 +178,7 @@ func (lexicon *Lexicon) unionFieldType(ref string) string {
 		if len(idparts) != 4 {
 			return "/* FIXME " + fmt.Sprintf("%+v", ref) + " */ string"
 		}
-		name := capitalize(idparts[0]) + capitalize(idparts[1]) + capitalize(idparts[2]) + capitalize(idparts[3])
+		name := codePrefix(id)
 		if tag != "main" {
 			name += "_" + capitalize(tag)
 		}
