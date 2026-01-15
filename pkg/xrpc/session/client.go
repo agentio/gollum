@@ -69,7 +69,7 @@ func (c *Client) Do(ctx context.Context, kind xrpc.RequestType, contentType, met
 	if bodyobj != nil && contentType != "" {
 		req.Header.Set("Content-Type", contentType)
 	}
-	req.Header.Set("User-Agent", "atiquette-session")
+	req.Header.Set("User-Agent", "slink-session")
 
 	if c.Headers != nil {
 		for k, v := range c.Headers {

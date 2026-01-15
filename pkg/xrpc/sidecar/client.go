@@ -1,4 +1,4 @@
-package xrpc_local
+package xrpc_sidecar
 
 import (
 	"bytes"
@@ -10,9 +10,9 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/agentio/sidecar"
 	"github.com/agentio/slink/pkg/xrpc"
 	"github.com/agentio/slink/pkg/xrpc/common"
-	"github.com/agentio/sidecar"
 )
 
 type Client struct {
@@ -76,7 +76,7 @@ func (c *Client) Do(
 	if bodyobj != nil && contentType != "" {
 		req.Header.Set("Content-Type", contentType)
 	}
-	req.Header.Set("User-Agent", "atiquette-anonymous")
+	req.Header.Set("User-Agent", "slink-sidecar")
 
 	client := sidecar.NewClient(sidecar.ClientOptions{
 		Address: c.Host,

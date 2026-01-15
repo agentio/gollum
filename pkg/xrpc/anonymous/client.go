@@ -66,7 +66,7 @@ func (c *Client) Do(
 	if bodyobj != nil && contentType != "" {
 		req.Header.Set("Content-Type", contentType)
 	}
-	req.Header.Set("User-Agent", "atiquette-anonymous")
+	req.Header.Set("User-Agent", "slink-anonymous")
 
 	resp, err := http.DefaultClient.Do(req.WithContext(ctx))
 	if err != nil {

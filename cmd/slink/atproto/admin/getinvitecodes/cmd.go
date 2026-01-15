@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/agentio/slink/api"
-	xrpc_local "github.com/agentio/slink/pkg/xrpc/local"
+	xrpc_sidecar "github.com/agentio/slink/pkg/xrpc/sidecar"
 	"github.com/spf13/cobra"
 )
 
@@ -17,7 +17,7 @@ func Cmd() *cobra.Command {
 		Short: "Get invite codes",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client := xrpc_local.NewClient()
+			client := xrpc_sidecar.NewClient()
 			response, err := api.AdminGetInviteCodes(cmd.Context(),
 				client,
 				cursor,
