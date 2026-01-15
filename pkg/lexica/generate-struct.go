@@ -178,15 +178,9 @@ func (lexicon *Lexicon) unionFieldType(ref string) string {
 		if len(idparts) != 4 {
 			return "/* FIXME " + fmt.Sprintf("%+v", ref) + " */ string"
 		}
-		name := capitalize(idparts[2]) + capitalize(idparts[3])
+		name := capitalize(idparts[0]) + capitalize(idparts[1]) + capitalize(idparts[2]) + capitalize(idparts[3])
 		if tag != "main" {
 			name += "_" + capitalize(tag)
-		}
-		// is the ref target in the same package as the lexicon?
-		// if not, we need to add the package name prefix
-		if !strings.HasPrefix(lexicon.Id, idparts[0]+"."+idparts[1]+".") {
-			prefix := idparts[0] + "_" + idparts[1]
-			name = prefix + "." + name
 		}
 		if reftype == "array" {
 			return "[]" + name + "_Elem"

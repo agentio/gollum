@@ -3,7 +3,7 @@ package listrepos
 import (
 	"encoding/json"
 
-	"github.com/agentio/slink/gen/com_atproto"
+	"github.com/agentio/slink/api"
 	xrpc_local "github.com/agentio/slink/pkg/xrpc/local"
 	"github.com/spf13/cobra"
 )
@@ -17,7 +17,7 @@ func Cmd() *cobra.Command {
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client := xrpc_local.NewClient()
-			response, err := com_atproto.SyncListRepos(cmd.Context(),
+			response, err := api.ComAtprotoSyncListRepos(cmd.Context(),
 				client,
 				cursor,
 				limit)

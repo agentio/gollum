@@ -14,7 +14,7 @@ func (lexicon *Lexicon) generateLexiconSourceFile(root string) {
 	if filename == "" {
 		return
 	}
-	packagename := lexiconPackageName(lexicon.Id)
+	packagename := lexiconPackageName(root, lexicon.Id)
 	if packagename == "" {
 		return
 	}
@@ -22,25 +22,14 @@ func (lexicon *Lexicon) generateLexiconSourceFile(root string) {
 }
 
 func lexiconFileName(root, id string) string {
-	parts := strings.Split(id, ".")
-	if len(parts) != 4 {
-		log.Warnf("skipping three-segment name %s", id)
-		return ""
-	}
-	d := root + "/" + parts[0] + "_" + parts[1]
-	os.MkdirAll(d, 0755)
-	filename := d + "/" + parts[2] + "_" + parts[3] + ".go"
+	base := strings.ReplaceAll(id, ".", "-")
+	os.MkdirAll(root, 0755)
+	filename := root + "/" + base + ".go"
 	return filename
 }
 
-func lexiconPackageName(id string) string {
-	parts := strings.Split(id, ".")
-	if len(parts) != 4 {
-		log.Warnf("skipping three-segment name %s", id)
-		return ""
-	}
-	packagename := parts[0] + "_" + parts[1]
-	return packagename
+func lexiconPackageName(root, id string) string {
+	return root
 }
 
 func (lexicon *Lexicon) generateFile(filename, packagename string) error {
@@ -48,15 +37,13 @@ func (lexicon *Lexicon) generateFile(filename, packagename string) error {
 	s += "package " + packagename + "\n\n"
 
 	s += `import "github.com/agentio/slink/pkg/xrpc"` + "\n"
-	s += `import "github.com/agentio/slink/gen/com_atproto"` + "\n"
-	s += `import "github.com/agentio/slink/gen/app_bsky"` + "\n"
 
 	prefix := codeprefix(lexicon.Id)
 	for name, def := range lexicon.Defs {
 		s += lexicon.generateDef(def, name, prefix)
 	}
 
-	if false { // append lexicon source to generated file
+	if true { // append lexicon source to generated file
 		filter := func(s string) string {
 			return strings.ReplaceAll(s, "*/*", "[ANY]")
 		}
@@ -78,5 +65,5 @@ func codeprefix(id string) string {
 	if len(parts) != 4 {
 		return ""
 	}
-	return capitalize(parts[2]) + capitalize(parts[3])
+	return capitalize(parts[0]) + capitalize(parts[1]) + capitalize(parts[2]) + capitalize(parts[3])
 }

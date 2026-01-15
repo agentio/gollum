@@ -1,3 +1,6 @@
+bootstrap:
+	go run ./cmd/bootstrap
+
 slink:
 	go install ./...
 
