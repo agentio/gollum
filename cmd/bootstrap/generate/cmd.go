@@ -24,7 +24,7 @@ func Cmd() *cobra.Command {
 			if err = catalog.Load(input); err != nil {
 				return err
 			}
-			err = catalog.GenerateCode(output)
+			err = catalog.GenerateSupportCode(output)
 			if err != nil {
 				return err
 			}

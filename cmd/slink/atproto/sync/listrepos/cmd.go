@@ -17,7 +17,7 @@ func Cmd() *cobra.Command {
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client := xrpc_local.NewClient()
-			response, err := api.ComAtprotoSyncListRepos(cmd.Context(),
+			response, err := api.SyncListRepos(cmd.Context(),
 				client,
 				cursor,
 				limit)

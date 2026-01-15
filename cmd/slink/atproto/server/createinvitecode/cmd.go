@@ -17,9 +17,9 @@ func Cmd() *cobra.Command {
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client := xrpc_local.NewClient()
-			response, err := api.ComAtprotoServerCreateInviteCode(cmd.Context(),
+			response, err := api.ServerCreateInviteCode(cmd.Context(),
 				client,
-				&api.ComAtprotoServerCreateInviteCode_Input{
+				&api.ServerCreateInviteCode_Input{
 					ForAccount: stringPointerOrNil(forAccount),
 					UseCount:   useCount,
 				})
