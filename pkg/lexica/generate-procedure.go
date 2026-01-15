@@ -2,12 +2,11 @@ package lexica
 
 import "strings"
 
-func (lexicon *Lexicon) generateProcedure(defname string, def *Def) string {
-	var s strings.Builder
+func (lexicon *Lexicon) generateProcedure(s *strings.Builder, defname string, def *Def) {
 	if def.Input != nil && def.Input.Encoding == "application/json" &&
 		def.Output != nil && def.Output.Encoding == "application/json" {
-		s.WriteString(lexicon.generateStruct(defname+"_Input", "", def.Input.Schema.Properties, def.Input.Schema.Required))
-		s.WriteString(lexicon.generateStruct(defname+"_Output", "", def.Output.Schema.Properties, def.Output.Schema.Required))
+		lexicon.generateStruct(s, defname+"_Input", "", def.Input.Schema.Properties, def.Input.Schema.Required)
+		lexicon.generateStruct(s, defname+"_Output", "", def.Output.Schema.Properties, def.Output.Schema.Required)
 		s.WriteString("// " + def.Description + "\n")
 		s.WriteString("func " + defname + "(ctx context.Context, c xrpc.Client, input *" + defname + "_Input) (*" + defname + "_Output" + ", error) {\n")
 		s.WriteString("var output " + defname + "_Output" + "\n")
@@ -18,7 +17,7 @@ func (lexicon *Lexicon) generateProcedure(defname string, def *Def) string {
 		s.WriteString("}\n\n")
 	} else if def.Input == nil &&
 		def.Output != nil && def.Output.Encoding == "application/json" {
-		s.WriteString(lexicon.generateStruct(defname+"_Output", "", def.Output.Schema.Properties, def.Output.Schema.Required))
+		lexicon.generateStruct(s, defname+"_Output", "", def.Output.Schema.Properties, def.Output.Schema.Required)
 		s.WriteString("// " + def.Description + "\n")
 		s.WriteString("func " + defname + "(ctx context.Context, c xrpc.Client) (*" + defname + "_Output" + ", error) {\n")
 		s.WriteString("var output " + defname + "_Output" + "\n")
@@ -29,7 +28,7 @@ func (lexicon *Lexicon) generateProcedure(defname string, def *Def) string {
 		s.WriteString("}\n\n")
 	} else if def.Input != nil && def.Input.Encoding == "application/json" &&
 		def.Output == nil {
-		s.WriteString(lexicon.generateStruct(defname+"_Input", "", def.Input.Schema.Properties, def.Input.Schema.Required))
+		lexicon.generateStruct(s, defname+"_Input", "", def.Input.Schema.Properties, def.Input.Schema.Required)
 		s.WriteString("// " + def.Description + "\n")
 		s.WriteString("func " + defname + "(ctx context.Context, c xrpc.Client, input *" + defname + "_Input) error {\n")
 		s.WriteString(`return c.Do(ctx, xrpc.Procedure, "", "` + lexicon.Id + `", nil, input, nil)` + "\n")
@@ -42,5 +41,4 @@ func (lexicon *Lexicon) generateProcedure(defname string, def *Def) string {
 	} else {
 		s.WriteString("// FIXME skipping procedure with unhandled types\n")
 	}
-	return s.String()
 }

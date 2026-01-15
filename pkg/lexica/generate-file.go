@@ -33,13 +33,13 @@ func lexiconPackageName(root, id string) string {
 }
 
 func (lexicon *Lexicon) generateFile(filename, packagename string) error {
-	var s strings.Builder
+	s := &strings.Builder{}
 	s.WriteString("package " + packagename + "\n")
 	s.WriteString("// " + lexicon.Id + "\n")
 	s.WriteString(`import "github.com/agentio/slink/pkg/xrpc"` + "\n")
-	prefix := codePrefix(lexicon.Id)
+	prefix := idPrefix(lexicon.Id)
 	for name, def := range lexicon.Defs {
-		s.WriteString(lexicon.generateDef(def, name, prefix))
+		lexicon.generateDef(s, def, name, prefix)
 	}
 	if true { // append lexicon source to generated file
 		filter := func(s string) string {

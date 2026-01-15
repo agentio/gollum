@@ -5,10 +5,9 @@ import (
 	"strings"
 )
 
-func (lexicon *Lexicon) generateQuery(defname string, def *Def) string {
-	var s strings.Builder
+func (lexicon *Lexicon) generateQuery(s *strings.Builder, defname string, def *Def) {
 	if def.Output != nil && def.Output.Encoding == "application/json" {
-		s.WriteString(lexicon.generateStruct(defname+"_Output", "", def.Output.Schema.Properties, def.Output.Schema.Required))
+		lexicon.generateStruct(s, defname+"_Output", "", def.Output.Schema.Properties, def.Output.Schema.Required)
 		params := ""
 		paramsok := false
 		if def.Parameters != nil && def.Parameters.Type == "params" {
@@ -34,7 +33,6 @@ func (lexicon *Lexicon) generateQuery(defname string, def *Def) string {
 	} else {
 		s.WriteString(fmt.Sprintf("// FIXME skipping query with no output %+v\n", def))
 	}
-	return s.String()
 }
 
 func parseQueryParameters(parameters *Parameters) (string, bool) {

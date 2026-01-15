@@ -6,16 +6,13 @@ import (
 	"strings"
 )
 
-func (lexicon *Lexicon) generateStruct(defname, description string, properties map[string]Property, required []string) string {
-	var s strings.Builder
+func (lexicon *Lexicon) generateStruct(s *strings.Builder, defname, description string, properties map[string]Property, required []string) {
 	s.WriteString("// " + description + "\n")
-	s.WriteString(lexicon.renderStruct(defname, properties, required))
-	s.WriteString(lexicon.renderDependencies(defname, properties, required))
-	return s.String()
+	lexicon.renderStruct(s, defname, properties, required)
+	lexicon.renderDependencies(s, defname, properties, required)
 }
 
-func (lexicon *Lexicon) renderStruct(defname string, properties map[string]Property, required []string) string {
-	var s strings.Builder
+func (lexicon *Lexicon) renderStruct(s *strings.Builder, defname string, properties map[string]Property, required []string) {
 	s.WriteString("type " + defname + " struct {\n")
 	for _, propertyName := range sortedPropertyNames(properties) {
 		required := slices.Contains(required, propertyName)
@@ -77,11 +74,9 @@ func (lexicon *Lexicon) renderStruct(defname string, properties map[string]Prope
 		}
 	}
 	s.WriteString("}\n\n")
-	return s.String()
 }
 
-func (lexicon *Lexicon) renderDependencies(defname string, properties map[string]Property, required []string) string {
-	var s strings.Builder
+func (lexicon *Lexicon) renderDependencies(s *strings.Builder, defname string, properties map[string]Property, required []string) {
 	propertyNames := sortedPropertyNames(properties)
 	for _, propertyName := range propertyNames {
 		property := properties[propertyName]
@@ -108,7 +103,6 @@ func (lexicon *Lexicon) renderDependencies(defname string, properties map[string
 			}
 		}
 	}
-	return s.String()
 }
 
 func (lexicon *Lexicon) unionFieldName(ref string) string {
@@ -174,7 +168,7 @@ func (lexicon *Lexicon) unionFieldType(ref string) string {
 				reftype = refdef.Type
 			}
 		}
-		name := codePrefix(id)
+		name := idPrefix(id)
 		if tag != "main" {
 			name += "_" + capitalize(tag)
 		}

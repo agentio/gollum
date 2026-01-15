@@ -6,25 +6,24 @@ import (
 	"github.com/charmbracelet/log"
 )
 
-func (lexicon *Lexicon) generateDef(def *Def, name string, prefix string) string {
+func (lexicon *Lexicon) generateDef(s *strings.Builder, def *Def, name string, prefix string) {
 	var defname string
 	if name == "main" {
 		defname = prefix
 	} else {
 		defname = prefix + "_" + capitalize(name)
 	}
-	var s strings.Builder
 	switch def.Type {
 	case "query":
-		s.WriteString(lexicon.generateQuery(defname, def))
+		lexicon.generateQuery(s, defname, def)
 	case "procedure":
-		s.WriteString(lexicon.generateProcedure(defname, def))
+		lexicon.generateProcedure(s, defname, def)
 	case "object":
-		s.WriteString(lexicon.generateStruct(defname, def.Description, def.Properties, def.Required))
+		lexicon.generateStruct(s, defname, def.Description, def.Properties, def.Required)
 	case "string":
 		s.WriteString("type " + defname + " string\n")
 	case "record":
-		s.WriteString(lexicon.generateStruct(defname, def.Description, def.Properties, def.Required))
+		lexicon.generateStruct(s, defname, def.Description, def.Properties, def.Required)
 	case "array":
 		s.WriteString("type " + defname + "_Elem struct {\n")
 		s.WriteString("}\n\n")
@@ -38,5 +37,4 @@ func (lexicon *Lexicon) generateDef(def *Def, name string, prefix string) string
 	default:
 		log.Warnf("skipping %s.%s (type %s)", lexicon.Id, name, def.Type)
 	}
-	return s.String()
 }

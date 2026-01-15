@@ -6,7 +6,7 @@ import (
 )
 
 func (lexicon *Lexicon) resolveUnionType(defname, propname string) string {
-	return codePrefix(lexicon.Id) + capitalize(defname) + "_" + capitalize(propname)
+	return idPrefix(lexicon.Id) + capitalize(defname) + "_" + capitalize(propname)
 }
 
 func (lexicon *Lexicon) resolveItemsType(defname, propname string, items *Items) string {
@@ -28,7 +28,7 @@ func (lexicon *Lexicon) resolveItemsType(defname, propname string, items *Items)
 
 func (lexicon *Lexicon) resolveRefType(ref string) string {
 	if ref[0] == '#' {
-		typename := codePrefix(lexicon.Id) + "_" + capitalize(ref[1:])
+		typename := idPrefix(lexicon.Id) + "_" + capitalize(ref[1:])
 		return "*" + typename
 	} else {
 		parts := strings.Split(ref, "#")
@@ -48,7 +48,7 @@ func (lexicon *Lexicon) resolveRefType(ref string) string {
 					refType = refDef.Type
 				}
 			}
-			name := codePrefix(id)
+			name := idPrefix(id)
 			if tag != "main" {
 				name += "_" + capitalize(tag)
 			}
