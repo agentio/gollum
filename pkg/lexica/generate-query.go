@@ -1,15 +1,16 @@
 package lexica
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+	"strings"
+)
 
 func (lexicon *Lexicon) generateQuery(defname string, def *Def) string {
-	s := ""
+	var s string
 	if def.Output != nil && def.Output.Encoding == "application/json" {
 		// output
-		s += "type " + defname + "_Output struct {\n"
-		s += renderProperties(lexicon, defname+"_Output", def.Output.Schema.Properties, def.Output.Schema.Required)
-		s += "}\n\n"
-		s += renderDependentTypes(lexicon, defname+"_Output", def.Output.Schema.Properties, def.Output.Schema.Required)
+		s += lexicon.generateStruct(defname+"_Output", "", def.Output.Schema.Properties, def.Output.Schema.Required)
 		// parameters
 		params := ""
 		paramsok := false
@@ -39,4 +40,35 @@ func (lexicon *Lexicon) generateQuery(defname string, def *Def) string {
 	}
 
 	return s
+}
+
+func parseParameters(parameters *Parameters) (string, bool) {
+	var parms []string
+	var parameterNames []string
+	for parameterName := range parameters.Properties {
+		parameterNames = append(parameterNames, parameterName)
+	}
+	sort.Strings(parameterNames)
+	for _, parameterName := range parameterNames {
+		parameterValue := parameters.Properties[parameterName]
+		declaration := parameterName + " "
+		switch parameterValue.Type {
+		case "integer":
+			declaration += "int64"
+		case "string":
+			declaration += "string"
+		case "boolean":
+			declaration += "bool"
+		case "array":
+			if parameterValue.Items.Type == "string" {
+				declaration += "[]string"
+			} else {
+				return "/* FIXME */", false
+			}
+		default:
+			return "/* FIXME */", false
+		}
+		parms = append(parms, declaration)
+	}
+	return ", " + strings.Join(parms, ", "), true
 }

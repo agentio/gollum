@@ -1,19 +1,13 @@
 package lexica
 
 func (lexicon *Lexicon) generateProcedure(defname string, def *Def) string {
-	s := ""
+	var s string
 	if def.Output != nil && def.Output.Encoding == "application/json" &&
 		def.Input != nil && def.Input.Encoding == "application/json" {
 		// input
-		s += "type " + defname + "_Input struct {\n"
-		s += renderProperties(lexicon, defname+"_Input", def.Input.Schema.Properties, def.Input.Schema.Required)
-		s += "}\n\n"
-		s += renderDependentTypes(lexicon, defname+"_Input", def.Input.Schema.Properties, def.Input.Schema.Required)
+		s += lexicon.generateStruct(defname+"_Input", "", def.Input.Schema.Properties, def.Input.Schema.Required)
 		// output
-		s += "type " + defname + "_Output struct {\n"
-		s += renderProperties(lexicon, defname+"_Output", def.Output.Schema.Properties, def.Output.Schema.Required)
-		s += "}\n\n"
-		s += renderDependentTypes(lexicon, defname+"_Output", def.Output.Schema.Properties, def.Output.Schema.Required)
+		s += lexicon.generateStruct(defname+"_Output", "", def.Output.Schema.Properties, def.Output.Schema.Required)
 		// func
 		s += "// " + def.Description + "\n"
 		s += "func " + defname + "(ctx context.Context, c xrpc.Client, input *" + defname + "_Input) (*" + defname + "_Output" + ", error) {\n"
@@ -25,10 +19,7 @@ func (lexicon *Lexicon) generateProcedure(defname string, def *Def) string {
 		s += "}\n\n"
 	} else if def.Input == nil && def.Output != nil && def.Output.Encoding == "application/json" {
 		// output
-		s += "type " + defname + "_Output struct {\n"
-		s += renderProperties(lexicon, defname+"_Output", def.Output.Schema.Properties, def.Output.Schema.Required)
-		s += "}\n\n"
-		s += renderDependentTypes(lexicon, defname+"_Output", def.Output.Schema.Properties, def.Output.Schema.Required)
+		s += lexicon.generateStruct(defname+"_Output", "", def.Output.Schema.Properties, def.Output.Schema.Required)
 		// func
 		s += "// " + def.Description + "\n"
 		s += "func " + defname + "(ctx context.Context, c xrpc.Client) (*" + defname + "_Output" + ", error) {\n"
@@ -40,10 +31,7 @@ func (lexicon *Lexicon) generateProcedure(defname string, def *Def) string {
 		s += "}\n\n"
 	} else if def.Output == nil && def.Input != nil && def.Input.Encoding == "application/json" {
 		// input
-		s += "type " + defname + "_Input struct {\n"
-		s += renderProperties(lexicon, defname+"_Input", def.Input.Schema.Properties, def.Input.Schema.Required)
-		s += "}\n\n"
-		s += renderDependentTypes(lexicon, defname+"_Input", def.Input.Schema.Properties, def.Input.Schema.Required)
+		s += lexicon.generateStruct(defname+"_Input", "", def.Input.Schema.Properties, def.Input.Schema.Required)
 		// func
 		s += "// " + def.Description + "\n"
 		s += "func " + defname + "(ctx context.Context, c xrpc.Client, input *" + defname + "_Input) error {\n"

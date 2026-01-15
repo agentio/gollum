@@ -85,3 +85,11 @@ func (lexicon *Lexicon) generateFile(filename, packagename string) error {
 	}
 	return os.WriteFile(filename, []byte(formatted), 0644)
 }
+
+func codeprefix(id string) string {
+	parts := strings.Split(id, ".")
+	if len(parts) != 4 {
+		return ""
+	}
+	return capitalize(parts[2]) + capitalize(parts[3])
+}
