@@ -3,7 +3,6 @@ package lexica
 import (
 	"fmt"
 	"slices"
-	"sort"
 	"strings"
 )
 
@@ -18,72 +17,68 @@ func (lexicon *Lexicon) generateStruct(defname, description string, properties m
 func (lexicon *Lexicon) renderStruct(defname string, properties map[string]Property, required []string) string {
 	var s string
 	s += "type " + defname + " struct {\n"
-	var propnames []string
-	for propname := range properties {
-		propnames = append(propnames, propname)
-	}
-	sort.Strings(propnames)
-	for _, propname := range propnames {
-		property := properties[propname]
-		required := slices.Contains(required, propname)
+	propertyNames := sortedPropertyNames(properties)
+	for _, propertyName := range propertyNames {
+		property := properties[propertyName]
+		required := slices.Contains(required, propertyName)
 		switch property.Type {
 		case "boolean":
 			if required {
-				s += capitalize(propname) + " bool `json:" + `"` + propname + `"` + "`\n"
+				s += capitalize(propertyName) + " bool `json:" + `"` + propertyName + `"` + "`\n"
 			} else {
-				s += capitalize(propname) + " *bool `json:" + `"` + propname + `,omitempty"` + "`\n"
+				s += capitalize(propertyName) + " *bool `json:" + `"` + propertyName + `,omitempty"` + "`\n"
 			}
 		case "integer":
 			if required {
-				s += capitalize(propname) + " int64 `json:" + `"` + propname + `,omitempty"` + "`\n"
+				s += capitalize(propertyName) + " int64 `json:" + `"` + propertyName + `,omitempty"` + "`\n"
 			} else {
-				s += capitalize(propname) + " *int64 `json:" + `"` + propname + `,omitempty"` + "`\n"
+				s += capitalize(propertyName) + " *int64 `json:" + `"` + propertyName + `,omitempty"` + "`\n"
 			}
 		case "string":
 			if required {
-				s += capitalize(propname) + " string `json:" + `"` + propname + `,omitempty"` + "`\n"
+				s += capitalize(propertyName) + " string `json:" + `"` + propertyName + `,omitempty"` + "`\n"
 			} else {
-				s += capitalize(propname) + " *string `json:" + `"` + propname + `,omitempty"` + "`\n"
+				s += capitalize(propertyName) + " *string `json:" + `"` + propertyName + `,omitempty"` + "`\n"
 			}
 		case "array":
-			itemstype := lexicon.resolveItemsType(defname, propname, property.Items)
+			itemstype := lexicon.resolveItemsType(defname, propertyName, property.Items)
 			if required {
-				s += capitalize(propname) + " []" + itemstype + " `json:" + `"` + propname + `,omitempty"` + "`\n"
+				s += capitalize(propertyName) + " []" + itemstype + " `json:" + `"` + propertyName + `,omitempty"` + "`\n"
 			} else {
-				s += capitalize(propname) + " []" + itemstype + " `json:" + `"` + propname + `,omitempty"` + "`\n"
+				s += capitalize(propertyName) + " []" + itemstype + " `json:" + `"` + propertyName + `,omitempty"` + "`\n"
 			}
 		case "ref":
 			reftype := lexicon.resolveRefType(property.Ref)
-			s += capitalize(propname) + reftype + " `json:" + `"` + propname + `,omitempty"` + "`\n"
+			s += capitalize(propertyName) + reftype + " `json:" + `"` + propertyName + `,omitempty"` + "`\n"
 		case "unknown":
 			if required {
-				s += capitalize(propname) + " interface{} `json:" + `"` + propname + `,omitempty"` + "`\n"
+				s += capitalize(propertyName) + " interface{} `json:" + `"` + propertyName + `,omitempty"` + "`\n"
 			} else {
-				s += capitalize(propname) + " *interface{} `json:" + `"` + propname + `,omitempty"` + "`\n"
+				s += capitalize(propertyName) + " *interface{} `json:" + `"` + propertyName + `,omitempty"` + "`\n"
 			}
 		case "blob":
 			if required {
-				s += capitalize(propname) + " []byte `json:" + `"` + propname + `"` + "`\n"
+				s += capitalize(propertyName) + " []byte `json:" + `"` + propertyName + `"` + "`\n"
 			} else {
-				s += capitalize(propname) + " *[]byte `json:" + `"` + propname + `,omitempty"` + "`\n"
+				s += capitalize(propertyName) + " *[]byte `json:" + `"` + propertyName + `,omitempty"` + "`\n"
 			}
 		case "union":
-			uniontype := lexicon.resolveUnionType(defname, propname)
-			s += capitalize(propname) + " " + uniontype + " `json:" + `"` + propname + `,omitempty"` + "`\n"
+			uniontype := lexicon.resolveUnionType(defname, propertyName)
+			s += capitalize(propertyName) + " " + uniontype + " `json:" + `"` + propertyName + `,omitempty"` + "`\n"
 		case "bytes":
 			if required {
-				s += capitalize(propname) + " []byte `json:" + `"` + propname + `"` + "`\n"
+				s += capitalize(propertyName) + " []byte `json:" + `"` + propertyName + `"` + "`\n"
 			} else {
-				s += capitalize(propname) + " *[]byte `json:" + `"` + propname + `,omitempty"` + "`\n"
+				s += capitalize(propertyName) + " *[]byte `json:" + `"` + propertyName + `,omitempty"` + "`\n"
 			}
 		case "cid-link":
 			if required {
-				s += capitalize(propname) + " string `json:" + `"` + propname + `,omitempty"` + "`\n"
+				s += capitalize(propertyName) + " string `json:" + `"` + propertyName + `,omitempty"` + "`\n"
 			} else {
-				s += capitalize(propname) + " *string `json:" + `"` + propname + `,omitempty"` + "`\n"
+				s += capitalize(propertyName) + " *string `json:" + `"` + propertyName + `,omitempty"` + "`\n"
 			}
 		default:
-			s += "// FIXME: unsupported property type " + propname + " " + property.Type + " " + fmt.Sprintf("required=%t %+v", required, property) + "\n"
+			s += "// FIXME: unsupported property type " + propertyName + " " + property.Type + " " + fmt.Sprintf("required=%t %+v", required, property) + "\n"
 		}
 	}
 	s += "}\n\n"
@@ -92,30 +87,26 @@ func (lexicon *Lexicon) renderStruct(defname string, properties map[string]Prope
 
 func (lexicon *Lexicon) renderDependencies(defname string, properties map[string]Property, required []string) string {
 	var s string
-	var propnames []string
-	for propname := range properties {
-		propnames = append(propnames, propname)
-	}
-	sort.Strings(propnames)
-	for _, propname := range propnames {
-		property := properties[propname]
+	propertyNames := sortedPropertyNames(properties)
+	for _, propertyName := range propertyNames {
+		property := properties[propertyName]
 		switch property.Type {
 		case "union":
-			uniontype := lexicon.resolveUnionType(defname, propname)
+			uniontype := lexicon.resolveUnionType(defname, propertyName)
 			s += "type " + uniontype + " struct {\n"
 			for _, ref := range property.Refs {
-				fieldname := lexicon.unionfieldname(ref)
-				fieldtype := lexicon.unionfieldtype(ref)
+				fieldname := lexicon.unionFieldName(ref)
+				fieldtype := lexicon.unionFieldType(ref)
 				s += fieldname + " " + fieldtype + "\n"
 			}
 			s += "}\n\n"
 		case "array":
 			if property.Items.Type == "union" {
-				uniontype := lexicon.resolveUnionType(defname, propname) + "_Elem"
+				uniontype := lexicon.resolveUnionType(defname, propertyName) + "_Elem"
 				s += "type " + uniontype + " struct {\n"
 				for _, ref := range property.Items.Refs {
-					fieldname := lexicon.unionfieldname(ref)
-					fieldtype := lexicon.unionfieldtype(ref)
+					fieldname := lexicon.unionFieldName(ref)
+					fieldtype := lexicon.unionFieldType(ref)
 					s += fieldname + " " + fieldtype + "\n"
 				}
 				s += "}\n\n"
@@ -125,7 +116,7 @@ func (lexicon *Lexicon) renderDependencies(defname string, properties map[string
 	return s
 }
 
-func (lexicon *Lexicon) unionfieldname(ref string) string {
+func (lexicon *Lexicon) unionFieldName(ref string) string {
 	parts := strings.Split(ref, "#")
 	if len(parts) == 2 || len(parts) == 1 {
 		var id string
@@ -140,7 +131,6 @@ func (lexicon *Lexicon) unionfieldname(ref string) string {
 		if id == "" {
 			id = lexicon.Id
 		}
-
 		var reftype string
 		reflexicon := Lookup(id)
 		if reflexicon != nil {
@@ -149,7 +139,6 @@ func (lexicon *Lexicon) unionfieldname(ref string) string {
 				reftype = refdef.Type
 			}
 		}
-
 		idparts := strings.Split(id, ".")
 		if len(idparts) != 4 {
 			return "/* FIXME " + fmt.Sprintf("%+v", ref) + " */ string"
@@ -158,18 +147,16 @@ func (lexicon *Lexicon) unionfieldname(ref string) string {
 		if tag != "main" {
 			name += "_" + capitalize(tag)
 		}
-
 		if reftype == "array" {
 			return "[]" + name + "_Elem"
 		}
-
 		return name
 	} else {
 		return "/* FIXME union field ref " + fmt.Sprintf("%+v", ref) + " */ string"
 	}
 }
 
-func (lexicon *Lexicon) unionfieldtype(ref string) string {
+func (lexicon *Lexicon) unionFieldType(ref string) string {
 	parts := strings.Split(ref, "#")
 	if len(parts) == 2 || len(parts) == 1 {
 		var id string
@@ -192,7 +179,6 @@ func (lexicon *Lexicon) unionfieldtype(ref string) string {
 				reftype = refdef.Type
 			}
 		}
-
 		idparts := strings.Split(id, ".")
 		if len(idparts) != 4 {
 			return "/* FIXME " + fmt.Sprintf("%+v", ref) + " */ string"
@@ -203,16 +189,13 @@ func (lexicon *Lexicon) unionfieldtype(ref string) string {
 		}
 		// is the ref target in the same package as the lexicon?
 		// if not, we need to add the package name prefix
-
 		if !strings.HasPrefix(lexicon.Id, idparts[0]+"."+idparts[1]+".") {
 			prefix := idparts[0] + "_" + idparts[1]
 			name = prefix + "." + name
 		}
-
 		if reftype == "array" {
 			return "[]" + name + "_Elem"
 		}
-
 		return "*" + name
 	} else {
 		return "/* FIXME union field ref " + fmt.Sprintf("%+v", ref) + " */ string"
