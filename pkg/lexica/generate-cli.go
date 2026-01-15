@@ -40,27 +40,28 @@ func (catalog *Catalog) GenerateCLI(root string) error {
 		subdirectories := getsubdirs(path)
 
 		s := &strings.Builder{}
-		fmt.Fprintf(s, "package %s\n", strings.ToLower(lastpart))
-		fmt.Fprintf(s, "import \"github.com/spf13/cobra\"\n")
-
+		fmt.Fprintf(s, "package %s\n", strings.ReplaceAll(strings.ToLower(lastpart), "-", "_"))
+		fmt.Fprintf(s, "import (\n")
+		fmt.Fprintf(s, "\"github.com/spf13/cobra\"\n")
 		for _, subdir := range subdirectories {
-			fmt.Fprintf(s, "import \"github.com/agentio/slink/%s/%s\"\n", path, subdir)
+			packagename := strings.ReplaceAll(subdir, "-", "_")
+			fmt.Fprintf(s, "%s \"github.com/agentio/slink/%s/%s\"\n", packagename, path, subdir)
 		}
-
+		fmt.Fprintf(s, ")\n")
 		fmt.Fprintf(s, "func Cmd() *cobra.Command {\n")
 		fmt.Fprintf(s, "cmd := &cobra.Command{\n")
 		fmt.Fprintf(s, "Use: \"%s\",\n", strcase.ToKebab(lastpart))
 		fmt.Fprintf(s, "}\n")
-
 		for _, subdir := range subdirectories {
-			fmt.Fprintf(s, "cmd.AddCommand(%s.Cmd())\n", strings.ToLower(subdir))
+			fmt.Fprintf(s, "cmd.AddCommand(%s.Cmd())\n", strings.ReplaceAll(strings.ToLower(subdir), "-", "_"))
 		}
-
 		fmt.Fprintf(s, "return cmd\n")
 		fmt.Fprintf(s, "}\n")
 		formatted, err := imports.Process(filename, []byte(s.String()), nil)
 		if err != nil {
-			log.Fatalf("failed to run goimports: %v\n%s", err, s.String())
+			log.Errorf("failed to run goimports: %v\n%s", err, s.String())
+			os.WriteFile(filename, []byte(s.String()), 0644)
+			return nil
 		}
 		os.WriteFile(filename, []byte(formatted), 0644)
 		return nil
@@ -96,25 +97,23 @@ func (lexicon *Lexicon) generateLexiconCLI(root string) {
 		return
 	}
 
-	id := strings.Replace(lexicon.Id, ".", "", 1)
+	id := strings.Replace(lexicon.Id, ".", "-", 1)
 	parts := strings.Split(id, ".")
 	lastpart := parts[len(parts)-1]
-
 	dirname := root + "/" + strings.ReplaceAll(id, ".", "/")
 	dirname = strings.ToLower(dirname)
-
 	os.MkdirAll(dirname, 0755)
 
 	filename := dirname + "/cmd.go"
 
 	s := &strings.Builder{}
-	fmt.Fprintf(s, "package %s\n", strings.ToLower(lastpart))
+	fmt.Fprintf(s, "package %s\n", strings.ReplaceAll(strings.ToLower(lastpart), "-", "_"))
 	fmt.Fprintf(s, "import \"github.com/spf13/cobra\"\n")
 	fmt.Fprintf(s, "func Cmd() *cobra.Command {\n")
 	fmt.Fprintf(s, "cmd := &cobra.Command{\n")
 	fmt.Fprintf(s, "Use: \"%s\",\n", strcase.ToKebab(lastpart))
 	fmt.Fprintf(s, "RunE: func(cmd *cobra.Command, args []string) error {\n")
-	fmt.Fprintf(s, "return nil")
+	fmt.Fprintf(s, "return errors.New(\"unimplemented\")")
 	fmt.Fprintf(s, "},\n")
 	fmt.Fprintf(s, "}\n")
 	fmt.Fprintf(s, "return cmd\n")
@@ -152,7 +151,9 @@ func (lexicon *Lexicon) generateLexiconCLI(root string) {
 
 	formatted, err := imports.Process(filename, []byte(s.String()), nil)
 	if err != nil {
-		log.Fatalf("failed to run goimports: %v\n%s", err, s.String())
+		log.Errorf("failed to run goimports: %v\n%s", err, s.String())
+		os.WriteFile(filename, []byte(s.String()), 0644)
+		return
 	}
 	os.WriteFile(filename, []byte(formatted), 0644)
 }

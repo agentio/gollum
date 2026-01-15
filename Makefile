@@ -3,8 +3,6 @@ bootstrap:
 	go run ./cmd/bootstrap
 
 slink:
-	go install ./...
+	go install ./cmd/slink
 
-all:
-	go run ./cmd/bootstrap
-	go install ./...
+all:	bootstrap slink
