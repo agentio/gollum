@@ -13,7 +13,7 @@ func Cmd() *cobra.Command {
 	var limit int64
 	cmd := &cobra.Command{
 		Use:   "list-repos",
-		Short: "List repos",
+		Short: api.SyncListRepos_Description,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client := xrpc_sidecar.NewClient()

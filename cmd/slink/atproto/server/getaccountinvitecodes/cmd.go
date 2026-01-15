@@ -13,7 +13,7 @@ func Cmd() *cobra.Command {
 	var includeUsed bool
 	cmd := &cobra.Command{
 		Use:   "get-account-invite-codes",
-		Short: "Get account invite codes",
+		Short: api.ServerGetAccountInviteCodes_Description,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client := xrpc_sidecar.NewClient()

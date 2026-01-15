@@ -13,7 +13,7 @@ func Cmd() *cobra.Command {
 	var useCount int64
 	cmd := &cobra.Command{
 		Use:   "create-invite-code",
-		Short: "Create invite code",
+		Short: api.ServerCreateInviteCode_Description,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client := xrpc_sidecar.NewClient()

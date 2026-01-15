@@ -2,6 +2,7 @@ package admin
 
 import (
 	"github.com/agentio/slink/cmd/slink/atproto/admin/getinvitecodes"
+	"github.com/agentio/slink/cmd/slink/atproto/admin/updateaccountpassword"
 	"github.com/spf13/cobra"
 )
 
@@ -11,5 +12,6 @@ func Cmd() *cobra.Command {
 		Short: "admin subcommands",
 	}
 	cmd.AddCommand(getinvitecodes.Cmd())
+	cmd.AddCommand(updateaccountpassword.Cmd())
 	return cmd
 }

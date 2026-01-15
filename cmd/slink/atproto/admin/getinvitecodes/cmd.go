@@ -14,7 +14,7 @@ func Cmd() *cobra.Command {
 	var sort string
 	cmd := &cobra.Command{
 		Use:   "get-invite-codes",
-		Short: "Get invite codes",
+		Short: api.AdminGetInviteCodes_Description,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client := xrpc_sidecar.NewClient()
