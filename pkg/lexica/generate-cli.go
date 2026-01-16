@@ -12,15 +12,18 @@ func (catalog *Catalog) GenerateCLI(root string) error {
 	var wg sync.WaitGroup
 	for _, lexicon := range catalog.Lexicons {
 		wg.Go(func() {
-			lexicon.generateLeafCommand(root)
+			lexicon.generateLeafCommands(root)
 		})
 	}
 	wg.Wait()
 	filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
 		if d.Type().IsDir() {
-			return catalog.generateInternalCommand(path)
+			wg.Go(func() {
+				catalog.generateInternalCommand(path)
+			})
 		}
 		return nil
 	})
+	wg.Wait()
 	return nil
 }

@@ -3,76 +3,167 @@ package lexica
 import (
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 
 	"github.com/charmbracelet/log"
 	"github.com/iancoleman/strcase"
 )
 
-func (lexicon *Lexicon) generateLeafCommand(root string) {
+func (lexicon *Lexicon) generateLeafCommands(root string) {
+	allow := []string{
+		"com.atproto.sync.listRepos",
+		"com.atproto.admin.getInviteCodes",
+		"com.atproto.server.getAccountInviteCodes",
+	}
+	if !slices.Contains(allow, lexicon.Id) {
+		//return
+	}
+	for defname, def := range lexicon.Defs {
+		if def.Type == "query" {
+			lexicon.generateLeafCommandForDef(root, defname, def)
+		} else if def.Type == "procedure" {
 
-	hasCode := false
-	for _, def := range lexicon.Defs {
-		if def.Type == "procedure" || def.Type == "query" {
-			hasCode = true
 		}
 	}
-	if !hasCode {
-		return
+}
+
+func (lexicon *Lexicon) generateLeafCommandForDef(root, defname string, def *Def) {
+	if defname != "main" {
+		log.Errorf("Can't generate leaf command for %s %s", lexicon.Id, defname)
 	}
 
-	id := strings.Replace(lexicon.Id, ".", "-", 1)
-	parts := strings.Split(id, ".")
-	lastpart := parts[len(parts)-1]
-	dirname := root + "/" + strings.ReplaceAll(id, ".", "/")
-	dirname = strings.ToLower(dirname)
+	id := strings.Replace(lexicon.Id, ".", "-", 1) // merge the first two segments of the lexicon id
+	dirname := strings.ToLower(root + "/" + strings.ReplaceAll(id, ".", "/"))
 	os.MkdirAll(dirname, 0755)
 
 	filename := dirname + "/cmd.go"
 
+	parts := strings.Split(id, ".")
+	lastpart := parts[len(parts)-1]
+	packagename := strings.ToLower(lastpart)
+	commandname := strcase.ToKebab(lastpart)
+	handlerName := idPrefix(lexicon.Id)
+
 	s := &strings.Builder{}
-	fmt.Fprintf(s, "package %s\n", strings.ReplaceAll(strings.ToLower(lastpart), "-", "_"))
+	fmt.Fprintf(s, "package %s // %s\n\n", packagename, lexicon.Id)
 	fmt.Fprintf(s, "import \"github.com/spf13/cobra\"\n")
+	fmt.Fprintf(s, "import \"github.com/agentio/slink/api\"\n")
+	fmt.Fprintf(s, "import xrpc_sidecar \"github.com/agentio/slink/pkg/xrpc/sidecar\"\n")
 	fmt.Fprintf(s, "func Cmd() *cobra.Command {\n")
+	if def.Type == "query" && def.Parameters != nil {
+		for _, propertyName := range sortedPropertyNames(def.Parameters.Properties) {
+			propertyValue := def.Parameters.Properties[propertyName]
+			switch propertyValue.Type {
+			case "string":
+				fmt.Fprintf(s, "var %s string\n", propertyName)
+			case "integer":
+				fmt.Fprintf(s, "var %s int\n", propertyName)
+			case "boolean":
+				fmt.Fprintf(s, "var %s bool\n", propertyName)
+			case "array":
+				if propertyValue.Items.Type == "string" {
+					fmt.Fprintf(s, "var %s []string\n", propertyName)
+				} else {
+					fmt.Fprintf(s, "// FIXME var %s %+v\n", propertyName, propertyValue)
+				}
+			default:
+				fmt.Fprintf(s, "// FIXME var %s %+v\n", propertyName, propertyValue)
+			}
+		}
+	}
 	fmt.Fprintf(s, "cmd := &cobra.Command{\n")
-	fmt.Fprintf(s, "Use: \"%s\",\n", strcase.ToKebab(lastpart))
+	fmt.Fprintf(s, "Use: \"%s\",\n", commandname)
+	fmt.Fprintf(s, "Args: cobra.NoArgs,\n")
+	fmt.Fprintf(s, "Short: api.%s_Description,\n", handlerName)
 	fmt.Fprintf(s, "RunE: func(cmd *cobra.Command, args []string) error {\n")
-	fmt.Fprintf(s, "return errors.New(\"unimplemented\")")
+	if def.Type == "query" && def.Parameters != nil {
+		fmt.Fprintf(s, "client := xrpc_sidecar.NewClient()\n")
+		fmt.Fprintf(s, "response, err := api.%s(\n", handlerName)
+		fmt.Fprintf(s, "cmd.Context(),\n")
+		fmt.Fprintf(s, "client,\n")
+		for _, propertyName := range sortedPropertyNames(def.Parameters.Properties) {
+			propertyValue := def.Parameters.Properties[propertyName]
+			switch propertyValue.Type {
+			case "string":
+				fmt.Fprintf(s, "%s,\n", propertyName)
+			case "integer":
+				fmt.Fprintf(s, "int64(%s),\n", propertyName)
+			case "boolean":
+				fmt.Fprintf(s, "%s,\n", propertyName)
+			case "array":
+				if propertyValue.Items.Type == "string" {
+					fmt.Fprintf(s, "%s,\n", propertyName)
+				}
+			default:
+			}
+		}
+		fmt.Fprintf(s, ")\n")
+		fmt.Fprintf(s, "if err != nil {return err}\n")
+		if def.Output != nil && def.Output.Encoding == "application/json" {
+			fmt.Fprintf(s, "b, err := json.MarshalIndent(response, \"\", \"  \")\n")
+			fmt.Fprintf(s, "cmd.OutOrStdout().Write(b)\n")
+			fmt.Fprintf(s, `cmd.OutOrStdout().Write([]byte("\n"))`+"\n")
+		} else {
+			fmt.Fprintf(s, "cmd.OutOrStdout().Write(response)\n")
+		}
+		fmt.Fprintf(s, "return nil\n")
+	} else {
+		fmt.Fprintf(s, "return errors.New(\"unimplemented\")")
+	}
 	fmt.Fprintf(s, "},\n")
 	fmt.Fprintf(s, "}\n")
+	if def.Type == "query" && def.Parameters != nil {
+		for _, propertyName := range sortedPropertyNames(def.Parameters.Properties) {
+			propertyValue := def.Parameters.Properties[propertyName]
+			switch propertyValue.Type {
+			case "string":
+				fmt.Fprintf(s, "cmd.Flags().StringVar(&%s, \"%s\", \"\", \"\")\n", propertyName, propertyName)
+			case "integer":
+				fmt.Fprintf(s, "cmd.Flags().IntVar(&%s, \"%s\", %d, \"\")\n", propertyName, propertyName, int64Value(propertyValue.Default))
+			case "boolean":
+				fmt.Fprintf(s, "cmd.Flags().BoolVar(&%s, \"%s\", %t, \"\")\n", propertyName, propertyName, boolValue(propertyValue.Default))
+			case "array":
+				if propertyValue.Items.Type == "string" {
+					fmt.Fprintf(s, "cmd.Flags().StringArrayVar(&%s, \"%s\", nil, \"\")\n", propertyName, propertyName)
+				} else {
+					fmt.Fprintf(s, "// FIXME cmd.Flags().XXXVar(&%s... %+v\n", propertyName, propertyValue)
+				}
+			default:
+				fmt.Fprintf(s, "// FIXME cmd.Flags().XXXVar(&%s... %+v\n", propertyName, propertyValue)
+			}
+		}
+	}
 	fmt.Fprintf(s, "return cmd\n")
 	fmt.Fprintf(s, "}\n")
-
-	/*
-
-	   func Cmd() *cobra.Command {
-	   	var did string
-	   	var password string
-	   	cmd := &cobra.Command{
-	   		Use:   "update-account-password",
-	   		Short: api.AdminUpdateAccountPassword_Description,
-	   		Args:  cobra.NoArgs,
-	   		RunE: func(cmd *cobra.Command, args []string) error {
-	   			client := xrpc_sidecar.NewClient()
-	   			err := api.AdminUpdateAccountPassword(cmd.Context(),
-	   				client,
-	   				&api.AdminUpdateAccountPassword_Input{
-	   					Did:      did,
-	   					Password: password,
-	   				},
-	   			)
-	   			if err != nil {
-	   				return err
-	   			}
-	   			return nil
-	   		},
-	   	}
-	   	cmd.Flags().StringVar(&did, "did", "", "")
-	   	cmd.Flags().StringVar(&password, "password", "", "")
-	   	return cmd
-	   }
-	*/
+	if true { // append lexicon source to generated file
+		lexicon.generateSourceComment(s)
+	}
 	if err := writeFormattedFile(filename, s.String()); err != nil {
 		log.Errorf("error writing file %s %s", filename, err)
+	}
+}
+
+func int64Value(v any) int64 {
+	switch v := v.(type) {
+	case int64:
+		return v
+	case float64:
+		return int64(v)
+	default:
+		return -999
+	}
+}
+
+func boolValue(v any) bool {
+	switch v := v.(type) {
+	case bool:
+		return v
+	case int64:
+		return v != 0
+	case float64:
+		return v != 0.0
+	default:
+		return false
 	}
 }

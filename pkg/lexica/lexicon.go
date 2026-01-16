@@ -111,10 +111,13 @@ type Schema struct {
 }
 
 type Property struct {
-	Type  string   `json:"type,omitempty"`
-	Ref   string   `json:"ref,omitempty"`
-	Refs  []string `json:"refs,omitempty"`
-	Items *Items   `json:"items,omitempty"`
+	Type    string   `json:"type,omitempty"`
+	Ref     string   `json:"ref,omitempty"`
+	Refs    []string `json:"refs,omitempty"`
+	Items   *Items   `json:"items,omitempty"`
+	Minimum int64    `json:"minimum,omitempty"`
+	Maximum int64    `json:"maximum,omitempty"`
+	Default any      `json:"default,omitempty"`
 }
 
 type Items struct {

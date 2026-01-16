@@ -1,7 +1,6 @@
 package lexica
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -43,13 +42,7 @@ func (lexicon *Lexicon) generateFile(filename, packagename string) error {
 		lexicon.generateDef(s, def, name, prefix)
 	}
 	if true { // append lexicon source to generated file
-		filter := func(s string) string {
-			return strings.ReplaceAll(s, "*/*", "[ANY]")
-		}
-		b, _ := json.MarshalIndent(lexicon, "", "  ")
-		s.WriteString("/*\n")
-		s.WriteString(filter(string(b)) + "\n")
-		s.WriteString("*/\n")
+		lexicon.generateSourceComment(s)
 	}
 	return writeFormattedFile(filename, s.String())
 }
