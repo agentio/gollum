@@ -32,7 +32,7 @@ func Cmd() *cobra.Command {
 		},
 	}
 	cmd.Flags().StringVarP(&input, "input", "i", "lexicons", "input directory")
-	cmd.Flags().StringVarP(&output, "output", "o", "cli", "output directory")
+	cmd.Flags().StringVarP(&output, "output", "o", "gen/slink", "output directory")
 	cmd.Flags().StringVarP(&logLevel, "log-level", "l", "info", "log level (debug, info, warn, error, fatal)")
 	return cmd
 }

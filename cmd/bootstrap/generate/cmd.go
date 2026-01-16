@@ -34,7 +34,7 @@ func Cmd() *cobra.Command {
 	}
 	cmd.AddCommand(gencli.Cmd())
 	cmd.Flags().StringVarP(&input, "input", "i", "lexicons", "input directory")
-	cmd.Flags().StringVarP(&output, "output", "o", "api", "output directory")
+	cmd.Flags().StringVarP(&output, "output", "o", "gen/api", "output directory")
 	cmd.Flags().StringVarP(&logLevel, "log-level", "l", "info", "log level (debug, info, warn, error, fatal)")
 	return cmd
 }

@@ -3,6 +3,7 @@ package lexica
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/charmbracelet/log"
@@ -30,7 +31,7 @@ func lexiconFileName(root, id string) string {
 }
 
 func lexiconPackageName(root, id string) string {
-	return root
+	return filepath.Base(root)
 }
 
 func (lexicon *Lexicon) generateFile(filename, packagename string) error {

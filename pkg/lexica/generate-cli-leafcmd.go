@@ -49,7 +49,7 @@ func (lexicon *Lexicon) generateLeafCommandForDef(root, defname string, def *Def
 	s := &strings.Builder{}
 	fmt.Fprintf(s, "package %s // %s\n\n", packagename, lexicon.Id)
 	fmt.Fprintf(s, "import \"github.com/spf13/cobra\"\n")
-	fmt.Fprintf(s, "import \"github.com/agentio/slink/api\"\n")
+	fmt.Fprintf(s, "import \"github.com/agentio/slink/gen/api\"\n")
 	fmt.Fprintf(s, "import \"github.com/agentio/slink/pkg/common\"\n")
 	fmt.Fprintf(s, "func Cmd() *cobra.Command {\n")
 	if def.Type == "query" && def.Parameters != nil {
