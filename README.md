@@ -1,8 +1,8 @@
 # slink
 
-`slink` is a command line tool for working with an ATProto PDS.
+`slink` is a command line tool for calling APIs described with [Lexicon](https://atproto.com/specs/lexicon).
 
-`slink` connects using a local IO which handles all routing and authentication.
+`slink` connects to remote services through a local [IO](https://agent.io/posts/io) which handles all routing and authentication.
 
 To install `slink` on any system with Go installed:
 1. clone the repo.
