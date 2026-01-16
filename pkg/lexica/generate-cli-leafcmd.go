@@ -35,7 +35,7 @@ func (lexicon *Lexicon) generateLeafCommandForDef(root, defname string, def *Def
 	if defname != "main" {
 		log.Errorf("Can't generate leaf command for %s %s", lexicon.Id, defname)
 	}
-	id := strings.Replace(lexicon.Id, ".", "-", 1) // merge the first two segments of the lexicon id
+	id := strings.Replace(lexicon.Id, ".", "-", 2) // merge initial segments of the lexicon id
 	dirname := strings.ToLower(root + "/" + strings.ReplaceAll(id, ".", "/"))
 	os.MkdirAll(dirname, 0755)
 	filename := dirname + "/cmd.go"
@@ -95,7 +95,8 @@ func (lexicon *Lexicon) generateLeafCommandForDef(root, defname string, def *Def
 	}
 	fmt.Fprintf(s, "cmd := &cobra.Command{\n")
 	fmt.Fprintf(s, "Use: \"%s\",\n", commandname)
-	fmt.Fprintf(s, "Short: api.%s_Description,\n", handlerName)
+	fmt.Fprintf(s, "Short: common.Truncate(api.%s_Description),\n", handlerName)
+	fmt.Fprintf(s, "Long: api.%s_Description,\n", handlerName)
 	fmt.Fprintf(s, "Args: cobra.NoArgs,\n")
 	fmt.Fprintf(s, "RunE: func(cmd *cobra.Command, args []string) error {\n")
 	if def.Type == "query" {

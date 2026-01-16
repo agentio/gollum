@@ -47,7 +47,7 @@ func (catalog *Catalog) generateInternalCommand(path string) error {
 	fmt.Fprintf(s, ")\n")
 	fmt.Fprintf(s, "func Cmd() *cobra.Command {\n")
 	fmt.Fprintf(s, "cmd := &cobra.Command{\n")
-	fmt.Fprintf(s, "Use: \"%s\",\n", strcase.ToKebab(lastpart))
+	fmt.Fprintf(s, "Use: \"%s\",\n", strings.ReplaceAll(strcase.ToKebab(lastpart), "-", "."))
 	fmt.Fprintf(s, "}\n")
 	for _, subdir := range subdirectories {
 		fmt.Fprintf(s, "cmd.AddCommand(%s.Cmd())\n", strings.ReplaceAll(strings.ToLower(subdir), "-", "_"))
