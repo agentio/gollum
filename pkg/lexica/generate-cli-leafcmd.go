@@ -23,7 +23,7 @@ func (lexicon *Lexicon) generateLeafCommands(root string) {
 		if def.Type == "query" {
 			lexicon.generateLeafCommandForDef(root, defname, def)
 		} else if def.Type == "procedure" {
-
+			lexicon.generateLeafCommandForDef(root, defname, def)
 		}
 	}
 }
@@ -49,7 +49,7 @@ func (lexicon *Lexicon) generateLeafCommandForDef(root, defname string, def *Def
 	fmt.Fprintf(s, "package %s // %s\n\n", packagename, lexicon.Id)
 	fmt.Fprintf(s, "import \"github.com/spf13/cobra\"\n")
 	fmt.Fprintf(s, "import \"github.com/agentio/slink/api\"\n")
-	fmt.Fprintf(s, "import xrpc_sidecar \"github.com/agentio/slink/pkg/xrpc/sidecar\"\n")
+	fmt.Fprintf(s, "import \"github.com/agentio/slink/pkg/common\"\n")
 	fmt.Fprintf(s, "func Cmd() *cobra.Command {\n")
 	if def.Type == "query" && def.Parameters != nil {
 		for _, propertyName := range sortedPropertyNames(def.Parameters.Properties) {
@@ -78,7 +78,7 @@ func (lexicon *Lexicon) generateLeafCommandForDef(root, defname string, def *Def
 	fmt.Fprintf(s, "Short: api.%s_Description,\n", handlerName)
 	fmt.Fprintf(s, "RunE: func(cmd *cobra.Command, args []string) error {\n")
 	if def.Type == "query" && def.Parameters != nil {
-		fmt.Fprintf(s, "client := xrpc_sidecar.NewClient()\n")
+		fmt.Fprintf(s, "client := common.NewClient()\n")
 		fmt.Fprintf(s, "response, err := api.%s(\n", handlerName)
 		fmt.Fprintf(s, "cmd.Context(),\n")
 		fmt.Fprintf(s, "client,\n")
@@ -100,14 +100,7 @@ func (lexicon *Lexicon) generateLeafCommandForDef(root, defname string, def *Def
 		}
 		fmt.Fprintf(s, ")\n")
 		fmt.Fprintf(s, "if err != nil {return err}\n")
-		if def.Output != nil && def.Output.Encoding == "application/json" {
-			fmt.Fprintf(s, "b, err := json.MarshalIndent(response, \"\", \"  \")\n")
-			fmt.Fprintf(s, "cmd.OutOrStdout().Write(b)\n")
-			fmt.Fprintf(s, `cmd.OutOrStdout().Write([]byte("\n"))`+"\n")
-		} else {
-			fmt.Fprintf(s, "cmd.OutOrStdout().Write(response)\n")
-		}
-		fmt.Fprintf(s, "return nil\n")
+		fmt.Fprintf(s, "return common.Write(cmd.OutOrStdout(), response)\n")
 	} else {
 		fmt.Fprintf(s, "return errors.New(\"unimplemented\")")
 	}
