@@ -19,7 +19,7 @@ func (lexicon *Lexicon) generateLeafCommands(root string) {
 		"com.atproto.sync.listRepos",
 	}
 	if !slices.Contains(allow, lexicon.Id) {
-		return
+		//return
 	}
 	for defname, def := range lexicon.Defs {
 		switch def.Type {
@@ -98,31 +98,33 @@ func (lexicon *Lexicon) generateLeafCommandForDef(root, defname string, def *Def
 	fmt.Fprintf(s, "Short: api.%s_Description,\n", handlerName)
 	fmt.Fprintf(s, "Args: cobra.NoArgs,\n")
 	fmt.Fprintf(s, "RunE: func(cmd *cobra.Command, args []string) error {\n")
-	if def.Type == "query" && def.Parameters != nil {
+	if def.Type == "query" {
 		fmt.Fprintf(s, "client := common.NewClient()\n")
 		fmt.Fprintf(s, "response, err := api.%s(\n", handlerName)
 		fmt.Fprintf(s, "cmd.Context(),\n")
 		fmt.Fprintf(s, "client,\n")
-		for _, propertyName := range sortedPropertyNames(def.Parameters.Properties) {
-			propertyValue := def.Parameters.Properties[propertyName]
-			switch propertyValue.Type {
-			case "string":
-				fmt.Fprintf(s, "%s,\n", propertyName)
-			case "integer":
-				fmt.Fprintf(s, "%s,\n", propertyName)
-			case "boolean":
-				fmt.Fprintf(s, "%s,\n", propertyName)
-			case "array":
-				if propertyValue.Items.Type == "string" {
+		if def.Parameters != nil {
+			for _, propertyName := range sortedPropertyNames(def.Parameters.Properties) {
+				propertyValue := def.Parameters.Properties[propertyName]
+				switch propertyValue.Type {
+				case "string":
 					fmt.Fprintf(s, "%s,\n", propertyName)
+				case "integer":
+					fmt.Fprintf(s, "%s,\n", propertyName)
+				case "boolean":
+					fmt.Fprintf(s, "%s,\n", propertyName)
+				case "array":
+					if propertyValue.Items.Type == "string" {
+						fmt.Fprintf(s, "%s,\n", propertyName)
+					}
+				default:
 				}
-			default:
 			}
 		}
 		fmt.Fprintf(s, ")\n")
 		fmt.Fprintf(s, "if err != nil {return err}\n")
 		fmt.Fprintf(s, "return common.Write(cmd.OutOrStdout(), response)\n")
-	} else if def.Type == "procedure" && def.Input != nil {
+	} else if def.Type == "procedure" && (def.Input == nil || def.Input.Encoding == "application/json") {
 		fmt.Fprintf(s, "client := common.NewClient()\n")
 		resultIfNeeded := ""
 		if def.Output != nil {
@@ -131,28 +133,34 @@ func (lexicon *Lexicon) generateLeafCommandForDef(root, defname string, def *Def
 		fmt.Fprintf(s, "%serr := api.%s(\n", resultIfNeeded, handlerName)
 		fmt.Fprintf(s, "cmd.Context(),\n")
 		fmt.Fprintf(s, "client,\n")
-		fmt.Fprintf(s, "&api.%s_Input{\n", handlerName)
-		for _, propertyName := range sortedPropertyNames(def.Input.Schema.Properties) {
-			propertyValue := def.Input.Schema.Properties[propertyName]
-			switch propertyValue.Type {
-			case "string":
-				if !slices.Contains(def.Input.Schema.Required, propertyName) {
-					fmt.Fprintf(s, "%s: common.StringPointerOrNil(%s),\n", capitalize(propertyName), propertyName)
-				} else {
-					fmt.Fprintf(s, "%s: %s,\n", capitalize(propertyName), propertyName)
+		if def.Input != nil {
+			fmt.Fprintf(s, "&api.%s_Input{\n", handlerName)
+			for _, propertyName := range sortedPropertyNames(def.Input.Schema.Properties) {
+				propertyValue := def.Input.Schema.Properties[propertyName]
+				switch propertyValue.Type {
+				case "string":
+					if !slices.Contains(def.Input.Schema.Required, propertyName) {
+						fmt.Fprintf(s, "%s: common.StringPointerOrNil(%s),\n", capitalize(propertyName), propertyName)
+					} else {
+						fmt.Fprintf(s, "%s: %s,\n", capitalize(propertyName), propertyName)
+					}
+				case "integer":
+					if !slices.Contains(def.Input.Schema.Required, propertyName) {
+						fmt.Fprintf(s, "%s: common.Int64PointerOrNil(%s),\n", capitalize(propertyName), propertyName)
+					} else {
+						fmt.Fprintf(s, "%s: %s,\n", capitalize(propertyName), propertyName)
+					}
+				case "boolean":
+					//fmt.Fprintf(s, "%s,\n", propertyName)
+				case "array":
+					if propertyValue.Items.Type == "string" {
+						//	fmt.Fprintf(s, "%s,\n", propertyName)
+					}
+				default:
 				}
-			case "integer":
-				fmt.Fprintf(s, "%s: %s,\n", capitalize(propertyName), propertyName)
-			case "boolean":
-				//fmt.Fprintf(s, "%s,\n", propertyName)
-			case "array":
-				if propertyValue.Items.Type == "string" {
-					//	fmt.Fprintf(s, "%s,\n", propertyName)
-				}
-			default:
 			}
+			fmt.Fprintf(s, "},\n")
 		}
-		fmt.Fprintf(s, "},\n")
 		fmt.Fprintf(s, ")\n")
 		fmt.Fprintf(s, "if err != nil {return err}\n")
 		if def.Output == nil {
