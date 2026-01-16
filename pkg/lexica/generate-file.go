@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/log"
-	"golang.org/x/tools/imports"
 )
 
 func (lexicon *Lexicon) generateLexiconSourceFile(root string) {
@@ -19,7 +18,9 @@ func (lexicon *Lexicon) generateLexiconSourceFile(root string) {
 	if packagename == "" {
 		return
 	}
-	lexicon.generateFile(filename, packagename)
+	if err := lexicon.generateFile(filename, packagename); err != nil {
+		log.Errorf("error writing file %s %s", filename, err)
+	}
 }
 
 func lexiconFileName(root, id string) string {
@@ -50,9 +51,5 @@ func (lexicon *Lexicon) generateFile(filename, packagename string) error {
 		s.WriteString(filter(string(b)) + "\n")
 		s.WriteString("*/\n")
 	}
-	formatted, err := imports.Process(filename, []byte(s.String()), nil)
-	if err != nil {
-		log.Fatalf("failed to run goimports: %v\n%s", err, s.String())
-	}
-	return os.WriteFile(filename, []byte(formatted), 0644)
+	return writeFormattedFile(filename, s.String())
 }
