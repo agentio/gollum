@@ -2,7 +2,7 @@ package updateaccountpassword
 
 import (
 	"github.com/agentio/slink/api"
-	xrpc_sidecar "github.com/agentio/slink/pkg/xrpc/sidecar"
+	"github.com/agentio/slink/pkg/common"
 	"github.com/spf13/cobra"
 )
 
@@ -14,8 +14,9 @@ func Cmd() *cobra.Command {
 		Short: api.AdminUpdateAccountPassword_Description,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client := xrpc_sidecar.NewClient()
-			err := api.AdminUpdateAccountPassword(cmd.Context(),
+			client := common.NewClient()
+			err := api.AdminUpdateAccountPassword(
+				cmd.Context(),
 				client,
 				&api.AdminUpdateAccountPassword_Input{
 					Did:      did,

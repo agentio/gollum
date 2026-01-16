@@ -1,10 +1,8 @@
 package listrepos
 
 import (
-	"encoding/json"
-
 	"github.com/agentio/slink/api"
-	xrpc_sidecar "github.com/agentio/slink/pkg/xrpc/sidecar"
+	"github.com/agentio/slink/pkg/common"
 	"github.com/spf13/cobra"
 )
 
@@ -16,18 +14,17 @@ func Cmd() *cobra.Command {
 		Short: api.SyncListRepos_Description,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client := xrpc_sidecar.NewClient()
-			response, err := api.SyncListRepos(cmd.Context(),
+			client := common.NewClient()
+			response, err := api.SyncListRepos(
+				cmd.Context(),
 				client,
 				cursor,
 				limit)
 			if err != nil {
 				return err
 			}
-			b, err := json.MarshalIndent(response, "", "  ")
-			cmd.OutOrStdout().Write(b)
-			cmd.OutOrStdout().Write([]byte("\n"))
-			return nil
+			return common.Write(cmd.OutOrStdout(), response)
+
 		},
 	}
 	cmd.Flags().StringVar(&cursor, "cursor", "", "")
