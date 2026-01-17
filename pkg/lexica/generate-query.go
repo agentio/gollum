@@ -17,7 +17,7 @@ func (lexicon *Lexicon) generateQuery(s *strings.Builder, defname string, def *D
 		s.WriteString("// " + def.Description + "\n")
 		s.WriteString("func " + defname + "(ctx context.Context, c common.Client" + params + ") (*" + defname + "_Output" + ", error) {\n")
 		s.WriteString("var output " + defname + "_Output" + "\n")
-		s.WriteString("params := map[string]interface{}{\n")
+		s.WriteString("params := map[string]any{\n")
 		if paramsok {
 			for parameterName := range def.Parameters.Properties {
 				s.WriteString(`"` + parameterName + `":` + parameterName + ",\n")
@@ -38,7 +38,7 @@ func (lexicon *Lexicon) generateQuery(s *strings.Builder, defname string, def *D
 		}
 		s.WriteString("// " + def.Description + "\n")
 		s.WriteString("func " + defname + "(ctx context.Context, c common.Client" + params + ") ([]byte, error) {\n")
-		s.WriteString("params := map[string]interface{}{\n")
+		s.WriteString("params := map[string]any{\n")
 		if paramsok {
 			for parameterName := range def.Parameters.Properties {
 				s.WriteString(`"` + parameterName + `":` + parameterName + ",\n")

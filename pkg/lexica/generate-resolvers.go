@@ -14,7 +14,7 @@ func (lexicon *Lexicon) resolveItemsType(defname, propname string, items *Items)
 	case "string":
 		return "string"
 	case "unknown":
-		return "interface{}"
+		return "any"
 	case "cid-link":
 		return "string"
 	case "ref":

@@ -10,5 +10,5 @@ const (
 )
 
 type Client interface {
-	Do(context.Context, RequestType, string, string, map[string]interface{}, interface{}, interface{}) error
+	Do(context.Context, RequestType, string, string, map[string]any, any, any) error
 }

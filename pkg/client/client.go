@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/agentio/sidecar"
@@ -18,8 +19,12 @@ type Client struct {
 }
 
 func NewClient() *Client {
+	host := os.Getenv("SLINK_HOST")
+	if host == "" {
+		host = "http://localhost:5050"
+	}
 	return &Client{
-		Host: "http://localhost:5050",
+		Host: host,
 	}
 }
 
@@ -28,9 +33,9 @@ func (c *Client) Do(
 	kind common.RequestType,
 	contentType string,
 	method string,
-	params map[string]interface{},
-	bodyobj interface{},
-	out interface{},
+	params map[string]any,
+	bodyobj any,
+	out any,
 ) error {
 	var body io.Reader
 	if bodyobj != nil {
@@ -74,7 +79,12 @@ func (c *Client) Do(
 	if bodyobj != nil && contentType != "" {
 		req.Header.Set("Content-Type", contentType)
 	}
-	req.Header.Set("User-Agent", "slink-sidecar")
+	req.Header.Set("User-Agent", "slink")
+
+	authorization := os.Getenv("SLINK_AUTHORIZATION")
+	if authorization != "" {
+		req.Header.Set("Authorization", authorization)
+	}
 
 	client := sidecar.NewClient(sidecar.ClientOptions{
 		Address: c.Host,

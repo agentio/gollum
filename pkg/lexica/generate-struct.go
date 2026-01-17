@@ -44,9 +44,9 @@ func (lexicon *Lexicon) renderStruct(s *strings.Builder, defname string, propert
 			s.WriteString(capitalize(propertyName) + reftype + " `json:" + `"` + propertyName + `,omitempty"` + "`\n")
 		case "unknown":
 			if required {
-				s.WriteString(capitalize(propertyName) + " interface{} `json:" + `"` + propertyName + `,omitempty"` + "`\n")
+				s.WriteString(capitalize(propertyName) + " any `json:" + `"` + propertyName + `,omitempty"` + "`\n")
 			} else {
-				s.WriteString(capitalize(propertyName) + " *interface{} `json:" + `"` + propertyName + `,omitempty"` + "`\n")
+				s.WriteString(capitalize(propertyName) + " *any `json:" + `"` + propertyName + `,omitempty"` + "`\n")
 			}
 		case "blob":
 			if required {
