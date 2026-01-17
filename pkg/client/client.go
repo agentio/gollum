@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"strings"
 
@@ -88,20 +87,21 @@ func (c *Client) Do(
 
 	defer resp.Body.Close()
 
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
 	if resp.StatusCode != 200 {
-
-		b, _ := io.ReadAll(resp.Body)
-		log.Printf("%s", string(b))
-
 		var xe XRPCError
-		if err := json.NewDecoder(resp.Body).Decode(&xe); err != nil {
+		if err := json.Unmarshal(b, &xe); err != nil {
 			return errorFromHTTPResponse(resp, fmt.Errorf("failed to decode xrpc error message: %w", err))
 		}
 		return errorFromHTTPResponse(resp, &xe)
 	}
 
 	if out != nil {
-		if err := json.NewDecoder(resp.Body).Decode(out); err != nil {
+		if err := json.Unmarshal(b, out); err != nil {
 			return fmt.Errorf("decoding xrpc response: %w", err)
 		}
 	}

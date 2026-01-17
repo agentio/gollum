@@ -59,7 +59,7 @@ type Def struct {
 	Items *Items `json:"items,omitempty"`
 
 	// permission-set
-	Permissions []*Permission `json:"permissions,omitempty`
+	Permissions []*Permission `json:"permissions,omitempty"`
 }
 
 func (def *Def) Validate(path string) error {
@@ -106,8 +106,9 @@ type Input struct {
 
 type Schema struct {
 	Type       string              `json:"type"`
-	Required   []string            `json:"required"`
-	Properties map[string]Property `json:"properties"`
+	Ref        string              `json:"ref,omitempty"`
+	Required   []string            `json:"required,omitempty"`
+	Properties map[string]Property `json:"properties,omitempty"`
 }
 
 type Property struct {
