@@ -15,7 +15,7 @@ func (lexicon *Lexicon) generateQuery(s *strings.Builder, defname string, def *D
 			params, paramsok = parseQueryParameters(def.Parameters)
 		}
 		s.WriteString("// " + def.Description + "\n")
-		s.WriteString("func " + defname + "(ctx context.Context, c xrpc.Client" + params + ") (*" + defname + "_Output" + ", error) {\n")
+		s.WriteString("func " + defname + "(ctx context.Context, c common.Client" + params + ") (*" + defname + "_Output" + ", error) {\n")
 		s.WriteString("var output " + defname + "_Output" + "\n")
 		s.WriteString("params := map[string]interface{}{\n")
 		if paramsok {
@@ -24,7 +24,7 @@ func (lexicon *Lexicon) generateQuery(s *strings.Builder, defname string, def *D
 			}
 		}
 		s.WriteString("}\n")
-		s.WriteString(`if err := c.Do(ctx, xrpc.Query, "", "` + lexicon.Id + `", params, nil, &output); err != nil {` + "\n")
+		s.WriteString(`if err := c.Do(ctx, common.Query, "", "` + lexicon.Id + `", params, nil, &output); err != nil {` + "\n")
 		s.WriteString("return nil, err\n")
 		s.WriteString("}\n")
 		s.WriteString("return &output, nil\n")
@@ -37,7 +37,7 @@ func (lexicon *Lexicon) generateQuery(s *strings.Builder, defname string, def *D
 			params, paramsok = parseQueryParameters(def.Parameters)
 		}
 		s.WriteString("// " + def.Description + "\n")
-		s.WriteString("func " + defname + "(ctx context.Context, c xrpc.Client" + params + ") ([]byte, error) {\n")
+		s.WriteString("func " + defname + "(ctx context.Context, c common.Client" + params + ") ([]byte, error) {\n")
 		s.WriteString("params := map[string]interface{}{\n")
 		if paramsok {
 			for parameterName := range def.Parameters.Properties {
@@ -46,7 +46,7 @@ func (lexicon *Lexicon) generateQuery(s *strings.Builder, defname string, def *D
 		}
 		s.WriteString("}\n")
 		s.WriteString("var output []byte\n")
-		s.WriteString(`if err := c.Do(ctx, xrpc.Query, "", "` + lexicon.Id + `", params, nil, &output); err != nil {` + "\n")
+		s.WriteString(`if err := c.Do(ctx, common.Query, "", "` + lexicon.Id + `", params, nil, &output); err != nil {` + "\n")
 		s.WriteString("return nil, err\n")
 		s.WriteString("}\n")
 		s.WriteString("return output, nil\n")

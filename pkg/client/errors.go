@@ -1,4 +1,4 @@
-package common
+package client
 
 import (
 	"fmt"
@@ -44,7 +44,7 @@ func (xe *XRPCError) Error() string {
 	return fmt.Sprintf("%s: %s", xe.ErrStr, xe.Message)
 }
 
-func ErrorFromHTTPResponse(resp *http.Response, err error) error {
+func errorFromHTTPResponse(resp *http.Response, err error) error {
 	r := &Error{
 		StatusCode: resp.StatusCode,
 		Wrapped:    err,

@@ -37,7 +37,7 @@ func lexiconPackageName(root, id string) string {
 func (lexicon *Lexicon) generateFile(filename, packagename string) error {
 	s := &strings.Builder{}
 	fmt.Fprintf(s, "package %s // %s\n\n", packagename, lexicon.Id)
-	s.WriteString(`import "github.com/agentio/slink/pkg/xrpc"` + "\n\n")
+	s.WriteString(`import "github.com/agentio/slink/pkg/common"` + "\n\n")
 	prefix := idPrefix(lexicon.Id)
 	for name, def := range lexicon.Defs {
 		lexicon.generateDef(s, def, name, prefix)

@@ -1,10 +1,14 @@
 package common
 
-import (
-	"github.com/agentio/slink/pkg/xrpc"
-	xrpc_sidecar "github.com/agentio/slink/pkg/xrpc/sidecar"
+import "context"
+
+type RequestType int
+
+const (
+	Query = RequestType(iota)
+	Procedure
 )
 
-func NewClient() xrpc.Client {
-	return xrpc_sidecar.NewClient()
+type Client interface {
+	Do(context.Context, RequestType, string, string, map[string]interface{}, interface{}, interface{}) error
 }

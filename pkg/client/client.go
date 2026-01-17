@@ -1,4 +1,4 @@
-package xrpc_sidecar
+package client
 
 import (
 	"bytes"
@@ -11,8 +11,7 @@ import (
 	"strings"
 
 	"github.com/agentio/sidecar"
-	"github.com/agentio/slink/pkg/xrpc"
-	"github.com/agentio/slink/pkg/xrpc/common"
+	"github.com/agentio/slink/pkg/common"
 )
 
 type Client struct {
@@ -27,7 +26,7 @@ func NewClient() *Client {
 
 func (c *Client) Do(
 	ctx context.Context,
-	kind xrpc.RequestType,
+	kind common.RequestType,
 	contentType string,
 	method string,
 	params map[string]interface{},
@@ -50,9 +49,9 @@ func (c *Client) Do(
 
 	var m string
 	switch kind {
-	case xrpc.Query:
+	case common.Query:
 		m = "GET"
-	case xrpc.Procedure:
+	case common.Procedure:
 		m = "POST"
 	default:
 		return fmt.Errorf("unsupported request kind: %d", kind)
@@ -60,7 +59,7 @@ func (c *Client) Do(
 
 	var paramStr string
 	if len(params) > 0 {
-		paramStr = "?" + common.MakeParams(params)
+		paramStr = "?" + makeParams(params)
 	}
 
 	host := c.Host
@@ -94,11 +93,11 @@ func (c *Client) Do(
 		b, _ := io.ReadAll(resp.Body)
 		log.Printf("%s", string(b))
 
-		var xe common.XRPCError
+		var xe XRPCError
 		if err := json.NewDecoder(resp.Body).Decode(&xe); err != nil {
-			return common.ErrorFromHTTPResponse(resp, fmt.Errorf("failed to decode xrpc error message: %w", err))
+			return errorFromHTTPResponse(resp, fmt.Errorf("failed to decode xrpc error message: %w", err))
 		}
-		return common.ErrorFromHTTPResponse(resp, &xe)
+		return errorFromHTTPResponse(resp, &xe)
 	}
 
 	if out != nil {
