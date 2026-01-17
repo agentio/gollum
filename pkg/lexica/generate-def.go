@@ -23,7 +23,7 @@ func (lexicon *Lexicon) generateDef(s *strings.Builder, def *Def, name string, p
 	case "string":
 		s.WriteString("type " + defname + " string\n")
 	case "record":
-		lexicon.generateStruct(s, defname, def.Description, def.Properties, def.Required)
+		lexicon.generateStruct(s, defname, def.Description, def.Record.Properties, def.Record.Required)
 	case "array":
 		s.WriteString("type " + defname + "_Elem struct {\n")
 		s.WriteString("}\n\n")

@@ -60,6 +60,9 @@ type Def struct {
 
 	// permission-set
 	Permissions []*Permission `json:"permissions,omitempty"`
+
+	// record
+	Record *Schema `json:"record,omitempty"`
 }
 
 func (def *Def) Validate(path string) error {
@@ -112,13 +115,15 @@ type Schema struct {
 }
 
 type Property struct {
-	Type    string   `json:"type,omitempty"`
-	Ref     string   `json:"ref,omitempty"`
-	Refs    []string `json:"refs,omitempty"`
-	Items   *Items   `json:"items,omitempty"`
-	Minimum int64    `json:"minimum,omitempty"`
-	Maximum int64    `json:"maximum,omitempty"`
-	Default any      `json:"default,omitempty"`
+	Type       string              `json:"type,omitempty"`
+	Ref        string              `json:"ref,omitempty"`
+	Refs       []string            `json:"refs,omitempty"`
+	Items      *Items              `json:"items,omitempty"`
+	Minimum    int64               `json:"minimum,omitempty"`
+	Maximum    int64               `json:"maximum,omitempty"`
+	Default    any                 `json:"default,omitempty"`
+	Required   []string            `json:"required,omitempty"`
+	Properties map[string]Property `json:"properties,omitempty"`
 }
 
 type Items struct {
