@@ -1,4 +1,4 @@
-package gencli
+package slink
 
 import (
 	"github.com/agentio/slink/pkg/lexica"
@@ -11,8 +11,8 @@ func Cmd() *cobra.Command {
 	var output string
 	var logLevel string
 	var cmd = &cobra.Command{
-		Use:   "cli",
-		Short: "Generate CLI for lexicons",
+		Use:   "slink",
+		Short: "Generate a command-line interface for a directory of lexicons",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 			ll, err := log.ParseLevel(logLevel)

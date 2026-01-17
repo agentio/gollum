@@ -49,7 +49,7 @@ func (lexicon *Lexicon) generateLeafCommandForDef(root, defname string, def *Def
 	s := &strings.Builder{}
 	fmt.Fprintf(s, "package %s // %s\n\n", packagename, lexicon.Id)
 	fmt.Fprintf(s, "import \"github.com/spf13/cobra\"\n")
-	fmt.Fprintf(s, "import \"github.com/agentio/slink/gen/api\"\n")
+	fmt.Fprintf(s, "import \"github.com/agentio/slink/gen/xrpc\"\n")
 	fmt.Fprintf(s, "import \"github.com/agentio/slink/pkg/common\"\n")
 	fmt.Fprintf(s, "import \"github.com/agentio/slink/pkg/client\"\n")
 	fmt.Fprintf(s, "func Cmd() *cobra.Command {\n")
@@ -96,13 +96,13 @@ func (lexicon *Lexicon) generateLeafCommandForDef(root, defname string, def *Def
 	}
 	fmt.Fprintf(s, "cmd := &cobra.Command{\n")
 	fmt.Fprintf(s, "Use: \"%s\",\n", commandname)
-	fmt.Fprintf(s, "Short: common.Truncate(api.%s_Description),\n", handlerName)
-	fmt.Fprintf(s, "Long: api.%s_Description,\n", handlerName)
+	fmt.Fprintf(s, "Short: common.Truncate(xrpc.%s_Description),\n", handlerName)
+	fmt.Fprintf(s, "Long: xrpc.%s_Description,\n", handlerName)
 	fmt.Fprintf(s, "Args: cobra.NoArgs,\n")
 	fmt.Fprintf(s, "RunE: func(cmd *cobra.Command, args []string) error {\n")
 	if def.Type == "query" {
 		fmt.Fprintf(s, "client := client.NewClient()\n")
-		fmt.Fprintf(s, "response, err := api.%s(\n", handlerName)
+		fmt.Fprintf(s, "response, err := xrpc.%s(\n", handlerName)
 		fmt.Fprintf(s, "cmd.Context(),\n")
 		fmt.Fprintf(s, "client,\n")
 		if def.Parameters != nil {
@@ -132,11 +132,11 @@ func (lexicon *Lexicon) generateLeafCommandForDef(root, defname string, def *Def
 		if def.Output != nil {
 			resultIfNeeded = "response, "
 		}
-		fmt.Fprintf(s, "%serr := api.%s(\n", resultIfNeeded, handlerName)
+		fmt.Fprintf(s, "%serr := xrpc.%s(\n", resultIfNeeded, handlerName)
 		fmt.Fprintf(s, "cmd.Context(),\n")
 		fmt.Fprintf(s, "client,\n")
 		if def.Input != nil {
-			fmt.Fprintf(s, "&api.%s_Input{\n", handlerName)
+			fmt.Fprintf(s, "&xrpc.%s_Input{\n", handlerName)
 			for _, propertyName := range sortedPropertyNames(def.Input.Schema.Properties) {
 				propertyValue := def.Input.Schema.Properties[propertyName]
 				switch propertyValue.Type {
