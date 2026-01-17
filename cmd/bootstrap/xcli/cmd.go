@@ -1,4 +1,4 @@
-package slink
+package xcli
 
 import (
 	"github.com/agentio/slink/pkg/lexica"
@@ -11,7 +11,7 @@ func Cmd() *cobra.Command {
 	var output string
 	var logLevel string
 	var cmd = &cobra.Command{
-		Use:   "slink",
+		Use:   "xcli",
 		Short: "Generate a command-line interface for a directory of lexicons",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
@@ -32,7 +32,7 @@ func Cmd() *cobra.Command {
 		},
 	}
 	cmd.Flags().StringVarP(&input, "input", "i", "lexicons", "input directory")
-	cmd.Flags().StringVarP(&output, "output", "o", "gen/slink", "output directory")
+	cmd.Flags().StringVarP(&output, "output", "o", "gen/call", "output directory")
 	cmd.Flags().StringVarP(&logLevel, "log-level", "l", "info", "log level (debug, info, warn, error, fatal)")
 	return cmd
 }

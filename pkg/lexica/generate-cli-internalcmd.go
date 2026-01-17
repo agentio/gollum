@@ -34,6 +34,10 @@ func (catalog *Catalog) generateInternalCommand(path string) error {
 	parts := strings.Split(path, "/")
 	lastpart := parts[len(parts)-1]
 
+	short := "Call XRPC methods"
+	if len(parts) > 2 {
+		short += " under " + strings.ReplaceAll(lastpart, "-", ".")
+	}
 	subdirectories := getsubdirs(path)
 
 	s := &strings.Builder{}
@@ -48,6 +52,7 @@ func (catalog *Catalog) generateInternalCommand(path string) error {
 	fmt.Fprintf(s, "func Cmd() *cobra.Command {\n")
 	fmt.Fprintf(s, "cmd := &cobra.Command{\n")
 	fmt.Fprintf(s, "Use: \"%s\",\n", strings.ReplaceAll(strcase.ToKebab(lastpart), "-", "."))
+	fmt.Fprintf(s, "Short: \"%s\",\n", short)
 	fmt.Fprintf(s, "}\n")
 	for _, subdir := range subdirectories {
 		fmt.Fprintf(s, "cmd.AddCommand(%s.Cmd())\n", strings.ReplaceAll(strings.ToLower(subdir), "-", "_"))

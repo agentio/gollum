@@ -179,16 +179,17 @@ func (lexicon *Lexicon) generateLeafCommandForDef(root, defname string, def *Def
 		for _, propertyName := range sortedPropertyNames(def.Parameters.Properties) {
 			propertyValue := def.Parameters.Properties[propertyName]
 			flagName := strcase.ToKebab(propertyName)
+			description := propertyName
 			switch propertyValue.Type {
 			case "string":
-				fmt.Fprintf(s, "cmd.Flags().StringVar(&%s, \"%s\", \"\", \"\")\n", propertyName, flagName)
+				fmt.Fprintf(s, "cmd.Flags().StringVar(&%s, \"%s\", \"\", \"%s\")\n", propertyName, flagName, description)
 			case "integer":
-				fmt.Fprintf(s, "cmd.Flags().Int64Var(&%s, \"%s\", %d, \"\")\n", propertyName, flagName, int64Value(propertyValue.Default))
+				fmt.Fprintf(s, "cmd.Flags().Int64Var(&%s, \"%s\", %d, \"%s\")\n", propertyName, flagName, int64Value(propertyValue.Default), description)
 			case "boolean":
-				fmt.Fprintf(s, "cmd.Flags().BoolVar(&%s, \"%s\", %t, \"\")\n", propertyName, flagName, boolValue(propertyValue.Default))
+				fmt.Fprintf(s, "cmd.Flags().BoolVar(&%s, \"%s\", %t, \"%s\")\n", propertyName, flagName, boolValue(propertyValue.Default), description)
 			case "array":
 				if propertyValue.Items.Type == "string" {
-					fmt.Fprintf(s, "cmd.Flags().StringArrayVar(&%s, \"%s\", nil, \"\")\n", propertyName, flagName)
+					fmt.Fprintf(s, "cmd.Flags().StringArrayVar(&%s, \"%s\", nil, \"%s\")\n", propertyName, flagName, description)
 				} else {
 					fmt.Fprintf(s, "// FIXME cmd.Flags().XXXVar(&%s... %+v\n", propertyName, propertyValue)
 				}
@@ -200,16 +201,17 @@ func (lexicon *Lexicon) generateLeafCommandForDef(root, defname string, def *Def
 		for _, propertyName := range sortedPropertyNames(def.Input.Schema.Properties) {
 			propertyValue := def.Input.Schema.Properties[propertyName]
 			flagName := strcase.ToKebab(propertyName)
+			description := propertyName
 			switch propertyValue.Type {
 			case "string":
-				fmt.Fprintf(s, "cmd.Flags().StringVar(&%s, \"%s\", \"\", \"\")\n", propertyName, flagName)
+				fmt.Fprintf(s, "cmd.Flags().StringVar(&%s, \"%s\", \"\", \"%s\")\n", propertyName, flagName, description)
 			case "integer":
-				fmt.Fprintf(s, "cmd.Flags().Int64Var(&%s, \"%s\", %d, \"\")\n", propertyName, flagName, int64Value(propertyValue.Default))
+				fmt.Fprintf(s, "cmd.Flags().Int64Var(&%s, \"%s\", %d, \"%s\")\n", propertyName, flagName, int64Value(propertyValue.Default), description)
 			case "boolean":
-				fmt.Fprintf(s, "cmd.Flags().BoolVar(&%s, \"%s\", %t, \"\")\n", propertyName, flagName, boolValue(propertyValue.Default))
+				fmt.Fprintf(s, "cmd.Flags().BoolVar(&%s, \"%s\", %t, \"%s\")\n", propertyName, flagName, boolValue(propertyValue.Default), description)
 			case "array":
 				if propertyValue.Items.Type == "string" {
-					fmt.Fprintf(s, "cmd.Flags().StringArrayVar(&%s, \"%s\", nil, \"\")\n", propertyName, flagName)
+					fmt.Fprintf(s, "cmd.Flags().StringArrayVar(&%s, \"%s\", nil, \"%s\")\n", propertyName, flagName, description)
 				} else {
 					fmt.Fprintf(s, "// FIXME cmd.Flags().XXXVar(&%s... %+v\n", propertyName, propertyValue)
 				}
