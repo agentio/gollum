@@ -21,7 +21,7 @@ func Cmd() *cobra.Command {
 			}
 			log.SetLevel(ll)
 			catalog := lexica.NewCatalog()
-			if err = catalog.Load(input); err != nil {
+			if err = catalog.Load(input, false /* skip lint */); err != nil {
 				return err
 			}
 			err = catalog.GenerateCLI(output)

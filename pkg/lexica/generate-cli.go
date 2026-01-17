@@ -9,6 +9,7 @@ import (
 
 func (catalog *Catalog) GenerateCLI(root string) error {
 	os.RemoveAll(root)
+	os.MkdirAll(root, 0755)
 	var wg sync.WaitGroup
 	for _, lexicon := range catalog.Lexicons {
 		wg.Go(func() {

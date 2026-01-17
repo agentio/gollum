@@ -30,7 +30,7 @@ func (catalog *Catalog) generateInternalCommand(path string) error {
 	if err == nil {
 		return nil // a command already exists
 	}
-	log.Printf("generating %s", filename)
+	log.Debugf("generating %s", filename)
 	parts := strings.Split(path, "/")
 	lastpart := parts[len(parts)-1]
 
