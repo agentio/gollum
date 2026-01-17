@@ -81,7 +81,7 @@ func (c *Client) Do(
 	}
 	req.Header.Set("User-Agent", "slink")
 
-	authorization := os.Getenv("SLINK_AUTHORIZATION")
+	authorization := os.Getenv("SLINK_AUTH")
 	if authorization != "" {
 		req.Header.Set("Authorization", authorization)
 	}

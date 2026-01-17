@@ -23,6 +23,10 @@ func cmd() *cobra.Command {
 				`"Perhaps we’ve shaken him off at last, the miserable slinker!"`,
 				``,
 				`A tool for working with the AT Protocol.`,
+				``,
+				`Environment Variables:`,
+				`  SLINK_HOST sets the target host (e.g. "http://localhost:5050")`,
+				`  SLINK_AUTH sets the authorization header (e.g. "Bearer XXXX")`,
 			}, "\n"),
 	}
 	cmd.AddCommand(call.Cmd())
