@@ -4,6 +4,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/agentio/slink/cmd/slink/now"
 	"github.com/agentio/slink/gen/call"
 	"github.com/spf13/cobra"
 )
@@ -30,5 +31,6 @@ func cmd() *cobra.Command {
 			}, "\n"),
 	}
 	cmd.AddCommand(call.Cmd())
+	cmd.AddCommand(now.Cmd())
 	return cmd
 }
