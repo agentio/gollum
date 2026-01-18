@@ -14,7 +14,7 @@ func Cmd() *cobra.Command {
 		Use:   "now",
 		Short: "Print the current time in ATProto timestamp format",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			fmt.Fprintf(cmd.OutOrStdout(), "%s", time.Now().Format(ISO8601))
+			fmt.Fprintf(cmd.OutOrStdout(), "%s", time.Now().UTC().Format(ISO8601))
 			return nil
 		},
 	}
