@@ -130,12 +130,24 @@ func (lexicon *Lexicon) generateLeafCommandForDef(root, defname string, def *Def
 		fmt.Fprintf(s, "if err != nil {return err}\n")
 		fmt.Fprintf(s, "return common.Write(cmd.OutOrStdout(), _output, response)\n")
 	} else if def.Type == "procedure" && (def.Input == nil || def.Input.Encoding == "application/json") {
+		fmt.Fprintf(s, "var err error\n")
+		if def.Input != nil {
+			for _, propertyName := range sortedPropertyNames(def.Input.Schema.Properties) {
+				propertyValue := def.Input.Schema.Properties[propertyName]
+				if propertyValue.Type == "unknown" {
+					fmt.Fprintf(s, "%s_value, err := common.ReadJSONFile(%s)\n", propertyName, propertyName)
+					fmt.Fprintf(s, "if err != nil {return err}\n")
+				}
+			}
+		}
 		fmt.Fprintf(s, "client := client.NewClient()\n")
 		resultIfNeeded := ""
+		assignment := "="
 		if def.Output != nil {
 			resultIfNeeded = "response, "
+			assignment = ":="
 		}
-		fmt.Fprintf(s, "%serr := xrpc.%s(\n", resultIfNeeded, handlerName)
+		fmt.Fprintf(s, "%serr %s xrpc.%s(\n", resultIfNeeded, assignment, handlerName)
 		fmt.Fprintf(s, "cmd.Context(),\n")
 		fmt.Fprintf(s, "client,\n")
 		if def.Input != nil {
@@ -161,6 +173,8 @@ func (lexicon *Lexicon) generateLeafCommandForDef(root, defname string, def *Def
 					if propertyValue.Items.Type == "string" {
 						//	fmt.Fprintf(s, "%s,\n", propertyName)
 					}
+				case "unknown":
+					fmt.Fprintf(s, "%s: &%s_value,\n", capitalize(propertyName), propertyName)
 				default:
 				}
 			}
