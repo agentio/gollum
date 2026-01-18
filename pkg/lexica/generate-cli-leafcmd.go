@@ -90,6 +90,8 @@ func (lexicon *Lexicon) generateLeafCommandForDef(root, defname string, def *Def
 				} else {
 					fmt.Fprintf(s, "// FIXME var %s %+v\n", propertyName, propertyValue)
 				}
+			case "unknown":
+				fmt.Fprintf(s, "var %s string\n", propertyName)
 			default:
 				fmt.Fprintf(s, "// FIXME var %s %+v\n", propertyName, propertyValue)
 			}
@@ -217,6 +219,8 @@ func (lexicon *Lexicon) generateLeafCommandForDef(root, defname string, def *Def
 				} else {
 					fmt.Fprintf(s, "// FIXME cmd.Flags().XXXVar(&%s... %+v\n", propertyName, propertyValue)
 				}
+			case "unknown":
+				fmt.Fprintf(s, "cmd.Flags().StringVar(&%s, \"%s\", \"\", \"%s\")\n", propertyName, flagName, description)
 			default:
 				fmt.Fprintf(s, "// FIXME cmd.Flags().XXXVar(&%s... %+v\n", propertyName, propertyValue)
 			}
