@@ -3,7 +3,6 @@ module github.com/agentio/slink
 go 1.25.1
 
 require (
-	github.com/agentio/atiquette v0.0.0-20250519003452-9d778dfd2d16
 	github.com/agentio/sidecar v0.1.16
 	github.com/charmbracelet/log v0.4.2
 	github.com/iancoleman/strcase v0.3.0
