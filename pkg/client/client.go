@@ -111,6 +111,12 @@ func (c *Client) Do(
 	}
 
 	if out != nil {
+		bufferPointer, ok := out.(*[]byte)
+		if ok {
+			*bufferPointer = b
+			return nil
+		}
+
 		if err := json.Unmarshal(b, out); err != nil {
 			return fmt.Errorf("decoding xrpc response: %w", err)
 		}
