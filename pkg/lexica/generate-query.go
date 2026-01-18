@@ -30,7 +30,6 @@ func (lexicon *Lexicon) generateQuery(s *strings.Builder, defname string, def *D
 		s.WriteString("return &output, nil\n")
 		s.WriteString("}\n\n")
 	} else if def.Output != nil {
-		s.WriteString(fmt.Sprintf("// CHECKME rendering query with output type %s\n", def.Output.Encoding))
 		params := ""
 		paramsok := false
 		if def.Parameters != nil && def.Parameters.Type == "params" {
