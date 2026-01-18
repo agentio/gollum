@@ -53,6 +53,7 @@ func (lexicon *Lexicon) generateLeafCommandForDef(root, defname string, def *Def
 	fmt.Fprintf(s, "import \"github.com/agentio/slink/pkg/common\"\n")
 	fmt.Fprintf(s, "import \"github.com/agentio/slink/pkg/client\"\n")
 	fmt.Fprintf(s, "func Cmd() *cobra.Command {\n")
+	fmt.Fprintf(s, "var _output string\n")
 	if def.Type == "query" && def.Parameters != nil {
 		for _, propertyName := range sortedPropertyNames(def.Parameters.Properties) {
 			propertyValue := def.Parameters.Properties[propertyName]
@@ -125,7 +126,7 @@ func (lexicon *Lexicon) generateLeafCommandForDef(root, defname string, def *Def
 		}
 		fmt.Fprintf(s, ")\n")
 		fmt.Fprintf(s, "if err != nil {return err}\n")
-		fmt.Fprintf(s, "return common.Write(cmd.OutOrStdout(), response)\n")
+		fmt.Fprintf(s, "return common.Write(cmd.OutOrStdout(), _output, response)\n")
 	} else if def.Type == "procedure" && (def.Input == nil || def.Input.Encoding == "application/json") {
 		fmt.Fprintf(s, "client := client.NewClient()\n")
 		resultIfNeeded := ""
@@ -168,13 +169,14 @@ func (lexicon *Lexicon) generateLeafCommandForDef(root, defname string, def *Def
 		if def.Output == nil {
 			fmt.Fprintf(s, "return nil\n")
 		} else {
-			fmt.Fprintf(s, "return common.Write(cmd.OutOrStdout(), response)\n")
+			fmt.Fprintf(s, "return common.Write(cmd.OutOrStdout(), _output, response)\n")
 		}
 	} else {
 		fmt.Fprintf(s, "return errors.New(\"unimplemented\")")
 	}
 	fmt.Fprintf(s, "},\n")
 	fmt.Fprintf(s, "}\n")
+	fmt.Fprintf(s, "cmd.Flags().StringVarP(&_output, \"output\", \"o\", \"\", \"output destination\")\n")
 	if def.Type == "query" && def.Parameters != nil {
 		for _, propertyName := range sortedPropertyNames(def.Parameters.Properties) {
 			propertyValue := def.Parameters.Properties[propertyName]
