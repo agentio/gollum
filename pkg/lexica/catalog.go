@@ -49,12 +49,3 @@ func (catalog *Catalog) LoadLexicon(path string, lint bool) error {
 	catalog.Lexicons = append(catalog.Lexicons, &lexicon)
 	return nil
 }
-
-func LookupLexicon(id string) *Lexicon {
-	for _, lexicon := range _catalog.Lexicons {
-		if lexicon.Id == id {
-			return lexicon
-		}
-	}
-	return nil
-}
