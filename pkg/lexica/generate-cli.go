@@ -7,13 +7,35 @@ import (
 	"sync"
 )
 
-func (catalog *Catalog) GenerateCLI(root string) error {
+func (catalog *Catalog) GenerateCallingCLI(root string) error {
 	os.RemoveAll(root)
 	os.MkdirAll(root, 0755)
 	var wg sync.WaitGroup
 	for _, lexicon := range catalog.Lexicons {
 		wg.Go(func() {
-			lexicon.generateLeafCommands(root)
+			lexicon.generateCallCommands(root)
+		})
+	}
+	wg.Wait()
+	filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+		if d.Type().IsDir() {
+			wg.Go(func() {
+				catalog.generateInternalCommand(path)
+			})
+		}
+		return nil
+	})
+	wg.Wait()
+	return nil
+}
+
+func (catalog *Catalog) GenerateCheckingCLI(root string) error {
+	os.RemoveAll(root)
+	os.MkdirAll(root, 0755)
+	var wg sync.WaitGroup
+	for _, lexicon := range catalog.Lexicons {
+		wg.Go(func() {
+			lexicon.generateCheckCommands(root)
 		})
 	}
 	wg.Wait()

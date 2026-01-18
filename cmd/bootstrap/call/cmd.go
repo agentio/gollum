@@ -1,4 +1,4 @@
-package xcli
+package call
 
 import (
 	"github.com/agentio/slink/pkg/lexica"
@@ -11,8 +11,8 @@ func Cmd() *cobra.Command {
 	var output string
 	var logLevel string
 	var cmd = &cobra.Command{
-		Use:   "xcli",
-		Short: "Generate a command-line interface for a directory of lexicons",
+		Use:   "call",
+		Short: "Generate a command-line interface to call methods in a directory of lexicons",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 			ll, err := log.ParseLevel(logLevel)
@@ -24,7 +24,7 @@ func Cmd() *cobra.Command {
 			if err = catalog.Load(input, false /* skip lint */); err != nil {
 				return err
 			}
-			err = catalog.GenerateCLI(output)
+			err = catalog.GenerateCallingCLI(output)
 			if err != nil {
 				return err
 			}

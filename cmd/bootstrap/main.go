@@ -3,8 +3,9 @@ package main
 import (
 	"os"
 
+	"github.com/agentio/slink/cmd/bootstrap/call"
+	"github.com/agentio/slink/cmd/bootstrap/check"
 	"github.com/agentio/slink/cmd/bootstrap/lint"
-	"github.com/agentio/slink/cmd/bootstrap/xcli"
 	"github.com/agentio/slink/cmd/bootstrap/xrpc"
 	"github.com/spf13/cobra"
 )
@@ -20,7 +21,8 @@ func cmd() *cobra.Command {
 		Use: "bootstrap",
 	}
 	cmd.AddCommand(lint.Cmd())
-	cmd.AddCommand(xcli.Cmd())
+	cmd.AddCommand(call.Cmd())
+	cmd.AddCommand(check.Cmd())
 	cmd.AddCommand(xrpc.Cmd())
 	return cmd
 }

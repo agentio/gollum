@@ -10,7 +10,7 @@ import (
 	"github.com/iancoleman/strcase"
 )
 
-func (lexicon *Lexicon) generateLeafCommands(root string) {
+func (lexicon *Lexicon) generateCallCommands(root string) {
 	allow := []string{
 		"com.atproto.admin.getInviteCodes",
 		"com.atproto.admin.updateAccountPassword",
@@ -24,14 +24,14 @@ func (lexicon *Lexicon) generateLeafCommands(root string) {
 	for defname, def := range lexicon.Defs {
 		switch def.Type {
 		case "query":
-			lexicon.generateLeafCommandForDef(root, defname, def)
+			lexicon.generateCallCommandForDef(root, defname, def)
 		case "procedure":
-			lexicon.generateLeafCommandForDef(root, defname, def)
+			lexicon.generateCallCommandForDef(root, defname, def)
 		}
 	}
 }
 
-func (lexicon *Lexicon) generateLeafCommandForDef(root, defname string, def *Def) {
+func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def) {
 	if defname != "main" {
 		log.Errorf("Can't generate leaf command for %s %s", lexicon.Id, defname)
 	}
@@ -234,7 +234,7 @@ func (lexicon *Lexicon) generateLeafCommandForDef(root, defname string, def *Def
 					fmt.Fprintf(s, "// FIXME cmd.Flags().XXXVar(&%s... %+v\n", propertyName, propertyValue)
 				}
 			case "unknown":
-				fmt.Fprintf(s, "cmd.Flags().StringVar(&%s, \"%s\", \"\", \"%s\")\n", propertyName, flagName, description)
+				fmt.Fprintf(s, "cmd.Flags().StringVar(&%s, \"%s\", \"\", \"%s (name of a json file)\")\n", propertyName, flagName, description)
 			default:
 				fmt.Fprintf(s, "// FIXME cmd.Flags().XXXVar(&%s... %+v\n", propertyName, propertyValue)
 			}
