@@ -2,7 +2,7 @@
 
 `slink` is a command line tool for calling APIs described with [Lexicon](https://atproto.com/specs/lexicon).
 
-`slink` is designed to connect to remote services through a local [IO](https://agent.io/posts/io) which  handles all routing and authentication, but `slink` can also be configured to make direct calls to XRPC hosts.
+`slink` was created to connect to remote services through a local [IO](https://agent.io/posts/io) which  handles all routing and authentication, but `slink` can also be configured to make direct calls to XRPC hosts.
 
 ## Installing slink
 
@@ -13,9 +13,15 @@ To install `slink` on any system with Go installed:
 
 ## Using slink
 
-With `slink`, it's very easy to call XRPC APIs that don't require authentication.
+`slink` makes it very easy to call XRPC APIs.
+
+Set the host to be called with the `SLINK_HOST` environment variable (be sure to include the `https://` or `http://` prefix).
 ```
-$ export SLINK_HOST=(your PDS url)
+export SLINK_HOST=$YOUR_PDS_URL
+```
+
+With that, you can use `slink` to make unauthenticated calls.
+```
 $ slink call com.atproto.sync list-repos
 {
   "cursor": "...",
@@ -36,12 +42,13 @@ $ slink call com.atproto.sync list-repos
 }
 ```
 
-The `slink` authentication header can be set using `SLINK_AUTH`.
-
-Here's how you can use `slink` to make calls as a PDS admin:
+To make authenticated calls, use `SLINK_AUTH` to specify the authentication header. To make calls as a PDS admin, set `SLINK_AUTH` to the Basic Auth credentials for the admin.
 ```
-$ export SLINK_HOST=(your PDS url)
-$ export SLINK_AUTH="Basic $(echo -n "admin:$ADMIN_PASSWORD" | base64)"
+export SLINK_AUTH="Basic $(echo -n "admin:$ADMIN_PASSWORD" | base64)"
+```
+
+Now you can make calls as the admin.
+```
 $ slink call com.atproto.admin get-invite-codes
 {
   "codes": [
@@ -58,20 +65,13 @@ $ slink call com.atproto.admin get-invite-codes
 }
 ```
 
-Here's how you can use `slink` to make calls as a PDS user:
+To make calls as a PDS user, set `SLINK_AUTH` to a Bearer token for the user. Here's one way to do that:
 ```
-$ export SLINK_HOST=(your PDS url)
-$ slink call com.atproto.server create-session --identifier $HANDLE --password $PASSWORD
-{
-  "accessJwt": "...
-  "active": true,
-  "did": "did:plc:...
-  "email": "...
-  "emailConfirmed": true,
-  "handle": "...",
-  "refreshJwt": "..."
-}
-$ export SLINK_AUTH="Bearer $(slink call com.atproto.server create-session --identifier $HANDLE --password $PASSWORD | jq .accessJwt -r)"
+export SLINK_AUTH="Bearer $(slink call com.atproto.server create-session --identifier $HANDLE --password $PASSWORD | jq .accessJwt -r)"
+```
+
+With this, you can make calls as the user.
+```
 $ slink call com.atproto.server get-session
 {
   "active": true,
@@ -82,9 +82,19 @@ $ slink call com.atproto.server get-session
 }
 ```
 
+## Using slink with a sidecar proxy
+
+`slink` can be configured to use a sidecar proxy like [IO](https://agent.io/posts/io). This moves authentication and routing to the sidecar and can allow credential owners to keep their secrets secure while allowing these secrets to be used to call specific (allow-listed) XRPC methods.
+
+If the sidecar proxy listens on a TCP socket, configuration is trivial: just set `SLINK_HOST` to the port where the proxy is listening. If the sidecar proxy listens on a Unix domain socket, it's also really easy: set `SLINK_HOST` to `unix:` followed by the socket name, e.g.
+```
+export SLINK_HOST=unix:@io-calling-pds
+```
+Here `@io-calling-pds` is the name of a Linux abstract socket that a sidecar provides for calling a PDS.
+
 ## Warning!
 
-`slink` is pre-release software. Not all aspects of [Lexicon](https://atproto.com/specs/lexicon) are currently supported, but that's the goal.
+`slink` is pre-release software. Not all aspects of [Lexicon](https://atproto.com/specs/lexicon) are currently supported, but it's coming.
 
 ## Copyright
 
