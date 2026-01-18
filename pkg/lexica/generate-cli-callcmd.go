@@ -33,7 +33,7 @@ func (lexicon *Lexicon) generateCallCommands(root string) {
 
 func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def) {
 	if defname != "main" {
-		log.Errorf("Can't generate leaf command for %s %s", lexicon.Id, defname)
+		log.Errorf("Can't generate call command for %s %s", lexicon.Id, defname)
 	}
 	id := strings.Replace(lexicon.Id, ".", "-", 2) // merge initial segments of the lexicon id
 	dirname := strings.ToLower(root + "/" + strings.ReplaceAll(id, ".", "/"))

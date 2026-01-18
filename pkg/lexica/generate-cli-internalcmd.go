@@ -24,7 +24,7 @@ func getsubdirs(path string) []string {
 	return subdirs
 }
 
-func (catalog *Catalog) generateInternalCommand(path string) error {
+func (catalog *Catalog) generateInternalCommand(path, prompt string) error {
 	filename := path + "/cmd.go"
 	_, err := os.Stat(filename)
 	if err == nil {
@@ -34,7 +34,7 @@ func (catalog *Catalog) generateInternalCommand(path string) error {
 	parts := strings.Split(path, "/")
 	lastpart := parts[len(parts)-1]
 
-	short := "Call XRPC methods"
+	short := prompt
 	if len(parts) > 2 {
 		short += " under " + strings.ReplaceAll(lastpart, "-", ".")
 	}

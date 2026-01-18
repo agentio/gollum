@@ -20,7 +20,7 @@ func (catalog *Catalog) GenerateCallingCLI(root string) error {
 	filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
 		if d.Type().IsDir() {
 			wg.Go(func() {
-				catalog.generateInternalCommand(path)
+				catalog.generateInternalCommand(path, "Call XRPC methods")
 			})
 		}
 		return nil
@@ -42,7 +42,7 @@ func (catalog *Catalog) GenerateCheckingCLI(root string) error {
 	filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
 		if d.Type().IsDir() {
 			wg.Go(func() {
-				catalog.generateInternalCommand(path)
+				catalog.generateInternalCommand(path, "Check XRPC records")
 			})
 		}
 		return nil

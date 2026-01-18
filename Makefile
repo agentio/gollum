@@ -4,6 +4,7 @@ bootstrap:
 	go run ./cmd/bootstrap lint
 	go run ./cmd/bootstrap xrpc
 	go run ./cmd/bootstrap call
+	go run ./cmd/bootstrap check
 
 slink:
 	go install ./cmd/slink
