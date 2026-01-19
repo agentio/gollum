@@ -8,7 +8,7 @@ import (
 func (lexicon *Lexicon) generateQuery(s *strings.Builder, defname string, def *Def) {
 	s.WriteString("const " + defname + "_Description = " + `"` + def.Description + `"` + "\n\n")
 	if def.Output != nil && def.Output.Encoding == "application/json" {
-		lexicon.generateStruct(s, defname+"_Output", "", def.Output.Schema.Properties, def.Output.Schema.Required)
+		lexicon.generateStruct(s, defname+"_Output", "", def.Output.Schema.Properties, def.Output.Schema.Required, false)
 		params := ""
 		paramsok := false
 		if def.Parameters != nil && def.Parameters.Type == "params" {

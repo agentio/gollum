@@ -20,12 +20,12 @@ func (lexicon *Lexicon) generateDef(s *strings.Builder, def *Def, name string, p
 	case "procedure":
 		lexicon.generateProcedure(s, defname, def)
 	case "object":
-		lexicon.generateStruct(s, defname, def.Description, def.Properties, def.Required)
+		lexicon.generateStruct(s, defname, def.Description, def.Properties, def.Required, false)
 	case "string":
 		s.WriteString("type " + defname + " string\n")
 	case "record":
 		fmt.Fprintf(s, "const %s_Description = \"%s\"\n", defname, def.Description)
-		lexicon.generateStruct(s, defname, def.Description, def.Record.Properties, def.Record.Required)
+		lexicon.generateStruct(s, defname, def.Description, def.Record.Properties, def.Record.Required, true)
 	case "array":
 		s.WriteString("type " + defname + "_Elem struct {\n")
 		s.WriteString("}\n\n")

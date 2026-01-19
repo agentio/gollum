@@ -6,14 +6,17 @@ import (
 	"strings"
 )
 
-func (lexicon *Lexicon) generateStruct(s *strings.Builder, defname, description string, properties map[string]Property, required []string) {
+func (lexicon *Lexicon) generateStruct(s *strings.Builder, defname, description string, properties map[string]Property, required []string, isRecord bool) {
 	s.WriteString("// " + description + "\n")
-	lexicon.renderStruct(s, defname, properties, required)
+	lexicon.renderStruct(s, defname, properties, required, isRecord)
 	lexicon.renderDependencies(s, defname, properties, required)
 }
 
-func (lexicon *Lexicon) renderStruct(s *strings.Builder, defname string, properties map[string]Property, required []string) {
+func (lexicon *Lexicon) renderStruct(s *strings.Builder, defname string, properties map[string]Property, required []string, isRecord bool) {
 	s.WriteString("type " + defname + " struct {\n")
+	if isRecord {
+		fmt.Fprintf(s, "LexiconTypeID string `json:\"$type\"`\n")
+	}
 	for _, propertyName := range sortedPropertyNames(properties) {
 		required := slices.Contains(required, propertyName)
 		property := properties[propertyName]
