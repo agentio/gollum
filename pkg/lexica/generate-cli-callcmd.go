@@ -187,6 +187,23 @@ func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def
 		} else {
 			fmt.Fprintf(s, "return common.Write(cmd.OutOrStdout(), _output, response)\n")
 		}
+	} else if def.Type == "procedure" && def.Input != nil {
+		fmt.Fprintf(s, "client := client.NewClient()\n")
+		resultIfNeeded := ""
+		if def.Output != nil {
+			resultIfNeeded = "response, "
+		}
+		fmt.Fprintf(s, "%serr := xrpc.%s(\n", resultIfNeeded, handlerName)
+		fmt.Fprintf(s, "cmd.Context(),\n")
+		fmt.Fprintf(s, "client,\n")
+		fmt.Fprintf(s, "cmd.InOrStdin(),\n")
+		fmt.Fprintf(s, ")\n")
+		fmt.Fprintf(s, "if err != nil {return err}\n")
+		if def.Output == nil {
+			fmt.Fprintf(s, "return nil\n")
+		} else {
+			fmt.Fprintf(s, "return common.Write(cmd.OutOrStdout(), _output, response)\n")
+		}
 	} else {
 		fmt.Fprintf(s, "return errors.New(\"unimplemented\")")
 	}
