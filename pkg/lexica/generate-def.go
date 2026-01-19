@@ -20,7 +20,7 @@ func (lexicon *Lexicon) generateDef(s *strings.Builder, def *Def, name string, p
 	case "procedure":
 		lexicon.generateProcedure(s, defname, def)
 	case "object":
-		lexicon.generateStruct(s, defname, def.Description, def.Properties, def.Required, false)
+		lexicon.generateStruct(s, defname, def.Description, def.Properties, def.Required, true)
 	case "string":
 		s.WriteString("type " + defname + " string\n")
 	case "record":

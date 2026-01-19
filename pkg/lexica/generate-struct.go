@@ -15,7 +15,7 @@ func (lexicon *Lexicon) generateStruct(s *strings.Builder, defname, description 
 func (lexicon *Lexicon) renderStruct(s *strings.Builder, defname string, properties map[string]Property, required []string, isRecord bool) {
 	s.WriteString("type " + defname + " struct {\n")
 	if isRecord {
-		fmt.Fprintf(s, "LexiconTypeID string `json:\"$type\"`\n")
+		fmt.Fprintf(s, "LexiconTypeID string `json:\"$type,omitempty\"`\n")
 	}
 	for _, propertyName := range sortedPropertyNames(properties) {
 		required := slices.Contains(required, propertyName)
@@ -53,13 +53,13 @@ func (lexicon *Lexicon) renderStruct(s *strings.Builder, defname string, propert
 			}
 		case "blob":
 			if required {
-				s.WriteString(capitalize(propertyName) + " []byte `json:" + `"` + propertyName + `"` + "`\n")
+				s.WriteString(capitalize(propertyName) + " *common.Blob `json:" + `"` + propertyName + `"` + "`\n")
 			} else {
-				s.WriteString(capitalize(propertyName) + " *[]byte `json:" + `"` + propertyName + `,omitempty"` + "`\n")
+				s.WriteString(capitalize(propertyName) + " *common.Blob `json:" + `"` + propertyName + `,omitempty"` + "`\n")
 			}
 		case "union":
 			uniontype := lexicon.resolveUnionType(defname, propertyName)
-			s.WriteString(capitalize(propertyName) + " " + uniontype + " `json:" + `"` + propertyName + `,omitempty"` + "`\n")
+			s.WriteString(capitalize(propertyName) + " *" + uniontype + " `json:" + `"` + propertyName + `,omitempty"` + "`\n")
 		case "bytes":
 			if required {
 				s.WriteString(capitalize(propertyName) + " []byte `json:" + `"` + propertyName + `"` + "`\n")
@@ -93,6 +93,29 @@ func (lexicon *Lexicon) renderDependencies(s *strings.Builder, defname string, p
 				s.WriteString(fieldname + " " + fieldtype + "\n")
 			}
 			s.WriteString("}\n\n")
+			fmt.Fprintf(s, "func (m *%s) UnmarshalJSON(data []byte) error {\n", uniontype)
+			fmt.Fprintf(s, "recordType := common.LexiconTypeFromJSONBytes(data)\n")
+			fmt.Fprintf(s, "switch recordType {\n")
+			for _, ref := range property.Refs {
+				fieldname := lexicon.unionFieldName(ref)
+				fieldtype := lexicon.unionFieldType(ref)[1:] // strip leading *
+				fmt.Fprintf(s, "case \"%s\":\n", ref)
+				fmt.Fprintf(s, "m.%s = &%s{}\n", fieldname, fieldtype)
+				fmt.Fprintf(s, "json.Unmarshal(data, m.%s)\n", fieldname)
+
+			}
+			fmt.Fprintf(s, "}\n")
+			fmt.Fprintf(s, "return nil\n")
+			fmt.Fprintf(s, "}\n\n")
+			fmt.Fprintf(s, "func (m %s) MarshalJSON() ([]byte, error) {\n", uniontype)
+			for _, ref := range property.Refs {
+				fieldname := lexicon.unionFieldName(ref)
+				fmt.Fprintf(s, "if m.%s != nil {\n", fieldname)
+				fmt.Fprintf(s, "return json.Marshal(m.%s)\n", fieldname)
+				fmt.Fprintf(s, "} else ")
+			}
+			fmt.Fprintf(s, "{ return []byte(\"{}\"), nil }\n")
+			fmt.Fprintf(s, "}\n\n")
 		case "array":
 			if property.Items.Type == "union" {
 				uniontype := lexicon.resolveUnionType(defname, propertyName) + "_Elem"
@@ -103,6 +126,36 @@ func (lexicon *Lexicon) renderDependencies(s *strings.Builder, defname string, p
 					s.WriteString(fieldname + " " + fieldtype + "\n")
 				}
 				s.WriteString("}\n\n")
+
+				//fmt.Fprintf(s, "/*\n")
+				fmt.Fprintf(s, "func (m *%s) UnmarshalJSON(data []byte) error {\n", uniontype)
+				fmt.Fprintf(s, "recordType := common.LexiconTypeFromJSONBytes(data)\n")
+				fmt.Fprintf(s, "switch recordType {\n")
+				for _, ref := range property.Items.Refs {
+					fieldname := lexicon.unionFieldName(ref)
+					fieldtype := lexicon.unionFieldType(ref)[1:] // strip leading *
+					refType := ref
+					if refType[0] == '#' {
+						refType = lexicon.Id + refType
+					}
+					fmt.Fprintf(s, "case \"%s\":\n", refType)
+					fmt.Fprintf(s, "m.%s = &%s{}\n", fieldname, fieldtype)
+					fmt.Fprintf(s, "json.Unmarshal(data, m.%s)\n", fieldname)
+
+				}
+				fmt.Fprintf(s, "}\n")
+				fmt.Fprintf(s, "return nil\n")
+				fmt.Fprintf(s, "}\n\n")
+				fmt.Fprintf(s, "func (m %s) MarshalJSON() ([]byte, error) {\n", uniontype)
+				for _, ref := range property.Items.Refs {
+					fieldname := lexicon.unionFieldName(ref)
+					fmt.Fprintf(s, "if m.%s != nil {\n", fieldname)
+					fmt.Fprintf(s, "return json.Marshal(m.%s)\n", fieldname)
+					fmt.Fprintf(s, "} else ")
+				}
+				fmt.Fprintf(s, "{ return []byte(\"{}\"), nil }\n")
+				fmt.Fprintf(s, "}\n\n")
+				//fmt.Fprintf(s, "*/\n")
 			}
 		}
 	}
