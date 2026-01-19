@@ -116,11 +116,14 @@ func (c *Client) Do(
 			*bufferPointer = b
 			return nil
 		}
-
-		if err := json.Unmarshal(b, out); err != nil {
-			return fmt.Errorf("decoding xrpc response: %w", err)
+		responseContentType := resp.Header.Get("Content-Type")
+		if strings.HasPrefix(responseContentType, "application/json") {
+			if err := json.Unmarshal(b, out); err != nil {
+				return fmt.Errorf("decoding xrpc response: %w", err)
+			}
+			return nil
 		}
+		return fmt.Errorf("unexpected content type: %s", responseContentType)
 	}
-
 	return nil
 }
