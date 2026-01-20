@@ -1,0 +1,5 @@
+#!/bin/bash
+# Sets the SLINK_HOST environment variable to the PDS that hosts a specified handle.
+# Usage: source $0 [HANDLE]
+echo "Setting SLINK_HOST to the host of $1."
+export SLINK_HOST=$(slink resolve did $(slink resolve handle $1) | jq .service.[0].serviceEndpoint -r)
