@@ -1,6 +1,7 @@
 package lexica
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/charmbracelet/log"
@@ -57,8 +58,8 @@ func (def *Def) ValidateQuery(path string) error {
 	if def.Parameters != nil {
 		for name, value := range def.Parameters.Properties {
 			if value.Type == "integer" {
-				if value.Default == nil {
-					log.Warnf("(required?) integer parameter %s has no default [%s]", name, path)
+				if value.Default == nil && !slices.Contains(def.Required, name) {
+					log.Warnf("integer parameter %s has no default and is not required [%s]", name, path)
 				}
 			}
 		}
@@ -70,8 +71,8 @@ func (def *Def) ValidateProcedure(path string) error {
 	if def.Input != nil && def.Input.Encoding == "application/json" {
 		for name, value := range def.Input.Schema.Properties {
 			if value.Type == "integer" {
-				if value.Default == nil {
-					log.Warnf("(required?) integer input field %s has no default [%s]", name, path)
+				if value.Default == nil && !slices.Contains(def.Input.Schema.Required, name) {
+					log.Warnf("integer input field %s has no default and is not required [%s]", name, path)
 				}
 			}
 		}
