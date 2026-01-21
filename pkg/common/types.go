@@ -28,7 +28,11 @@ func BoolPointerOrNil(v bool) *bool {
 }
 
 func Truncate(s string) string {
-	const maxlen = 77
+	return TruncateToLength(s, 80)
+}
+
+func TruncateToLength(s string, maxlen int) string {
+	maxlen = maxlen - 3
 	if len(s) < maxlen {
 		return s
 	}

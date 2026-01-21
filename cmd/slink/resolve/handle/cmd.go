@@ -7,15 +7,21 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/agentio/slink/pkg/tool"
+	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 )
 
 func Cmd() *cobra.Command {
+	var _loglevel string
 	cmd := &cobra.Command{
 		Use:   "handle HANDLE",
 		Short: "Lookup the DID for a handle",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := tool.SetLogLevel(_loglevel); err != nil {
+				return err
+			}
 			handle := args[0]
 			// first check DNS
 			records, err := net.LookupTXT(fmt.Sprintf("_atproto.%s", handle))
@@ -24,6 +30,7 @@ func Cmd() *cobra.Command {
 					if strings.HasPrefix(rec, "did=") {
 						did := strings.Split(rec, "did=")[1]
 						if did != "" {
+							log.Info("Found DID with DNS")
 							fmt.Fprintf(cmd.OutOrStdout(), "%s\n", did)
 							return nil
 						}
@@ -53,9 +60,11 @@ func Cmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
+			log.Info("Found DID with HTTP")
 			fmt.Fprintf(cmd.OutOrStdout(), "%s\n", string(b))
 			return nil
 		},
 	}
+	cmd.Flags().StringVarP(&_loglevel, "log-level", "l", "warn", "log level (debug, info, warn, error, fatal)")
 	return cmd
 }

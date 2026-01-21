@@ -8,12 +8,12 @@ import (
 
 func Cmd() *cobra.Command {
 	var input string
-	var logLevel string
+	var _loglevel string
 	var cmd = &cobra.Command{
 		Use:   "lint",
 		Short: "Check a directory of Lexicon files for possible problems",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := tool.SetLogLevel(logLevel); err != nil {
+			if err := tool.SetLogLevel(_loglevel); err != nil {
 				return err
 			}
 			catalog := lexica.NewCatalog()
@@ -24,6 +24,6 @@ func Cmd() *cobra.Command {
 		},
 	}
 	cmd.Flags().StringVarP(&input, "input", "i", "lexicons", "input directory")
-	cmd.Flags().StringVarP(&logLevel, "log-level", "l", "info", "log level (debug, info, warn, error, fatal)")
+	cmd.Flags().StringVarP(&_loglevel, "log-level", "l", "warn", "log level (debug, info, warn, error, fatal)")
 	return cmd
 }

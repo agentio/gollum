@@ -12,6 +12,7 @@ import (
 
 	"github.com/agentio/sidecar"
 	"github.com/agentio/slink/pkg/common"
+	"github.com/charmbracelet/log"
 )
 
 type Client struct {
@@ -71,6 +72,7 @@ func (c *Client) Do(
 		host = "http://unix"
 	}
 	path := host + "/xrpc/" + method + paramStr
+	log.Infof("%s %s", m, path)
 	req, err := http.NewRequest(m, path, body)
 	if err != nil {
 		return err
@@ -84,6 +86,7 @@ func (c *Client) Do(
 	authorization := os.Getenv("SLINK_AUTH")
 	if authorization != "" {
 		req.Header.Set("Authorization", authorization)
+		log.Infof("%s", common.TruncateToLength(authorization, 16))
 	}
 
 	client := sidecar.NewClient(sidecar.ClientOptions{
@@ -100,6 +103,11 @@ func (c *Client) Do(
 	b, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return err
+	}
+
+	log.Infof("%d (%d bytes)", resp.StatusCode, len(b))
+	if strings.HasPrefix(resp.Header.Get("Content-Type"), "application/json") {
+		log.Debugf("%s", string(b))
 	}
 
 	if resp.StatusCode != 200 {
