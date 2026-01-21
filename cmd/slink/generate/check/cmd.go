@@ -2,7 +2,7 @@ package check
 
 import (
 	"github.com/agentio/slink/pkg/lexica"
-	"github.com/charmbracelet/log"
+	"github.com/agentio/slink/pkg/tool"
 	"github.com/spf13/cobra"
 )
 
@@ -12,20 +12,16 @@ func Cmd() *cobra.Command {
 	var logLevel string
 	var cmd = &cobra.Command{
 		Use:   "check",
-		Short: "Generate a command-line interface to check records in a directory of lexicons",
+		Short: "Generate a command-line interface to check records in a directory of Lexicon files",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			var err error
-			ll, err := log.ParseLevel(logLevel)
-			if err != nil {
+			if err := tool.SetLogLevel(logLevel); err != nil {
 				return err
 			}
-			log.SetLevel(ll)
 			catalog := lexica.NewCatalog()
-			if err = catalog.Load(input, false /* skip lint */); err != nil {
+			if err := catalog.Load(input, false /* skip lint */); err != nil {
 				return err
 			}
-			err = catalog.GenerateCheckCommands(output)
-			if err != nil {
+			if err := catalog.GenerateCheckCommands(output); err != nil {
 				return err
 			}
 			return nil

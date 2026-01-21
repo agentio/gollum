@@ -1,8 +1,6 @@
-package main
+package generate
 
 import (
-	"os"
-
 	"github.com/agentio/slink/cmd/slink/generate/call"
 	"github.com/agentio/slink/cmd/slink/generate/check"
 	"github.com/agentio/slink/cmd/slink/generate/lint"
@@ -10,15 +8,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func main() {
-	if err := cmd().Execute(); err != nil {
-		os.Exit(1)
-	}
-}
-
-func cmd() *cobra.Command {
-	var cmd = &cobra.Command{
-		Use: "bootstrap",
+func Cmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "generate",
+		Short: "Generate slink code from a directory of Lexicon files",
 	}
 	cmd.AddCommand(lint.Cmd())
 	cmd.AddCommand(call.Cmd())
