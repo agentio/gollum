@@ -35,6 +35,7 @@ func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def
 	if defname != "main" {
 		log.Errorf("Can't generate call command for %s %s", lexicon.Id, defname)
 	}
+	defname = idPrefix(lexicon.Id)
 	id := strings.Replace(lexicon.Id, ".", "-", 2) // merge initial segments of the lexicon id
 	dirname := strings.ToLower(root + "/" + strings.ReplaceAll(id, ".", "/"))
 	os.MkdirAll(dirname, 0755)
@@ -88,10 +89,10 @@ func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def
 				if propertyValue.Items.Type == "string" {
 					fmt.Fprintf(s, "var %s []string\n", propertyName)
 				} else {
-					fmt.Fprintf(s, "// FIXME var %s %+v\n", propertyName, propertyValue)
+					fmt.Fprintf(s, "var %s string // filename\n", propertyName)
 				}
-			case "unknown":
-				fmt.Fprintf(s, "var %s string\n", propertyName)
+			case "unknown", "ref", "union":
+				fmt.Fprintf(s, "var %s string // filename\n", propertyName)
 			default:
 				fmt.Fprintf(s, "// FIXME var %s %+v\n", propertyName, propertyValue)
 			}
@@ -134,7 +135,10 @@ func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def
 		if def.Input != nil {
 			for _, propertyName := range sortedPropertyNames(def.Input.Schema.Properties) {
 				propertyValue := def.Input.Schema.Properties[propertyName]
-				if propertyValue.Type == "unknown" {
+				if propertyValue.Type == "unknown" ||
+					propertyValue.Type == "ref" ||
+					propertyValue.Type == "union" ||
+					(propertyValue.Type == "array" && propertyValue.Items.Type != "string") {
 					fmt.Fprintf(s, "%s_value, err := common.ReadJSONFile(%s)\n", propertyName, propertyName)
 					fmt.Fprintf(s, "if err != nil {return err}\n")
 				}
@@ -168,13 +172,30 @@ func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def
 						fmt.Fprintf(s, "%s: %s,\n", capitalize(propertyName), propertyName)
 					}
 				case "boolean":
-					//fmt.Fprintf(s, "%s,\n", propertyName)
+					if !slices.Contains(def.Input.Schema.Required, propertyName) {
+						fmt.Fprintf(s, "%s: common.BoolPointerOrNil(%s),\n", capitalize(propertyName), propertyName)
+					} else {
+						fmt.Fprintf(s, "%s: %s,\n", capitalize(propertyName), propertyName)
+					}
 				case "array":
 					if propertyValue.Items.Type == "string" {
-						//	fmt.Fprintf(s, "%s,\n", propertyName)
+						fmt.Fprintf(s, "%s: %s,\n", capitalize(propertyName), propertyName)
+					} else {
+						itemstype := lexicon.resolveItemsType(defname+"_Input", propertyName, propertyValue.Items)
+						fmt.Fprintf(s, "%s: common.CastIntoArrayType[xrpc.%s](%s_value), // CHECKME\n", capitalize(propertyName), itemstype[1:], propertyName)
 					}
 				case "unknown":
 					fmt.Fprintf(s, "%s: &%s_value,\n", capitalize(propertyName), propertyName)
+				case "ref":
+					reftype := lexicon.resolveRefType(propertyValue.Ref)
+					if reftype[0] == '*' {
+						fmt.Fprintf(s, "%s: common.CastIntoRefType[xrpc.%s](%s_value), // CHECKME\n", capitalize(propertyName), reftype[1:], propertyName)
+					} else {
+						fmt.Fprintf(s, "%s: common.CastIntoRefArrayType[xrpc.%s](%s_value), // CHECKME\n", capitalize(propertyName), reftype[2:], propertyName)
+					}
+				case "union":
+					uniontype := lexicon.resolveUnionFieldType(defname+"_Input", propertyName)
+					fmt.Fprintf(s, "%s: common.CastIntoUnionType[xrpc.%s](%s_value), // CHECKME\n", capitalize(propertyName), uniontype, propertyName)
 				default:
 				}
 			}
@@ -248,9 +269,9 @@ func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def
 				if propertyValue.Items.Type == "string" {
 					fmt.Fprintf(s, "cmd.Flags().StringArrayVar(&%s, \"%s\", nil, \"%s\")\n", propertyName, flagName, description)
 				} else {
-					fmt.Fprintf(s, "// FIXME cmd.Flags().XXXVar(&%s... %+v\n", propertyName, propertyValue)
+					fmt.Fprintf(s, "cmd.Flags().StringVar(&%s, \"%s\", \"\", \"%s (name of a json file)\")\n", propertyName, flagName, description)
 				}
-			case "unknown":
+			case "unknown", "ref", "union":
 				fmt.Fprintf(s, "cmd.Flags().StringVar(&%s, \"%s\", \"\", \"%s (name of a json file)\")\n", propertyName, flagName, description)
 			default:
 				fmt.Fprintf(s, "// FIXME cmd.Flags().XXXVar(&%s... %+v\n", propertyName, propertyValue)

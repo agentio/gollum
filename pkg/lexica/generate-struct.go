@@ -58,7 +58,7 @@ func (lexicon *Lexicon) renderStruct(s *strings.Builder, defname string, propert
 				s.WriteString(capitalize(propertyName) + " *common.Blob `json:" + `"` + propertyName + `,omitempty"` + "`\n")
 			}
 		case "union":
-			uniontype := lexicon.resolveUnionType(defname, propertyName)
+			uniontype := lexicon.resolveUnionFieldType(defname, propertyName)
 			s.WriteString(capitalize(propertyName) + " *" + uniontype + " `json:" + `"` + propertyName + `,omitempty"` + "`\n")
 		case "bytes":
 			if required {
@@ -85,7 +85,7 @@ func (lexicon *Lexicon) renderDependencies(s *strings.Builder, defname string, p
 		property := properties[propertyName]
 		switch property.Type {
 		case "union":
-			uniontype := lexicon.resolveUnionType(defname, propertyName)
+			uniontype := lexicon.resolveUnionFieldType(defname, propertyName)
 			s.WriteString("type " + uniontype + " struct {\n")
 			for _, ref := range property.Refs {
 				fieldname := lexicon.unionFieldName(ref)
@@ -118,7 +118,7 @@ func (lexicon *Lexicon) renderDependencies(s *strings.Builder, defname string, p
 			fmt.Fprintf(s, "}\n\n")
 		case "array":
 			if property.Items.Type == "union" {
-				uniontype := lexicon.resolveUnionType(defname, propertyName) + "_Elem"
+				uniontype := lexicon.resolveUnionFieldType(defname, propertyName) + "_Elem"
 				s.WriteString("type " + uniontype + " struct {\n")
 				for _, ref := range property.Items.Refs {
 					fieldname := lexicon.unionFieldName(ref)

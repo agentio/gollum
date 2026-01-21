@@ -1,6 +1,10 @@
 package common
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	"github.com/charmbracelet/log"
+)
 
 func StringPointerOrNil(s string) *string {
 	if s == "" {
@@ -11,6 +15,13 @@ func StringPointerOrNil(s string) *string {
 
 func Int64PointerOrNil(v int64) *int64 {
 	if v == 0 {
+		return nil
+	}
+	return &v
+}
+
+func BoolPointerOrNil(v bool) *bool {
+	if v == false {
 		return nil
 	}
 	return &v
@@ -45,4 +56,28 @@ type Blob struct {
 
 type Link struct {
 	LexiconLink string `json:"$link"`
+}
+
+func CastIntoRefType[T any](v any) *T {
+	var result T
+	log.Errorf("conversion to ref *%T is unimplemented", result)
+	return nil
+}
+
+func CastIntoRefArrayType[T any](v any) []T {
+	var result []T
+	log.Errorf("conversion to ref []%T is unimplemented", result)
+	return nil
+}
+
+func CastIntoUnionType[T any](v any) *T {
+	var result T
+	log.Errorf("conversion to union *%T is unimplemented", result)
+	return &result
+}
+
+func CastIntoArrayType[T any](v any) []*T {
+	var result []*T
+	log.Errorf("conversion to []*%T is unimplemented", result)
+	return result
 }

@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func (lexicon *Lexicon) resolveUnionType(defname, propname string) string {
+func (lexicon *Lexicon) resolveUnionFieldType(defname, propname string) string {
 	return idPrefix(lexicon.Id) + capitalize(defname) + "_" + capitalize(propname)
 }
 
@@ -20,7 +20,7 @@ func (lexicon *Lexicon) resolveItemsType(defname, propname string, items *Items)
 	case "ref":
 		return lexicon.resolveRefType(items.Ref)
 	case "union":
-		return "*" + lexicon.resolveUnionType(defname, propname) + "_Elem"
+		return "*" + lexicon.resolveUnionFieldType(defname, propname) + "_Elem"
 	default:
 	}
 	return "/* FIXME defaulting on unsupported items type: " + items.Type + " */ string"
