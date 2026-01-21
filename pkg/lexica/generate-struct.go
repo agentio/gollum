@@ -23,7 +23,7 @@ func (lexicon *Lexicon) renderStruct(s *strings.Builder, defname string, propert
 		switch property.Type {
 		case "boolean":
 			if required {
-				s.WriteString(capitalize(propertyName) + " bool `json:" + `"` + propertyName + `,omitempty"` + "`\n")
+				s.WriteString(capitalize(propertyName) + " bool `json:" + `"` + propertyName + `"` + "`\n")
 			} else {
 				s.WriteString(capitalize(propertyName) + " *bool `json:" + `"` + propertyName + `,omitempty"` + "`\n")
 			}

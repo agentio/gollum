@@ -7,6 +7,9 @@ import (
 )
 
 func ReadJSONFile(name string) (any, error) {
+	if name == "" {
+		return nil, nil
+	}
 	b, err := os.ReadFile(name)
 	if err != nil {
 		return nil, err
@@ -19,7 +22,7 @@ func ReadJSONFile(name string) (any, error) {
 	var arrayValue []any
 	err = json.Unmarshal(b, &arrayValue)
 	if err == nil {
-		return mapValue, nil
+		return arrayValue, nil
 	}
 	return nil, fmt.Errorf("unable to unmarshal contents of %s, is it json?", name)
 }

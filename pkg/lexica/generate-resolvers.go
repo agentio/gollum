@@ -53,7 +53,15 @@ func (lexicon *Lexicon) resolveRefType(ref string) string {
 				name += "_" + capitalize(tag)
 			}
 			if refType == "array" {
-				return "[]" + name + "_Elem"
+				refDef := refLexicon.Lookup(tag)
+				if refDef != nil {
+					refType = refDef.Type
+				}
+				if refDef.Items.Type == "string" {
+					return "[]" + name + "_Elem"
+				} else {
+					return "[]*" + name + "_Elem"
+				}
 			}
 			return "*" + name
 		} else {

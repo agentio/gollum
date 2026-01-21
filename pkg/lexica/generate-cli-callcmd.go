@@ -191,7 +191,7 @@ func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def
 					if reftype[0] == '*' {
 						fmt.Fprintf(s, "%s: common.CastIntoRefType[xrpc.%s](%s_value), // CHECKME\n", capitalize(propertyName), reftype[1:], propertyName)
 					} else {
-						fmt.Fprintf(s, "%s: common.CastIntoRefArrayType[xrpc.%s](%s_value), // CHECKME\n", capitalize(propertyName), reftype[2:], propertyName)
+						fmt.Fprintf(s, "%s: common.CastIntoArrayType[xrpc.%s](%s_value), // CHECKME\n", capitalize(propertyName), reftype[3:], propertyName)
 					}
 				case "union":
 					uniontype := lexicon.resolveUnionFieldType(defname+"_Input", propertyName)

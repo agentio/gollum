@@ -59,15 +59,21 @@ type Link struct {
 }
 
 func CastIntoRefType[T any](v any) *T {
+	if v == nil {
+		return nil
+	}
 	var result T
-	log.Errorf("conversion to ref *%T is unimplemented", result)
-	return nil
-}
-
-func CastIntoRefArrayType[T any](v any) []T {
-	var result []T
-	log.Errorf("conversion to ref []%T is unimplemented", result)
-	return nil
+	b, err := json.Marshal(v)
+	if err != nil {
+		log.Printf("%+v", err)
+		return nil
+	}
+	err = json.Unmarshal(b, &result)
+	if err != nil {
+		log.Printf("%+v", err)
+		return nil
+	}
+	return &result
 }
 
 func CastIntoUnionType[T any](v any) *T {
@@ -78,6 +84,15 @@ func CastIntoUnionType[T any](v any) *T {
 
 func CastIntoArrayType[T any](v any) []*T {
 	var result []*T
-	log.Errorf("conversion to []*%T is unimplemented", result)
+	b, err := json.Marshal(v)
+	if err != nil {
+		log.Printf("%+v", err)
+		return nil
+	}
+	err = json.Unmarshal(b, &result)
+	if err != nil {
+		log.Printf("%+v", err)
+		return nil
+	}
 	return result
 }
