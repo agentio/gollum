@@ -58,7 +58,7 @@ type Link struct {
 	LexiconLink string `json:"$link"`
 }
 
-func CastIntoRefType[T any](v any) *T {
+func CastIntoStructType[T any](v any) *T {
 	if v == nil {
 		return nil
 	}
@@ -73,12 +73,6 @@ func CastIntoRefType[T any](v any) *T {
 		log.Printf("%+v", err)
 		return nil
 	}
-	return &result
-}
-
-func CastIntoUnionType[T any](v any) *T {
-	var result T
-	log.Errorf("conversion to union *%T is unimplemented", result)
 	return &result
 }
 

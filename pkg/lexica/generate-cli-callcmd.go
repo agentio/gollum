@@ -182,20 +182,20 @@ func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def
 						fmt.Fprintf(s, "%s: %s,\n", capitalize(propertyName), propertyName)
 					} else {
 						itemstype := lexicon.resolveItemsType(defname+"_Input", propertyName, propertyValue.Items)
-						fmt.Fprintf(s, "%s: common.CastIntoArrayType[xrpc.%s](%s_value), // CHECKME\n", capitalize(propertyName), itemstype[1:], propertyName)
+						fmt.Fprintf(s, "%s: common.CastIntoArrayType[xrpc.%s](%s_value),\n", capitalize(propertyName), itemstype[1:], propertyName)
 					}
 				case "unknown":
 					fmt.Fprintf(s, "%s: &%s_value,\n", capitalize(propertyName), propertyName)
 				case "ref":
 					reftype := lexicon.resolveRefType(propertyValue.Ref)
 					if reftype[0] == '*' {
-						fmt.Fprintf(s, "%s: common.CastIntoRefType[xrpc.%s](%s_value), // CHECKME\n", capitalize(propertyName), reftype[1:], propertyName)
+						fmt.Fprintf(s, "%s: common.CastIntoStructType[xrpc.%s](%s_value),\n", capitalize(propertyName), reftype[1:], propertyName)
 					} else {
-						fmt.Fprintf(s, "%s: common.CastIntoArrayType[xrpc.%s](%s_value), // CHECKME\n", capitalize(propertyName), reftype[3:], propertyName)
+						fmt.Fprintf(s, "%s: common.CastIntoArrayType[xrpc.%s](%s_value),\n", capitalize(propertyName), reftype[3:], propertyName)
 					}
 				case "union":
 					uniontype := lexicon.resolveUnionFieldType(defname+"_Input", propertyName)
-					fmt.Fprintf(s, "%s: common.CastIntoUnionType[xrpc.%s](%s_value), // CHECKME\n", capitalize(propertyName), uniontype, propertyName)
+					fmt.Fprintf(s, "%s: common.CastIntoStructType[xrpc.%s](%s_value),\n", capitalize(propertyName), uniontype, propertyName)
 				default:
 				}
 			}
