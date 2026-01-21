@@ -5,7 +5,7 @@ import (
 	"sync"
 )
 
-func (catalog *Catalog) GenerateSupportCode(root string) error {
+func (catalog *Catalog) GenerateXRPCHandlers(root string) error {
 	os.RemoveAll(root)
 	var wg sync.WaitGroup
 	for _, lexicon := range catalog.Lexicons {

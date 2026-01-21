@@ -224,7 +224,7 @@ func (lexicon *Lexicon) unionFieldType(ref string) string {
 				reftype = refdef.Type
 			}
 		}
-		name := idPrefix(id)
+		name := symbolForID(id)
 		if tag != "main" {
 			name += "_" + capitalize(tag)
 		}

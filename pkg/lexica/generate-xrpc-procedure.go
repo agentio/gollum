@@ -16,7 +16,7 @@ func (lexicon *Lexicon) generateProcedure(s *strings.Builder, defname string, de
 				fmt.Fprintf(s, "type %s = %s\n", defname+"_Output", defname+"_"+capitalize(def.Output.Schema.Ref[1:]))
 			} else {
 				parts := strings.Split(def.Output.Schema.Ref, "#")
-				fmt.Fprintf(s, "type %s = %s\n", defname+"_Output", idPrefix(parts[0])+"_"+capitalize(parts[1]))
+				fmt.Fprintf(s, "type %s = %s\n", defname+"_Output", symbolForID(parts[0])+"_"+capitalize(parts[1]))
 			}
 		} else {
 			lexicon.generateStruct(s, defname+"_Output", "", def.Output.Schema.Properties, def.Output.Schema.Required, false)
@@ -59,7 +59,7 @@ func (lexicon *Lexicon) generateProcedure(s *strings.Builder, defname string, de
 				fmt.Fprintf(s, "type %s = %s\n", defname+"_Output", defname+"_"+capitalize(def.Output.Schema.Ref[1:]))
 			} else {
 				parts := strings.Split(def.Output.Schema.Ref, "#")
-				fmt.Fprintf(s, "type %s = %s\n", defname+"_Output", idPrefix(parts[0])+"_"+capitalize(parts[1]))
+				fmt.Fprintf(s, "type %s = %s\n", defname+"_Output", symbolForID(parts[0])+"_"+capitalize(parts[1]))
 			}
 		} else {
 			lexicon.generateStruct(s, defname+"_Output", "", def.Output.Schema.Properties, def.Output.Schema.Required, false)

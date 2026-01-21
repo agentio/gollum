@@ -2,12 +2,37 @@ package lexica
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
+	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/charmbracelet/log"
 	"github.com/iancoleman/strcase"
 )
+
+func (catalog *Catalog) GenerateCheckCommands(root string) error {
+	os.RemoveAll(root)
+	os.MkdirAll(root, 0755)
+	var wg sync.WaitGroup
+	for _, lexicon := range catalog.Lexicons {
+		wg.Go(func() {
+			lexicon.generateCheckCommands(root)
+		})
+	}
+	wg.Wait()
+	filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+		if d.Type().IsDir() {
+			wg.Go(func() {
+				catalog.generateInternalCommand(path, "Check XRPC records")
+			})
+		}
+		return nil
+	})
+	wg.Wait()
+	return nil
+}
 
 func (lexicon *Lexicon) generateCheckCommands(root string) {
 	for defname, def := range lexicon.Defs {
@@ -34,12 +59,13 @@ func (lexicon *Lexicon) generateCheckCommandForDef(root, defname string, def *De
 	dirname := strings.ToLower(root + "/" + strings.ReplaceAll(id, ".", "/"))
 	os.MkdirAll(dirname, 0755)
 	filename := dirname + "/cmd.go"
+	log.Debugf("generating %s", filename)
 
 	parts := strings.Split(id, ".")
 	lastpart := parts[len(parts)-1]
 	packagename := strings.ToLower(lastpart)
 	commandname := strcase.ToKebab(lastpart)
-	handlerName := idPrefix(lexicon.Id)
+	handlerName := symbolForID(lexicon.Id)
 
 	s := &strings.Builder{}
 	fmt.Fprintf(s, "package %s // %s\n\n", packagename, lexicon.Id)
@@ -76,5 +102,4 @@ func (lexicon *Lexicon) generateCheckCommandForDef(root, defname string, def *De
 	if err := writeFormattedFile(filename, s.String()); err != nil {
 		log.Errorf("error writing file %s %s", filename, err)
 	}
-	log.Debugf("generating %s %s %s %s", filename, commandname, handlerName, packagename)
 }

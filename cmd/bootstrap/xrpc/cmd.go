@@ -24,7 +24,7 @@ func Cmd() *cobra.Command {
 			if err = catalog.Load(input, false /* skip lint */); err != nil {
 				return err
 			}
-			err = catalog.GenerateSupportCode(output)
+			err = catalog.GenerateXRPCHandlers(output)
 			if err != nil {
 				return err
 			}

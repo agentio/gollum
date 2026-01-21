@@ -2,13 +2,38 @@ package lexica
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
+	"path/filepath"
 	"slices"
 	"strings"
+	"sync"
 
 	"github.com/charmbracelet/log"
 	"github.com/iancoleman/strcase"
 )
+
+func (catalog *Catalog) GenerateCallCommands(root string) error {
+	os.RemoveAll(root)
+	os.MkdirAll(root, 0755)
+	var wg sync.WaitGroup
+	for _, lexicon := range catalog.Lexicons {
+		wg.Go(func() {
+			lexicon.generateCallCommands(root)
+		})
+	}
+	wg.Wait()
+	filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+		if d.Type().IsDir() {
+			wg.Go(func() {
+				catalog.generateInternalCommand(path, "Call XRPC methods")
+			})
+		}
+		return nil
+	})
+	wg.Wait()
+	return nil
+}
 
 func (lexicon *Lexicon) generateCallCommands(root string) {
 	allow := []string{
@@ -35,17 +60,18 @@ func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def
 	if defname != "main" {
 		log.Errorf("Can't generate call command for %s %s", lexicon.Id, defname)
 	}
-	defname = idPrefix(lexicon.Id)
+	defname = symbolForID(lexicon.Id)
 	id := strings.Replace(lexicon.Id, ".", "-", 2) // merge initial segments of the lexicon id
 	dirname := strings.ToLower(root + "/" + strings.ReplaceAll(id, ".", "/"))
 	os.MkdirAll(dirname, 0755)
 	filename := dirname + "/cmd.go"
+	log.Debugf("generating %s", filename)
 
 	parts := strings.Split(id, ".")
 	lastpart := parts[len(parts)-1]
 	packagename := strings.ToLower(lastpart)
 	commandname := strcase.ToKebab(lastpart)
-	handlerName := idPrefix(lexicon.Id)
+	handlerName := symbolForID(lexicon.Id)
 
 	s := &strings.Builder{}
 	fmt.Fprintf(s, "package %s // %s\n\n", packagename, lexicon.Id)

@@ -24,7 +24,7 @@ func Cmd() *cobra.Command {
 			if err = catalog.Load(input, false /* skip lint */); err != nil {
 				return err
 			}
-			err = catalog.GenerateCallingCLI(output)
+			err = catalog.GenerateCallCommands(output)
 			if err != nil {
 				return err
 			}
