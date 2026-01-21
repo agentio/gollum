@@ -8,7 +8,16 @@ import (
 func (lexicon *Lexicon) generateQuery(s *strings.Builder, defname string, def *Def) {
 	s.WriteString("const " + defname + "_Description = " + `"` + def.Description + `"` + "\n\n")
 	if def.Output != nil && def.Output.Encoding == "application/json" {
-		lexicon.generateStruct(s, defname+"_Output", "", def.Output.Schema.Properties, def.Output.Schema.Required, false)
+		if def.Output.Schema.Type == "ref" {
+			if def.Output.Schema.Ref[0] == '#' {
+				fmt.Fprintf(s, "type %s = %s\n", defname+"_Output", defname+"_"+capitalize(def.Output.Schema.Ref[1:]))
+			} else {
+				parts := strings.Split(def.Output.Schema.Ref, "#")
+				fmt.Fprintf(s, "type %s = %s\n", defname+"_Output", symbolForID(parts[0])+"_"+capitalize(parts[1]))
+			}
+		} else {
+			lexicon.generateStruct(s, defname+"_Output", "", def.Output.Schema.Properties, def.Output.Schema.Required, false)
+		}
 		params := ""
 		paramsok := false
 		if def.Parameters != nil && def.Parameters.Type == "params" {
