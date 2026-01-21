@@ -58,7 +58,7 @@ type Link struct {
 	LexiconLink string `json:"$link"`
 }
 
-func CastIntoStructType[T any](v any) *T {
+func CastIntoStructType[T any](v *any) *T {
 	if v == nil {
 		return nil
 	}
@@ -76,7 +76,7 @@ func CastIntoStructType[T any](v any) *T {
 	return &result
 }
 
-func CastIntoArrayType[T any](v any) []*T {
+func CastIntoArrayType[T any](v *any) []*T {
 	var result []*T
 	b, err := json.Marshal(v)
 	if err != nil {

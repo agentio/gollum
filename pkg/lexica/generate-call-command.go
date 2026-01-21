@@ -211,7 +211,7 @@ func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def
 						fmt.Fprintf(s, "%s: common.CastIntoArrayType[xrpc.%s](%s_value),\n", capitalize(propertyName), itemstype[1:], propertyName)
 					}
 				case "unknown":
-					fmt.Fprintf(s, "%s: &%s_value,\n", capitalize(propertyName), propertyName)
+					fmt.Fprintf(s, "%s: %s_value,\n", capitalize(propertyName), propertyName)
 				case "ref":
 					reftype := lexicon.resolveRefType(propertyValue.Ref)
 					if reftype[0] == '*' {
