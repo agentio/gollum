@@ -42,7 +42,7 @@ func (lexicon *Lexicon) generateDef(s *strings.Builder, def *Def, name string, p
 			for _, ref := range def.Items.Refs {
 				fieldname := lexicon.unionFieldName(ref)
 				fieldtype := lexicon.unionFieldType(ref)[1:] // strip leading *
-				fmt.Fprintf(s, "case \"%s\":\n", ref)
+				fmt.Fprintf(s, "case \"%s%s\":\n", lexicon.Id, ref)
 				fmt.Fprintf(s, "m.%s = &%s{}\n", fieldname, fieldtype)
 				fmt.Fprintf(s, "json.Unmarshal(data, m.%s)\n", fieldname)
 
