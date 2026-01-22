@@ -2,42 +2,23 @@ package did
 
 import (
 	"fmt"
-	"io"
-	"net/http"
-	"strings"
 
+	"github.com/agentio/slink/pkg/resolve"
+	"github.com/agentio/slink/pkg/tool"
 	"github.com/spf13/cobra"
 )
 
 func Cmd() *cobra.Command {
+	var loglevel string
 	cmd := &cobra.Command{
 		Use:   "did DID",
 		Short: "Fetch the DID document for a DID",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			did := args[0]
-			var url string
-			if strings.HasPrefix(did, "did:plc:") {
-				url = fmt.Sprintf("https://plc.directory/%s", did)
-			} else if strings.HasPrefix(did, "did:web:") {
-				url = fmt.Sprintf("https://%s/.well-known/did.json", strings.TrimPrefix(did, "did:web:"))
-			} else {
-				return fmt.Errorf("%s is not a valid did", did)
-			}
-			req, err := http.NewRequestWithContext(cmd.Context(), "GET", url, nil)
-			if err != nil {
+			if err := tool.SetLogLevel(loglevel); err != nil {
 				return err
 			}
-			resp, err := http.DefaultClient.Do(req)
-			if err != nil {
-				return err
-			}
-			defer resp.Body.Close()
-			if resp.StatusCode != http.StatusOK {
-				_, _ = io.Copy(io.Discard, resp.Body)
-				return fmt.Errorf("%s is not in the PLC registry", did)
-			}
-			b, err := io.ReadAll(resp.Body)
+			b, err := resolve.DidBytes(cmd.Context(), args[0])
 			if err != nil {
 				return err
 			}
@@ -45,5 +26,6 @@ func Cmd() *cobra.Command {
 			return nil
 		},
 	}
+	cmd.Flags().StringVarP(&loglevel, "log-level", "l", "warn", "log level (debug, info, warn, error, fatal)")
 	return cmd
 }
