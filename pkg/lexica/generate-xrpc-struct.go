@@ -29,51 +29,51 @@ func (lexicon *Lexicon) renderStruct(s *strings.Builder, defname string, propert
 			}
 		case "integer":
 			if required {
-				fmt.Fprintf(s, capitalize(propertyName)+" int64 `json:"+`"`+propertyName+`,omitempty"`+"`\n")
+				fmt.Fprintf(s, "%s int64 `json:\"%s,omitempty\"`\n", capitalize(propertyName), propertyName)
 			} else {
-				fmt.Fprintf(s, capitalize(propertyName)+" *int64 `json:"+`"`+propertyName+`,omitempty"`+"`\n")
+				fmt.Fprintf(s, "%s *int64 `json:\"%s,omitempty\"`\n", capitalize(propertyName), propertyName)
 			}
 		case "string":
 			if required {
-				fmt.Fprintf(s, capitalize(propertyName)+" string `json:"+`"`+propertyName+`,omitempty"`+"`\n")
+				fmt.Fprintf(s, "%s string `json:\"%s,omitempty\"`\n", capitalize(propertyName), propertyName)
 			} else {
-				fmt.Fprintf(s, capitalize(propertyName)+" *string `json:"+`"`+propertyName+`,omitempty"`+"`\n")
+				fmt.Fprintf(s, "%s *string `json:\"%s,omitempty\"`\n", capitalize(propertyName), propertyName)
 			}
 		case "array":
 			itemstype := lexicon.resolveItemsType(defname, propertyName, property.Items)
-			fmt.Fprintf(s, capitalize(propertyName)+" []"+itemstype+" `json:"+`"`+propertyName+`,omitempty"`+"`\n")
+			fmt.Fprintf(s, "%s []%s `json:\"%s,omitempty\"`\n", capitalize(propertyName), itemstype, propertyName)
 		case "ref":
 			reftype := lexicon.resolveRefType(property.Ref)
-			fmt.Fprintf(s, capitalize(propertyName)+reftype+" `json:"+`"`+propertyName+`,omitempty"`+"`\n")
+			fmt.Fprintf(s, "%s %s `json:\"%s,omitempty\"`\n", capitalize(propertyName), reftype, propertyName)
 		case "unknown":
 			if required {
-				fmt.Fprintf(s, capitalize(propertyName)+" any `json:"+`"`+propertyName+`,omitempty"`+"`\n")
+				fmt.Fprintf(s, "%s any `json:\"%s,omitempty\"`\n", capitalize(propertyName), propertyName)
 			} else {
-				fmt.Fprintf(s, capitalize(propertyName)+" *any `json:"+`"`+propertyName+`,omitempty"`+"`\n")
+				fmt.Fprintf(s, "%s *any `json:\"%s,omitempty\"`\n", capitalize(propertyName), propertyName)
 			}
 		case "blob":
 			if required {
-				fmt.Fprintf(s, capitalize(propertyName)+" *common.Blob `json:"+`"`+propertyName+`"`+"`\n")
+				fmt.Fprintf(s, "%s *common.Blob `json:\"%s\"`\n", capitalize(propertyName), propertyName)
 			} else {
-				fmt.Fprintf(s, capitalize(propertyName)+" *common.Blob `json:"+`"`+propertyName+`,omitempty"`+"`\n")
+				fmt.Fprintf(s, "%s *common.Blob `json:\"%s,omitempty\"`\n", capitalize(propertyName), propertyName)
 			}
 		case "union":
 			uniontype := lexicon.resolveUnionFieldType(defname, propertyName)
-			fmt.Fprintf(s, capitalize(propertyName)+" *"+uniontype+" `json:"+`"`+propertyName+`,omitempty"`+"`\n")
+			fmt.Fprintf(s, "%s *%s `json:\"%s,omitempty\"`\n", capitalize(propertyName), uniontype, propertyName)
 		case "bytes":
 			if required {
-				fmt.Fprintf(s, capitalize(propertyName)+" []byte `json:"+`"`+propertyName+`"`+"`\n")
+				fmt.Fprintf(s, "%s []byte `json:\"%s\"`\n", capitalize(propertyName), propertyName)
 			} else {
-				fmt.Fprintf(s, capitalize(propertyName)+" *[]byte `json:"+`"`+propertyName+`,omitempty"`+"`\n")
+				fmt.Fprintf(s, "%s *[]byte `json:\"%s,omitempty\"`\n", capitalize(propertyName), propertyName)
 			}
 		case "cid-link":
 			if required {
-				fmt.Fprintf(s, capitalize(propertyName)+" string `json:"+`"`+propertyName+`,omitempty"`+"`\n")
+				fmt.Fprintf(s, "%s string `json:\"%s,omitempty\"`\n", capitalize(propertyName), propertyName)
 			} else {
-				fmt.Fprintf(s, capitalize(propertyName)+" *string `json:"+`"`+propertyName+`,omitempty"`+"`\n")
+				fmt.Fprintf(s, "%s *string `json:\"%s,omitempty\"`\n", capitalize(propertyName), propertyName)
 			}
 		default:
-			fmt.Fprintf(s, "// FIXME skipping unsupported property type "+propertyName+" "+property.Type+" "+fmt.Sprintf("required=%t %+v", required, property)+"\n")
+			fmt.Fprintf(s, "// FIXME skipping unsupported property type %s %s required=%t %+v\n", propertyName, property.Type, required, property)
 		}
 	}
 	fmt.Fprintf(s, "}\n\n")
