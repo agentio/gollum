@@ -85,8 +85,14 @@ func (c *Client) Do(
 
 	authorization := os.Getenv("SLINK_AUTH")
 	if authorization != "" {
-		req.Header.Set("Authorization", authorization)
-		log.Infof("%s", common.TruncateToLength(authorization, 16))
+		req.Header.Set("authorization", authorization)
+		log.Infof("authorization: %s", common.TruncateToLength(authorization, 16))
+	}
+
+	atprotoproxy := os.Getenv("SLINK_ATPROTOPROXY")
+	if atprotoproxy != "" {
+		req.Header.Set("atproto-proxy", atprotoproxy)
+		log.Infof("atproto-proxy: %s", atprotoproxy)
 	}
 
 	client := sidecar.NewClient(sidecar.ClientOptions{
