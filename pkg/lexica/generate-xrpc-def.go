@@ -22,20 +22,20 @@ func (lexicon *Lexicon) generateDef(s *strings.Builder, def *Def, name string, p
 	case "object":
 		lexicon.generateStruct(s, defname, def.Description, def.Properties, def.Required, true)
 	case "string":
-		s.WriteString("type " + defname + " string\n")
+		fmt.Fprintf(s, "type %s string\n", defname)
 	case "record":
 		fmt.Fprintf(s, "const %s_Description = \"%s\"\n", defname, def.Description)
 		lexicon.generateStruct(s, defname, def.Description, def.Record.Properties, def.Record.Required, true)
 	case "array":
 		if def.Items.Type == "union" {
 			uniontype := defname + "_Elem"
-			s.WriteString("type " + defname + "_Elem struct {\n")
+			fmt.Fprintf(s, "type %s_Elem struct {\n", defname)
 			for _, ref := range def.Items.Refs {
 				fieldname := lexicon.unionFieldName(ref)
 				fieldtype := lexicon.unionFieldType(ref)
-				s.WriteString(fieldname + " " + fieldtype + "\n")
+				fmt.Fprintf(s, "%s %s\n", fieldname, fieldtype)
 			}
-			s.WriteString("}\n\n")
+			fmt.Fprintf(s, "}\n\n")
 			fmt.Fprintf(s, "func (m *%s) UnmarshalJSON(data []byte) error {\n", uniontype)
 			fmt.Fprintf(s, "recordType := common.LexiconTypeFromJSONBytes(data)\n")
 			fmt.Fprintf(s, "switch recordType {\n")
@@ -63,12 +63,12 @@ func (lexicon *Lexicon) generateDef(s *strings.Builder, def *Def, name string, p
 			fmt.Fprintf(s, "// FIXME: ungenerated array %+v\n", def)
 		}
 	case "token":
-		s.WriteString("// " + def.Description + "\n")
-		s.WriteString("const " + defname + " string = " + `"` + name + `"` + "\n\n")
+		fmt.Fprintf(s, "// %s\n", def.Description)
+		fmt.Fprintf(s, "const %s string = \"%s\"\n\n", defname, name)
 	case "permission-set":
-		s.WriteString("// CHECKME skipping permission set " + defname + "\n")
+		fmt.Fprintf(s, "// CHECKME skipping permission set %s\n", defname)
 	case "subscription":
-		s.WriteString("// CHECKME skipping subscription " + defname + "\n")
+		fmt.Fprintf(s, "// CHECKME skipping subscription %s\n", defname)
 	default:
 		log.Warnf("skipping %s.%s (type %s)", lexicon.Id, name, def.Type)
 	}

@@ -6,7 +6,7 @@ import (
 )
 
 func (lexicon *Lexicon) generateQuery(s *strings.Builder, defname string, def *Def) {
-	s.WriteString("const " + defname + "_Description = " + `"` + def.Description + `"` + "\n\n")
+	fmt.Fprintf(s, "const %s_Description = \"%s\"\n\n", defname, def.Description)
 	if def.Output != nil && def.Output.Encoding == "application/json" {
 		if def.Output.Schema.Type == "ref" {
 			if def.Output.Schema.Ref[0] == '#' {
@@ -23,44 +23,44 @@ func (lexicon *Lexicon) generateQuery(s *strings.Builder, defname string, def *D
 		if def.Parameters != nil && def.Parameters.Type == "params" {
 			params, paramsok = parseQueryParameters(def.Parameters)
 		}
-		s.WriteString("// " + def.Description + "\n")
-		s.WriteString("func " + defname + "(ctx context.Context, c common.Client" + params + ") (*" + defname + "_Output" + ", error) {\n")
-		s.WriteString("var output " + defname + "_Output" + "\n")
-		s.WriteString("params := map[string]any{\n")
+		fmt.Fprintf(s, "// %s\n", def.Description)
+		fmt.Fprintf(s, "func %s(ctx context.Context, c common.Client%s) (*%s_Output"+", error) {\n", defname, params, defname)
+		fmt.Fprintf(s, "var output %s_Output\n", defname)
+		fmt.Fprintf(s, "params := map[string]any{\n")
 		if paramsok {
 			for parameterName := range def.Parameters.Properties {
-				s.WriteString(`"` + parameterName + `":` + parameterName + ",\n")
+				fmt.Fprintf(s, "\"%s\":%s,\n", parameterName, parameterName)
 			}
 		}
-		s.WriteString("}\n")
-		s.WriteString(`if err := c.Do(ctx, common.Query, "", "` + lexicon.Id + `", params, nil, &output); err != nil {` + "\n")
-		s.WriteString("return nil, err\n")
-		s.WriteString("}\n")
-		s.WriteString("return &output, nil\n")
-		s.WriteString("}\n\n")
+		fmt.Fprintf(s, "}\n")
+		fmt.Fprintf(s, "if err := c.Do(ctx, common.Query, \"\", \"%s\", params, nil, &output); err != nil {\n", lexicon.Id)
+		fmt.Fprintf(s, "return nil, err\n")
+		fmt.Fprintf(s, "}\n")
+		fmt.Fprintf(s, "return &output, nil\n")
+		fmt.Fprintf(s, "}\n\n")
 	} else if def.Output != nil {
 		params := ""
 		paramsok := false
 		if def.Parameters != nil && def.Parameters.Type == "params" {
 			params, paramsok = parseQueryParameters(def.Parameters)
 		}
-		s.WriteString("// " + def.Description + "\n")
-		s.WriteString("func " + defname + "(ctx context.Context, c common.Client" + params + ") ([]byte, error) {\n")
-		s.WriteString("params := map[string]any{\n")
+		fmt.Fprintf(s, "// %s\n", def.Description)
+		fmt.Fprintf(s, "func %s(ctx context.Context, c common.Client%s) ([]byte, error) {\n", defname, params)
+		fmt.Fprintf(s, "params := map[string]any{\n")
 		if paramsok {
 			for parameterName := range def.Parameters.Properties {
-				s.WriteString(`"` + parameterName + `":` + parameterName + ",\n")
+				fmt.Fprintf(s, "\"%s\":%s,\n", parameterName, parameterName)
 			}
 		}
-		s.WriteString("}\n")
-		s.WriteString("var output []byte\n")
-		s.WriteString(`if err := c.Do(ctx, common.Query, "", "` + lexicon.Id + `", params, nil, &output); err != nil {` + "\n")
-		s.WriteString("return nil, err\n")
-		s.WriteString("}\n")
-		s.WriteString("return output, nil\n")
-		s.WriteString("}\n\n")
+		fmt.Fprintf(s, "}\n")
+		fmt.Fprintf(s, "var output []byte\n")
+		fmt.Fprintf(s, "if err := c.Do(ctx, common.Query, \"\", \"%s\", params, nil, &output); err != nil {\n", lexicon.Id)
+		fmt.Fprintf(s, "return nil, err\n")
+		fmt.Fprintf(s, "}\n")
+		fmt.Fprintf(s, "return output, nil\n")
+		fmt.Fprintf(s, "}\n\n")
 	} else {
-		s.WriteString(fmt.Sprintf("// FIXME skipping query with no output %+v\n", def))
+		fmt.Fprintf(s, "// FIXME skipping query with no output %+v\n", def)
 	}
 }
 

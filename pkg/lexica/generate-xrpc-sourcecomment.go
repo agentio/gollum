@@ -2,6 +2,7 @@ package lexica
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 )
 
@@ -10,7 +11,5 @@ func (lexicon *Lexicon) generateSourceComment(s *strings.Builder) {
 		return strings.ReplaceAll(s, "*/*", "[ANY]")
 	}
 	b, _ := json.MarshalIndent(lexicon, "", "  ")
-	s.WriteString("/*\n")
-	s.WriteString(filter(string(b)) + "\n")
-	s.WriteString("*/\n")
+	fmt.Fprintf(s, "/*\n%s\n*/\n", filter(string(b)))
 }

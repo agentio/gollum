@@ -7,13 +7,13 @@ import (
 )
 
 func (lexicon *Lexicon) generateStruct(s *strings.Builder, defname, description string, properties map[string]Property, required []string, isRecord bool) {
-	s.WriteString("// " + description + "\n")
+	fmt.Fprintf(s, "// %s\n", description)
 	lexicon.renderStruct(s, defname, properties, required, isRecord)
 	lexicon.renderDependencies(s, defname, properties, required)
 }
 
 func (lexicon *Lexicon) renderStruct(s *strings.Builder, defname string, properties map[string]Property, required []string, isRecord bool) {
-	s.WriteString("type " + defname + " struct {\n")
+	fmt.Fprintf(s, "type %s struct {\n", defname)
 	if isRecord {
 		fmt.Fprintf(s, "LexiconTypeID string `json:\"$type,omitempty\"`\n")
 	}
@@ -23,60 +23,60 @@ func (lexicon *Lexicon) renderStruct(s *strings.Builder, defname string, propert
 		switch property.Type {
 		case "boolean":
 			if required {
-				s.WriteString(capitalize(propertyName) + " bool `json:" + `"` + propertyName + `"` + "`\n")
+				fmt.Fprintf(s, "%s bool `json:\"%s\"`\n", capitalize(propertyName), propertyName)
 			} else {
-				s.WriteString(capitalize(propertyName) + " *bool `json:" + `"` + propertyName + `,omitempty"` + "`\n")
+				fmt.Fprintf(s, "%s *bool `json:\"%s,omitempty\"`\n", capitalize(propertyName), propertyName)
 			}
 		case "integer":
 			if required {
-				s.WriteString(capitalize(propertyName) + " int64 `json:" + `"` + propertyName + `,omitempty"` + "`\n")
+				fmt.Fprintf(s, capitalize(propertyName)+" int64 `json:"+`"`+propertyName+`,omitempty"`+"`\n")
 			} else {
-				s.WriteString(capitalize(propertyName) + " *int64 `json:" + `"` + propertyName + `,omitempty"` + "`\n")
+				fmt.Fprintf(s, capitalize(propertyName)+" *int64 `json:"+`"`+propertyName+`,omitempty"`+"`\n")
 			}
 		case "string":
 			if required {
-				s.WriteString(capitalize(propertyName) + " string `json:" + `"` + propertyName + `,omitempty"` + "`\n")
+				fmt.Fprintf(s, capitalize(propertyName)+" string `json:"+`"`+propertyName+`,omitempty"`+"`\n")
 			} else {
-				s.WriteString(capitalize(propertyName) + " *string `json:" + `"` + propertyName + `,omitempty"` + "`\n")
+				fmt.Fprintf(s, capitalize(propertyName)+" *string `json:"+`"`+propertyName+`,omitempty"`+"`\n")
 			}
 		case "array":
 			itemstype := lexicon.resolveItemsType(defname, propertyName, property.Items)
-			s.WriteString(capitalize(propertyName) + " []" + itemstype + " `json:" + `"` + propertyName + `,omitempty"` + "`\n")
+			fmt.Fprintf(s, capitalize(propertyName)+" []"+itemstype+" `json:"+`"`+propertyName+`,omitempty"`+"`\n")
 		case "ref":
 			reftype := lexicon.resolveRefType(property.Ref)
-			s.WriteString(capitalize(propertyName) + reftype + " `json:" + `"` + propertyName + `,omitempty"` + "`\n")
+			fmt.Fprintf(s, capitalize(propertyName)+reftype+" `json:"+`"`+propertyName+`,omitempty"`+"`\n")
 		case "unknown":
 			if required {
-				s.WriteString(capitalize(propertyName) + " any `json:" + `"` + propertyName + `,omitempty"` + "`\n")
+				fmt.Fprintf(s, capitalize(propertyName)+" any `json:"+`"`+propertyName+`,omitempty"`+"`\n")
 			} else {
-				s.WriteString(capitalize(propertyName) + " *any `json:" + `"` + propertyName + `,omitempty"` + "`\n")
+				fmt.Fprintf(s, capitalize(propertyName)+" *any `json:"+`"`+propertyName+`,omitempty"`+"`\n")
 			}
 		case "blob":
 			if required {
-				s.WriteString(capitalize(propertyName) + " *common.Blob `json:" + `"` + propertyName + `"` + "`\n")
+				fmt.Fprintf(s, capitalize(propertyName)+" *common.Blob `json:"+`"`+propertyName+`"`+"`\n")
 			} else {
-				s.WriteString(capitalize(propertyName) + " *common.Blob `json:" + `"` + propertyName + `,omitempty"` + "`\n")
+				fmt.Fprintf(s, capitalize(propertyName)+" *common.Blob `json:"+`"`+propertyName+`,omitempty"`+"`\n")
 			}
 		case "union":
 			uniontype := lexicon.resolveUnionFieldType(defname, propertyName)
-			s.WriteString(capitalize(propertyName) + " *" + uniontype + " `json:" + `"` + propertyName + `,omitempty"` + "`\n")
+			fmt.Fprintf(s, capitalize(propertyName)+" *"+uniontype+" `json:"+`"`+propertyName+`,omitempty"`+"`\n")
 		case "bytes":
 			if required {
-				s.WriteString(capitalize(propertyName) + " []byte `json:" + `"` + propertyName + `"` + "`\n")
+				fmt.Fprintf(s, capitalize(propertyName)+" []byte `json:"+`"`+propertyName+`"`+"`\n")
 			} else {
-				s.WriteString(capitalize(propertyName) + " *[]byte `json:" + `"` + propertyName + `,omitempty"` + "`\n")
+				fmt.Fprintf(s, capitalize(propertyName)+" *[]byte `json:"+`"`+propertyName+`,omitempty"`+"`\n")
 			}
 		case "cid-link":
 			if required {
-				s.WriteString(capitalize(propertyName) + " string `json:" + `"` + propertyName + `,omitempty"` + "`\n")
+				fmt.Fprintf(s, capitalize(propertyName)+" string `json:"+`"`+propertyName+`,omitempty"`+"`\n")
 			} else {
-				s.WriteString(capitalize(propertyName) + " *string `json:" + `"` + propertyName + `,omitempty"` + "`\n")
+				fmt.Fprintf(s, capitalize(propertyName)+" *string `json:"+`"`+propertyName+`,omitempty"`+"`\n")
 			}
 		default:
-			s.WriteString("// FIXME skipping unsupported property type " + propertyName + " " + property.Type + " " + fmt.Sprintf("required=%t %+v", required, property) + "\n")
+			fmt.Fprintf(s, "// FIXME skipping unsupported property type "+propertyName+" "+property.Type+" "+fmt.Sprintf("required=%t %+v", required, property)+"\n")
 		}
 	}
-	s.WriteString("}\n\n")
+	fmt.Fprintf(s, "}\n\n")
 }
 
 func (lexicon *Lexicon) renderDependencies(s *strings.Builder, defname string, properties map[string]Property, required []string) {
@@ -86,13 +86,13 @@ func (lexicon *Lexicon) renderDependencies(s *strings.Builder, defname string, p
 		switch property.Type {
 		case "union":
 			uniontype := lexicon.resolveUnionFieldType(defname, propertyName)
-			s.WriteString("type " + uniontype + " struct {\n")
+			fmt.Fprintf(s, "type %s struct {\n", uniontype)
 			for _, ref := range property.Refs {
 				fieldname := lexicon.unionFieldName(ref)
 				fieldtype := lexicon.unionFieldType(ref)
-				s.WriteString(fieldname + " " + fieldtype + "\n")
+				fmt.Fprintf(s, "%s %s\n", fieldname, fieldtype)
 			}
-			s.WriteString("}\n\n")
+			fmt.Fprintf(s, "}\n\n")
 			fmt.Fprintf(s, "func (m *%s) UnmarshalJSON(data []byte) error {\n", uniontype)
 			fmt.Fprintf(s, "recordType := common.LexiconTypeFromJSONBytes(data)\n")
 			fmt.Fprintf(s, "switch recordType {\n")
@@ -119,13 +119,13 @@ func (lexicon *Lexicon) renderDependencies(s *strings.Builder, defname string, p
 		case "array":
 			if property.Items.Type == "union" {
 				uniontype := lexicon.resolveUnionFieldType(defname, propertyName) + "_Elem"
-				s.WriteString("type " + uniontype + " struct {\n")
+				fmt.Fprintf(s, "type %s struct {\n", uniontype)
 				for _, ref := range property.Items.Refs {
 					fieldname := lexicon.unionFieldName(ref)
 					fieldtype := lexicon.unionFieldType(ref)
-					s.WriteString(fieldname + " " + fieldtype + "\n")
+					fmt.Fprintf(s, "%s %s\n", fieldname, fieldtype)
 				}
-				s.WriteString("}\n\n")
+				fmt.Fprintf(s, "}\n\n")
 
 				//fmt.Fprintf(s, "/*\n")
 				fmt.Fprintf(s, "func (m *%s) UnmarshalJSON(data []byte) error {\n", uniontype)
