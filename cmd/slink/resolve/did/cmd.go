@@ -3,8 +3,8 @@ package did
 import (
 	"fmt"
 
+	"github.com/agentio/slink/pkg/common"
 	"github.com/agentio/slink/pkg/resolve"
-	"github.com/agentio/slink/pkg/tool"
 	"github.com/spf13/cobra"
 )
 
@@ -15,7 +15,7 @@ func Cmd() *cobra.Command {
 		Short: "Fetch the DID document for a DID",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := tool.SetLogLevel(loglevel); err != nil {
+			if err := common.SetLogLevel(loglevel); err != nil {
 				return err
 			}
 			b, err := resolve.DidBytes(cmd.Context(), args[0])

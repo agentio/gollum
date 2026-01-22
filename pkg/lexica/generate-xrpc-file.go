@@ -37,6 +37,7 @@ func lexiconPackageName(root, id string) string {
 func (lexicon *Lexicon) generateFile(filename, packagename string) error {
 	log.Debugf("generating %s", filename)
 	s := &strings.Builder{}
+	packageComment(s, packagename)
 	fmt.Fprintf(s, "package %s // %s\n\n", packagename, lexicon.Id)
 	fmt.Fprintf(s, "import \"github.com/agentio/slink/pkg/common\"\n\n")
 	prefix := symbolForID(lexicon.Id)

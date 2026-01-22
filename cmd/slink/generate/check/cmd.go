@@ -1,8 +1,8 @@
 package check
 
 import (
+	"github.com/agentio/slink/pkg/common"
 	"github.com/agentio/slink/pkg/lexica"
-	"github.com/agentio/slink/pkg/tool"
 	"github.com/spf13/cobra"
 )
 
@@ -14,7 +14,7 @@ func Cmd() *cobra.Command {
 		Use:   "check",
 		Short: "Generate a command-line interface to check records in a directory of Lexicon files",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := tool.SetLogLevel(_loglevel); err != nil {
+			if err := common.SetLogLevel(_loglevel); err != nil {
 				return err
 			}
 			catalog := lexica.NewCatalog()

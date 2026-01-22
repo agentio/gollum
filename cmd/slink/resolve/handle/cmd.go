@@ -3,8 +3,8 @@ package handle
 import (
 	"fmt"
 
+	"github.com/agentio/slink/pkg/common"
 	"github.com/agentio/slink/pkg/resolve"
-	"github.com/agentio/slink/pkg/tool"
 	"github.com/spf13/cobra"
 )
 
@@ -15,7 +15,7 @@ func Cmd() *cobra.Command {
 		Short: "Lookup the DID for a handle",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := tool.SetLogLevel(loglevel); err != nil {
+			if err := common.SetLogLevel(loglevel); err != nil {
 				return err
 			}
 			did, err := resolve.Handle(cmd.Context(), args[0])

@@ -68,6 +68,7 @@ func (lexicon *Lexicon) generateCheckCommandForDef(root, defname string, def *De
 	handlerName := symbolForID(lexicon.Id)
 
 	s := &strings.Builder{}
+	packageComment(s, packagename)
 	fmt.Fprintf(s, "package %s // %s\n\n", packagename, lexicon.Id)
 	fmt.Fprintf(s, "import \"github.com/spf13/cobra\"\n")
 	fmt.Fprintf(s, "import \"github.com/agentio/slink/gen/xrpc\"\n")

@@ -33,6 +33,7 @@ func (catalog *Catalog) generateInternalCommand(path, prompt string) error {
 	log.Debugf("generating %s", filename)
 	parts := strings.Split(path, "/")
 	lastpart := parts[len(parts)-1]
+	packagename := strings.ReplaceAll(strings.ToLower(lastpart), "-", "_")
 
 	short := prompt
 	if len(parts) > 2 {
@@ -41,7 +42,8 @@ func (catalog *Catalog) generateInternalCommand(path, prompt string) error {
 	subdirectories := getsubdirs(path)
 
 	s := &strings.Builder{}
-	fmt.Fprintf(s, "package %s\n", strings.ReplaceAll(strings.ToLower(lastpart), "-", "_"))
+	packageComment(s, packagename)
+	fmt.Fprintf(s, "package %s\n", packagename)
 	fmt.Fprintf(s, "import (\n")
 	fmt.Fprintf(s, "\"github.com/spf13/cobra\"\n")
 	for _, subdir := range subdirectories {

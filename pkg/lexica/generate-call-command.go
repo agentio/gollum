@@ -74,6 +74,7 @@ func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def
 	handlerName := symbolForID(lexicon.Id)
 
 	s := &strings.Builder{}
+	packageComment(s, packagename)
 	fmt.Fprintf(s, "package %s // %s\n\n", packagename, lexicon.Id)
 	fmt.Fprintf(s, "import \"github.com/spf13/cobra\"\n")
 	fmt.Fprintf(s, "import \"github.com/agentio/slink/gen/xrpc\"\n")
@@ -132,7 +133,7 @@ func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def
 	fmt.Fprintf(s, "Long: xrpc.%s_Description,\n", handlerName)
 	fmt.Fprintf(s, "Args: cobra.NoArgs,\n")
 	fmt.Fprintf(s, "RunE: func(cmd *cobra.Command, args []string) error {\n")
-	fmt.Fprintf(s, "if err := tool.SetLogLevel(_loglevel); err != nil {return err}\n")
+	fmt.Fprintf(s, "if err := common.SetLogLevel(_loglevel); err != nil {return err}\n")
 	if def.Type == "query" {
 		fmt.Fprintf(s, "client := client.NewClient()\n")
 		fmt.Fprintf(s, "response, err := xrpc.%s(\n", handlerName)
