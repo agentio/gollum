@@ -9,13 +9,13 @@ import (
 )
 
 func Cmd() *cobra.Command {
-	var _loglevel string
+	var loglevel string
 	cmd := &cobra.Command{
 		Use:   "handle HANDLE",
 		Short: "Lookup the DID for a handle",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := tool.SetLogLevel(_loglevel); err != nil {
+			if err := tool.SetLogLevel(loglevel); err != nil {
 				return err
 			}
 			did, err := resolve.Handle(cmd.Context(), args[0])
@@ -26,6 +26,6 @@ func Cmd() *cobra.Command {
 			return nil
 		},
 	}
-	cmd.Flags().StringVarP(&_loglevel, "log-level", "l", "warn", "log level (debug, info, warn, error, fatal)")
+	cmd.Flags().StringVarP(&loglevel, "log-level", "l", "warn", "log level (debug, info, warn, error, fatal)")
 	return cmd
 }

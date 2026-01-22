@@ -16,7 +16,9 @@ import (
 )
 
 type Client struct {
-	Host string
+	Host          string
+	Authorization string
+	ATProtoProxy  string
 }
 
 func NewClient() *Client {
@@ -26,6 +28,20 @@ func NewClient() *Client {
 	}
 	return &Client{
 		Host: host,
+	}
+}
+
+type ClientOptions struct {
+	Host          string
+	Authorization string
+	ATProtoProxy  string
+}
+
+func NewClientWithOptions(options ClientOptions) *Client {
+	return &Client{
+		Host:          options.Host,
+		Authorization: options.Authorization,
+		ATProtoProxy:  options.ATProtoProxy,
 	}
 }
 
@@ -83,13 +99,19 @@ func (c *Client) Do(
 	}
 	req.Header.Set("User-Agent", "slink")
 
-	authorization := os.Getenv("SLINK_AUTH")
+	authorization := c.Authorization
+	if authorization == "" {
+		authorization = os.Getenv("SLINK_AUTH")
+	}
 	if authorization != "" {
 		req.Header.Set("authorization", authorization)
 		log.Infof("authorization: %s", common.TruncateToLength(authorization, 16))
 	}
 
-	atprotoproxy := os.Getenv("SLINK_ATPROTOPROXY")
+	atprotoproxy := c.ATProtoProxy
+	if atprotoproxy == "" {
+		atprotoproxy = os.Getenv("SLINK_ATPROTOPROXY")
+	}
 	if atprotoproxy != "" {
 		req.Header.Set("atproto-proxy", atprotoproxy)
 		log.Infof("atproto-proxy: %s", atprotoproxy)
