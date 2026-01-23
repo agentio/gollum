@@ -10,7 +10,21 @@ import (
 )
 
 func capitalize(s string) string {
+	if s == "atproto" {
+		return "ATProto"
+	}
 	return strings.ToUpper(s[0:1]) + s[1:]
+}
+
+func symbolForID(id string) string {
+	if false { // I think the code looks fine if we don't do this.
+		id = strings.TrimPrefix(id, "com.atproto.") // put these symbols in the top-level namespace
+	}
+	var s strings.Builder
+	for _, part := range strings.Split(id, ".") {
+		s.WriteString(capitalize(part))
+	}
+	return s.String()
 }
 
 func sortedDefNames(defs map[string]*Def) []string {
@@ -29,15 +43,6 @@ func sortedPropertyNames(properties map[string]Property) []string {
 	}
 	sort.Strings(propnames)
 	return propnames
-}
-
-func symbolForID(id string) string {
-	id = strings.TrimPrefix(id, "com.atproto.") // put these symbols in the top-level namespace
-	var s strings.Builder
-	for _, part := range strings.Split(id, ".") {
-		s.WriteString(capitalize(part))
-	}
-	return s.String()
 }
 
 func writeFormattedFile(filename string, body string) error {
