@@ -29,13 +29,13 @@ func (lexicon *Lexicon) renderStruct(s *strings.Builder, defname string, propert
 			}
 		case "integer":
 			if required {
-				fmt.Fprintf(s, "%s int64 `json:\"%s,omitempty\"`\n", capitalize(propertyName), propertyName)
+				fmt.Fprintf(s, "%s int64 `json:\"%s\"`\n", capitalize(propertyName), propertyName)
 			} else {
 				fmt.Fprintf(s, "%s *int64 `json:\"%s,omitempty\"`\n", capitalize(propertyName), propertyName)
 			}
 		case "string":
 			if required {
-				fmt.Fprintf(s, "%s string `json:\"%s,omitempty\"`\n", capitalize(propertyName), propertyName)
+				fmt.Fprintf(s, "%s string `json:\"%s\"`\n", capitalize(propertyName), propertyName)
 			} else {
 				fmt.Fprintf(s, "%s *string `json:\"%s,omitempty\"`\n", capitalize(propertyName), propertyName)
 			}
@@ -47,7 +47,7 @@ func (lexicon *Lexicon) renderStruct(s *strings.Builder, defname string, propert
 			fmt.Fprintf(s, "%s %s `json:\"%s,omitempty\"`\n", capitalize(propertyName), reftype, propertyName)
 		case "unknown":
 			if required {
-				fmt.Fprintf(s, "%s any `json:\"%s,omitempty\"`\n", capitalize(propertyName), propertyName)
+				fmt.Fprintf(s, "%s any `json:\"%s\"`\n", capitalize(propertyName), propertyName)
 			} else {
 				fmt.Fprintf(s, "%s *any `json:\"%s,omitempty\"`\n", capitalize(propertyName), propertyName)
 			}
@@ -68,7 +68,7 @@ func (lexicon *Lexicon) renderStruct(s *strings.Builder, defname string, propert
 			}
 		case "cid-link":
 			if required {
-				fmt.Fprintf(s, "%s string `json:\"%s,omitempty\"`\n", capitalize(propertyName), propertyName)
+				fmt.Fprintf(s, "%s string `json:\"%s\"`\n", capitalize(propertyName), propertyName)
 			} else {
 				fmt.Fprintf(s, "%s *string `json:\"%s,omitempty\"`\n", capitalize(propertyName), propertyName)
 			}
