@@ -18,7 +18,6 @@ func (lexicon *Lexicon) generateXRPCSourceFile(root string) {
 	if packagename == "" {
 		return
 	}
-	log.Debugf("generating %s", filename)
 	s := &strings.Builder{}
 	packageComment(s, packagename)
 	fmt.Fprintf(s, "package %s // %s\n\n", packagename, lexicon.Id)

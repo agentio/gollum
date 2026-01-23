@@ -5,7 +5,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/charmbracelet/log"
 	"github.com/iancoleman/strcase"
 )
 
@@ -30,11 +29,9 @@ func (catalog *Catalog) generateInternalCommand(path, prompt string) error {
 	if err == nil {
 		return nil // a command already exists
 	}
-	log.Debugf("generating %s", filename)
 	parts := strings.Split(path, "/")
 	lastpart := parts[len(parts)-1]
 	packagename := strings.ReplaceAll(strings.ToLower(lastpart), "-", "_")
-
 	short := prompt
 	if len(parts) > 2 {
 		short += " under " + strings.ReplaceAll(lastpart, "-", ".")

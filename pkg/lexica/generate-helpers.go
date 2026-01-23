@@ -46,6 +46,7 @@ func sortedPropertyNames(properties map[string]Property) []string {
 }
 
 func writeFormattedFile(filename string, body string) error {
+	log.Debugf("writing %s", filename)
 	formatted, err := imports.Process(filename, []byte(body), nil)
 	if err != nil {
 		log.Errorf("failed to run goimports: %v\n%s", err, body)

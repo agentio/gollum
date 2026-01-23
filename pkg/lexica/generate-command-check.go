@@ -59,7 +59,6 @@ func (lexicon *Lexicon) generateCheckCommandForDef(root, defname string, def *De
 	dirname := strings.ToLower(root + "/" + strings.ReplaceAll(id, ".", "/"))
 	os.MkdirAll(dirname, 0755)
 	filename := dirname + "/cmd.go"
-	log.Debugf("generating %s", filename)
 
 	parts := strings.Split(id, ".")
 	lastpart := parts[len(parts)-1]
