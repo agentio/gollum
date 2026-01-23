@@ -24,12 +24,19 @@ func (lexicon *Lexicon) generateXRPCSourceFile(root string) {
 	fmt.Fprintf(s, "package %s // %s\n\n", packagename, lexicon.Id)
 	fmt.Fprintf(s, "import \"encoding/json\"\n")
 	fmt.Fprintf(s, "import \"github.com/agentio/slink/pkg/slink\"\n")
+	var generations int
 	for _, name := range sortedDefNames(lexicon.Defs) {
 		def := lexicon.Defs[name]
-		lexicon.generateDef(s, name, def)
+		if ManifestIncludes(lexicon.Id, name) {
+			lexicon.generateDef(s, name, def)
+			generations++
+		}
 	}
-	if true { // append lexicon source to generated file
+	if false { // append lexicon source to generated file
 		lexicon.generateSourceComment(s)
+	}
+	if generations == 0 {
+		return
 	}
 	if err := writeFormattedFile(filename, s.String()); err != nil {
 		log.Errorf("error writing file %s %s", filename, err)

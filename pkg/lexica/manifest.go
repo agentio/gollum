@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+var _manifest *Manifest
+
 type Manifest struct {
 	IDs []string `json:"ids"`
 }
@@ -37,6 +39,18 @@ func parse(id string) (nsid string, name string) {
 	return
 }
 
+func ManifestIncludes(nsid, name string) bool {
+	if _manifest == nil {
+		return true
+	}
+	if name == "main" {
+		if slices.Contains(_manifest.IDs, nsid) {
+			return true
+		}
+	}
+	return slices.Contains(_manifest.IDs, nsid+"#"+name)
+}
+
 func (manifest *Manifest) Expand() error {
 	for i := 0; i < len(manifest.IDs); i++ {
 		id := manifest.IDs[i]
@@ -55,6 +69,7 @@ func (manifest *Manifest) Expand() error {
 		}
 	}
 	slices.Sort(manifest.IDs)
+	_manifest = manifest
 	return nil
 }
 

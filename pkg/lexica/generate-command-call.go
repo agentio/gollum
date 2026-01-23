@@ -300,7 +300,7 @@ func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def
 	}
 	fmt.Fprintf(s, "return cmd\n")
 	fmt.Fprintf(s, "}\n")
-	if true { // append lexicon source to generated file
+	if false { // append lexicon source to generated file
 		lexicon.generateSourceComment(s)
 	}
 	if err := writeFormattedFile(filename, s.String()); err != nil {

@@ -21,7 +21,6 @@ func Cmd() *cobra.Command {
 			if err := catalog.Load(input, false /* lint */); err != nil {
 				return err
 			}
-
 			manifest, err := lexica.ReadManifest(args[0])
 			if err != nil {
 				return err

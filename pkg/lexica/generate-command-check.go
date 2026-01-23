@@ -99,7 +99,7 @@ func (lexicon *Lexicon) generateCheckCommandForDef(root, defname string, def *De
 	fmt.Fprintf(s, "return cmd\n")
 	fmt.Fprintf(s, "}\n")
 
-	if true { // append lexicon source to generated file
+	if false { // append lexicon source to generated file
 		lexicon.generateSourceComment(s)
 	}
 	if err := writeFormattedFile(filename, s.String()); err != nil {
