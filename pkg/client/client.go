@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/agentio/sidecar"
-	"github.com/agentio/slink/pkg/common"
+	"github.com/agentio/slink/pkg/slink"
 	"github.com/charmbracelet/log"
 )
 
@@ -47,7 +47,7 @@ func NewClientWithOptions(options ClientOptions) *Client {
 
 func (c *Client) Do(
 	ctx context.Context,
-	kind common.RequestType,
+	kind slink.RequestType,
 	contentType string,
 	method string,
 	params map[string]any,
@@ -70,9 +70,9 @@ func (c *Client) Do(
 
 	var m string
 	switch kind {
-	case common.Query:
+	case slink.Query:
 		m = "GET"
-	case common.Procedure:
+	case slink.Procedure:
 		m = "POST"
 	default:
 		return fmt.Errorf("unsupported request kind: %d", kind)
@@ -105,7 +105,7 @@ func (c *Client) Do(
 	}
 	if authorization != "" {
 		req.Header.Set("authorization", authorization)
-		log.Infof("authorization: %s", common.TruncateToLength(authorization, 16))
+		log.Infof("authorization: %s", slink.TruncateToLength(authorization, 16))
 	}
 
 	atprotoproxy := c.ATProtoProxy

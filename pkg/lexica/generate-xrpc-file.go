@@ -39,7 +39,7 @@ func (lexicon *Lexicon) generateFile(filename, packagename string) error {
 	s := &strings.Builder{}
 	packageComment(s, packagename)
 	fmt.Fprintf(s, "package %s // %s\n\n", packagename, lexicon.Id)
-	fmt.Fprintf(s, "import \"github.com/agentio/slink/pkg/common\"\n\n")
+	fmt.Fprintf(s, "import \"github.com/agentio/slink/pkg/slink\"\n\n")
 	prefix := symbolForID(lexicon.Id)
 	for name, def := range lexicon.Defs {
 		lexicon.generateDef(s, def, name, prefix)

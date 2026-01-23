@@ -37,7 +37,7 @@ func (lexicon *Lexicon) generateDef(s *strings.Builder, def *Def, name string, p
 			}
 			fmt.Fprintf(s, "}\n\n")
 			fmt.Fprintf(s, "func (m *%s) UnmarshalJSON(data []byte) error {\n", uniontype)
-			fmt.Fprintf(s, "recordType := common.LexiconTypeFromJSONBytes(data)\n")
+			fmt.Fprintf(s, "recordType := slink.LexiconTypeFromJSONBytes(data)\n")
 			fmt.Fprintf(s, "switch recordType {\n")
 			for _, ref := range def.Items.Refs {
 				fieldname := lexicon.unionFieldName(ref)

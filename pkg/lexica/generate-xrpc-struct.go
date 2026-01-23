@@ -53,9 +53,9 @@ func (lexicon *Lexicon) renderStruct(s *strings.Builder, defname string, propert
 			}
 		case "blob":
 			if required {
-				fmt.Fprintf(s, "%s *common.Blob `json:\"%s\"`\n", capitalize(propertyName), propertyName)
+				fmt.Fprintf(s, "%s *slink.Blob `json:\"%s\"`\n", capitalize(propertyName), propertyName)
 			} else {
-				fmt.Fprintf(s, "%s *common.Blob `json:\"%s,omitempty\"`\n", capitalize(propertyName), propertyName)
+				fmt.Fprintf(s, "%s *slink.Blob `json:\"%s,omitempty\"`\n", capitalize(propertyName), propertyName)
 			}
 		case "union":
 			uniontype := lexicon.resolveUnionFieldType(defname, propertyName)
@@ -94,7 +94,7 @@ func (lexicon *Lexicon) renderDependencies(s *strings.Builder, defname string, p
 			}
 			fmt.Fprintf(s, "}\n\n")
 			fmt.Fprintf(s, "func (m *%s) UnmarshalJSON(data []byte) error {\n", uniontype)
-			fmt.Fprintf(s, "recordType := common.LexiconTypeFromJSONBytes(data)\n")
+			fmt.Fprintf(s, "recordType := slink.LexiconTypeFromJSONBytes(data)\n")
 			fmt.Fprintf(s, "switch recordType {\n")
 			for _, ref := range property.Refs {
 				fieldname := lexicon.unionFieldName(ref)
@@ -129,7 +129,7 @@ func (lexicon *Lexicon) renderDependencies(s *strings.Builder, defname string, p
 
 				//fmt.Fprintf(s, "/*\n")
 				fmt.Fprintf(s, "func (m *%s) UnmarshalJSON(data []byte) error {\n", uniontype)
-				fmt.Fprintf(s, "recordType := common.LexiconTypeFromJSONBytes(data)\n")
+				fmt.Fprintf(s, "recordType := slink.LexiconTypeFromJSONBytes(data)\n")
 				fmt.Fprintf(s, "switch recordType {\n")
 				for _, ref := range property.Items.Refs {
 					fieldname := lexicon.unionFieldName(ref)

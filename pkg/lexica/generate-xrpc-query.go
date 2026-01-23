@@ -24,7 +24,7 @@ func (lexicon *Lexicon) generateQuery(s *strings.Builder, defname string, def *D
 			params, paramsok = parseQueryParameters(def.Parameters)
 		}
 		fmt.Fprintf(s, "// %s\n", def.Description)
-		fmt.Fprintf(s, "func %s(ctx context.Context, c common.Client%s) (*%s_Output"+", error) {\n", defname, params, defname)
+		fmt.Fprintf(s, "func %s(ctx context.Context, c slink.Client%s) (*%s_Output"+", error) {\n", defname, params, defname)
 		fmt.Fprintf(s, "var output %s_Output\n", defname)
 		fmt.Fprintf(s, "params := map[string]any{\n")
 		if paramsok {
@@ -33,7 +33,7 @@ func (lexicon *Lexicon) generateQuery(s *strings.Builder, defname string, def *D
 			}
 		}
 		fmt.Fprintf(s, "}\n")
-		fmt.Fprintf(s, "if err := c.Do(ctx, common.Query, \"\", \"%s\", params, nil, &output); err != nil {\n", lexicon.Id)
+		fmt.Fprintf(s, "if err := c.Do(ctx, slink.Query, \"\", \"%s\", params, nil, &output); err != nil {\n", lexicon.Id)
 		fmt.Fprintf(s, "return nil, err\n")
 		fmt.Fprintf(s, "}\n")
 		fmt.Fprintf(s, "return &output, nil\n")
@@ -45,7 +45,7 @@ func (lexicon *Lexicon) generateQuery(s *strings.Builder, defname string, def *D
 			params, paramsok = parseQueryParameters(def.Parameters)
 		}
 		fmt.Fprintf(s, "// %s\n", def.Description)
-		fmt.Fprintf(s, "func %s(ctx context.Context, c common.Client%s) ([]byte, error) {\n", defname, params)
+		fmt.Fprintf(s, "func %s(ctx context.Context, c slink.Client%s) ([]byte, error) {\n", defname, params)
 		fmt.Fprintf(s, "params := map[string]any{\n")
 		if paramsok {
 			for parameterName := range def.Parameters.Properties {
@@ -54,7 +54,7 @@ func (lexicon *Lexicon) generateQuery(s *strings.Builder, defname string, def *D
 		}
 		fmt.Fprintf(s, "}\n")
 		fmt.Fprintf(s, "var output []byte\n")
-		fmt.Fprintf(s, "if err := c.Do(ctx, common.Query, \"\", \"%s\", params, nil, &output); err != nil {\n", lexicon.Id)
+		fmt.Fprintf(s, "if err := c.Do(ctx, slink.Query, \"\", \"%s\", params, nil, &output); err != nil {\n", lexicon.Id)
 		fmt.Fprintf(s, "return nil, err\n")
 		fmt.Fprintf(s, "}\n")
 		fmt.Fprintf(s, "return output, nil\n")

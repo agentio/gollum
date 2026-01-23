@@ -21,9 +21,9 @@ func (lexicon *Lexicon) generateProcedure(s *strings.Builder, defname string, de
 			lexicon.generateStruct(s, defname+"_Output", "", def.Output.Schema.Properties, def.Output.Schema.Required, false)
 		}
 		fmt.Fprintf(s, "// %s\n", def.Description)
-		fmt.Fprintf(s, "func %s(ctx context.Context, c common.Client, input *%s_Input) (*%s_Output"+", error) {\n", defname, defname, defname)
+		fmt.Fprintf(s, "func %s(ctx context.Context, c slink.Client, input *%s_Input) (*%s_Output"+", error) {\n", defname, defname, defname)
 		fmt.Fprintf(s, "var output %s_Output\n", defname)
-		fmt.Fprintf(s, "if err := c.Do(ctx, common.Procedure, \"%s\", \"%s\", nil, input, &output); err != nil {\n", def.Input.Encoding, lexicon.Id)
+		fmt.Fprintf(s, "if err := c.Do(ctx, slink.Procedure, \"%s\", \"%s\", nil, input, &output); err != nil {\n", def.Input.Encoding, lexicon.Id)
 		fmt.Fprintf(s, "return nil, err\n")
 		fmt.Fprintf(s, "}\n")
 		fmt.Fprintf(s, "return &output, nil\n")
@@ -32,9 +32,9 @@ func (lexicon *Lexicon) generateProcedure(s *strings.Builder, defname string, de
 		def.Output != nil && def.Output.Encoding == "application/json" {
 		lexicon.generateStruct(s, defname+"_Output", "", def.Output.Schema.Properties, def.Output.Schema.Required, false)
 		fmt.Fprintf(s, "// %s\n", def.Description)
-		fmt.Fprintf(s, "func %s(ctx context.Context, c common.Client) (*%s_Output, error) {\n", defname, defname)
+		fmt.Fprintf(s, "func %s(ctx context.Context, c slink.Client) (*%s_Output, error) {\n", defname, defname)
 		fmt.Fprintf(s, "var output %s_Output\n", defname)
-		fmt.Fprintf(s, "if err := c.Do(ctx, common.Procedure, \"\", \"%s\", nil, nil, &output); err != nil {\n", lexicon.Id)
+		fmt.Fprintf(s, "if err := c.Do(ctx, slink.Procedure, \"\", \"%s\", nil, nil, &output); err != nil {\n", lexicon.Id)
 		fmt.Fprintf(s, "return nil, err\n")
 		fmt.Fprintf(s, "}\n")
 		fmt.Fprintf(s, "return &output, nil\n")
@@ -43,13 +43,13 @@ func (lexicon *Lexicon) generateProcedure(s *strings.Builder, defname string, de
 		def.Output == nil {
 		lexicon.generateStruct(s, defname+"_Input", "", def.Input.Schema.Properties, def.Input.Schema.Required, false)
 		fmt.Fprintf(s, "// %s\n", def.Description)
-		fmt.Fprintf(s, "func %s(ctx context.Context, c common.Client, input *%s_Input) error {\n", defname, defname)
-		fmt.Fprintf(s, "return c.Do(ctx, common.Procedure, \"%s\", \"%s\", nil, input, nil)\n", def.Input.Encoding, lexicon.Id)
+		fmt.Fprintf(s, "func %s(ctx context.Context, c slink.Client, input *%s_Input) error {\n", defname, defname)
+		fmt.Fprintf(s, "return c.Do(ctx, slink.Procedure, \"%s\", \"%s\", nil, input, nil)\n", def.Input.Encoding, lexicon.Id)
 		fmt.Fprintf(s, "}\n\n")
 	} else if def.Input == nil && def.Output == nil {
 		fmt.Fprintf(s, "// %s\n", def.Description)
-		fmt.Fprintf(s, "func %s(ctx context.Context, c common.Client) error {\n", defname)
-		fmt.Fprintf(s, "return c.Do(ctx, common.Procedure, \"\", \"%s\", nil, nil, nil)\n", lexicon.Id)
+		fmt.Fprintf(s, "func %s(ctx context.Context, c slink.Client) error {\n", defname)
+		fmt.Fprintf(s, "return c.Do(ctx, slink.Procedure, \"\", \"%s\", nil, nil, nil)\n", lexicon.Id)
 		fmt.Fprintf(s, "}\n\n")
 	} else if def.Input != nil &&
 		def.Output != nil && def.Output.Encoding == "application/json" {
@@ -64,17 +64,17 @@ func (lexicon *Lexicon) generateProcedure(s *strings.Builder, defname string, de
 			lexicon.generateStruct(s, defname+"_Output", "", def.Output.Schema.Properties, def.Output.Schema.Required, false)
 		}
 		fmt.Fprintf(s, "// %s\n", def.Description)
-		fmt.Fprintf(s, "func %s(ctx context.Context, c common.Client, input io.Reader) (*%s_Output, error) {\n", defname, defname)
+		fmt.Fprintf(s, "func %s(ctx context.Context, c slink.Client, input io.Reader) (*%s_Output, error) {\n", defname, defname)
 		fmt.Fprintf(s, "var output %s_Output\n", defname)
-		fmt.Fprintf(s, "if err := c.Do(ctx, common.Procedure, \"%s\", \"%s\", nil, input, &output); err != nil {\n", def.Input.Encoding, lexicon.Id)
+		fmt.Fprintf(s, "if err := c.Do(ctx, slink.Procedure, \"%s\", \"%s\", nil, input, &output); err != nil {\n", def.Input.Encoding, lexicon.Id)
 		fmt.Fprintf(s, "return nil, err\n")
 		fmt.Fprintf(s, "}\n")
 		fmt.Fprintf(s, "return &output, nil\n")
 		fmt.Fprintf(s, "}\n\n")
 	} else if def.Input != nil && def.Output == nil {
 		fmt.Fprintf(s, "// %s\n", def.Description)
-		fmt.Fprintf(s, "func %s(ctx context.Context, c common.Client, input io.Reader) error {\n", defname)
-		fmt.Fprintf(s, "if err := c.Do(ctx, common.Procedure, \"%s\", \"%s\", nil, input, nil); err != nil {\n", def.Input.Encoding, lexicon.Id)
+		fmt.Fprintf(s, "func %s(ctx context.Context, c slink.Client, input io.Reader) error {\n", defname)
+		fmt.Fprintf(s, "if err := c.Do(ctx, slink.Procedure, \"%s\", \"%s\", nil, input, nil); err != nil {\n", def.Input.Encoding, lexicon.Id)
 		fmt.Fprintf(s, "return err\n")
 		fmt.Fprintf(s, "}\n")
 		fmt.Fprintf(s, "return nil\n")

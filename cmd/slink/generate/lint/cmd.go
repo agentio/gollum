@@ -1,8 +1,8 @@
 package lint
 
 import (
-	"github.com/agentio/slink/pkg/common"
 	"github.com/agentio/slink/pkg/lexica"
+	"github.com/agentio/slink/pkg/slink"
 	"github.com/spf13/cobra"
 )
 
@@ -13,7 +13,7 @@ func Cmd() *cobra.Command {
 		Use:   "lint",
 		Short: "Check a directory of Lexicon files for possible problems",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := common.SetLogLevel(_loglevel); err != nil {
+			if err := slink.SetLogLevel(_loglevel); err != nil {
 				return err
 			}
 			catalog := lexica.NewCatalog()

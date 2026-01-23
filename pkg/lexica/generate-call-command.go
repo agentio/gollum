@@ -78,7 +78,7 @@ func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def
 	fmt.Fprintf(s, "package %s // %s\n\n", packagename, lexicon.Id)
 	fmt.Fprintf(s, "import \"github.com/spf13/cobra\"\n")
 	fmt.Fprintf(s, "import \"github.com/agentio/slink/gen/xrpc\"\n")
-	fmt.Fprintf(s, "import \"github.com/agentio/slink/pkg/common\"\n")
+	fmt.Fprintf(s, "import \"github.com/agentio/slink/pkg/slink\"\n")
 	fmt.Fprintf(s, "import \"github.com/agentio/slink/pkg/client\"\n")
 	fmt.Fprintf(s, "import \"github.com/agentio/slink/pkg/tool\"\n")
 	fmt.Fprintf(s, "func Cmd() *cobra.Command {\n")
@@ -129,11 +129,11 @@ func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def
 	}
 	fmt.Fprintf(s, "cmd := &cobra.Command{\n")
 	fmt.Fprintf(s, "Use: \"%s\",\n", commandname)
-	fmt.Fprintf(s, "Short: common.Truncate(xrpc.%s_Description),\n", handlerName)
+	fmt.Fprintf(s, "Short: slink.Truncate(xrpc.%s_Description),\n", handlerName)
 	fmt.Fprintf(s, "Long: xrpc.%s_Description,\n", handlerName)
 	fmt.Fprintf(s, "Args: cobra.NoArgs,\n")
 	fmt.Fprintf(s, "RunE: func(cmd *cobra.Command, args []string) error {\n")
-	fmt.Fprintf(s, "if err := common.SetLogLevel(_loglevel); err != nil {return err}\n")
+	fmt.Fprintf(s, "if err := slink.SetLogLevel(_loglevel); err != nil {return err}\n")
 	if def.Type == "query" {
 		fmt.Fprintf(s, "client := client.NewClient()\n")
 		fmt.Fprintf(s, "response, err := xrpc.%s(\n", handlerName)
@@ -159,7 +159,7 @@ func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def
 		}
 		fmt.Fprintf(s, ")\n")
 		fmt.Fprintf(s, "if err != nil {return err}\n")
-		fmt.Fprintf(s, "return common.Write(cmd.OutOrStdout(), _output, response)\n")
+		fmt.Fprintf(s, "return slink.Write(cmd.OutOrStdout(), _output, response)\n")
 	} else if def.Type == "procedure" && (def.Input == nil || def.Input.Encoding == "application/json") {
 		fmt.Fprintf(s, "var err error\n")
 		if def.Input != nil {
@@ -169,7 +169,7 @@ func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def
 					propertyValue.Type == "ref" ||
 					propertyValue.Type == "union" ||
 					(propertyValue.Type == "array" && propertyValue.Items.Type != "string") {
-					fmt.Fprintf(s, "%s_value, err := common.ReadJSONFile(%s)\n", propertyName, propertyName)
+					fmt.Fprintf(s, "%s_value, err := slink.ReadJSONFile(%s)\n", propertyName, propertyName)
 					fmt.Fprintf(s, "if err != nil {return err}\n")
 				}
 			}
@@ -191,19 +191,19 @@ func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def
 				switch propertyValue.Type {
 				case "string":
 					if !slices.Contains(def.Input.Schema.Required, propertyName) {
-						fmt.Fprintf(s, "%s: common.StringPointerOrNil(%s),\n", capitalize(propertyName), propertyName)
+						fmt.Fprintf(s, "%s: slink.StringPointerOrNil(%s),\n", capitalize(propertyName), propertyName)
 					} else {
 						fmt.Fprintf(s, "%s: %s,\n", capitalize(propertyName), propertyName)
 					}
 				case "integer":
 					if !slices.Contains(def.Input.Schema.Required, propertyName) {
-						fmt.Fprintf(s, "%s: common.Int64PointerOrNil(%s),\n", capitalize(propertyName), propertyName)
+						fmt.Fprintf(s, "%s: slink.Int64PointerOrNil(%s),\n", capitalize(propertyName), propertyName)
 					} else {
 						fmt.Fprintf(s, "%s: %s,\n", capitalize(propertyName), propertyName)
 					}
 				case "boolean":
 					if !slices.Contains(def.Input.Schema.Required, propertyName) {
-						fmt.Fprintf(s, "%s: common.BoolPointerOrNil(%s),\n", capitalize(propertyName), propertyName)
+						fmt.Fprintf(s, "%s: slink.BoolPointerOrNil(%s),\n", capitalize(propertyName), propertyName)
 					} else {
 						fmt.Fprintf(s, "%s: %s,\n", capitalize(propertyName), propertyName)
 					}
@@ -212,20 +212,20 @@ func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def
 						fmt.Fprintf(s, "%s: %s,\n", capitalize(propertyName), propertyName)
 					} else {
 						itemstype := lexicon.resolveItemsType(defname+"_Input", propertyName, propertyValue.Items)
-						fmt.Fprintf(s, "%s: common.CastIntoArrayType[xrpc.%s](%s_value),\n", capitalize(propertyName), itemstype[1:], propertyName)
+						fmt.Fprintf(s, "%s: slink.CastIntoArrayType[xrpc.%s](%s_value),\n", capitalize(propertyName), itemstype[1:], propertyName)
 					}
 				case "unknown":
 					fmt.Fprintf(s, "%s: %s_value,\n", capitalize(propertyName), propertyName)
 				case "ref":
 					reftype := lexicon.resolveRefType(propertyValue.Ref)
 					if reftype[0] == '*' {
-						fmt.Fprintf(s, "%s: common.CastIntoStructType[xrpc.%s](%s_value),\n", capitalize(propertyName), reftype[1:], propertyName)
+						fmt.Fprintf(s, "%s: slink.CastIntoStructType[xrpc.%s](%s_value),\n", capitalize(propertyName), reftype[1:], propertyName)
 					} else {
-						fmt.Fprintf(s, "%s: common.CastIntoArrayType[xrpc.%s](%s_value),\n", capitalize(propertyName), reftype[3:], propertyName)
+						fmt.Fprintf(s, "%s: slink.CastIntoArrayType[xrpc.%s](%s_value),\n", capitalize(propertyName), reftype[3:], propertyName)
 					}
 				case "union":
 					uniontype := lexicon.resolveUnionFieldType(defname+"_Input", propertyName)
-					fmt.Fprintf(s, "%s: common.CastIntoStructType[xrpc.%s](%s_value),\n", capitalize(propertyName), uniontype, propertyName)
+					fmt.Fprintf(s, "%s: slink.CastIntoStructType[xrpc.%s](%s_value),\n", capitalize(propertyName), uniontype, propertyName)
 				default:
 				}
 			}
@@ -236,7 +236,7 @@ func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def
 		if def.Output == nil {
 			fmt.Fprintf(s, "return nil\n")
 		} else {
-			fmt.Fprintf(s, "return common.Write(cmd.OutOrStdout(), _output, response)\n")
+			fmt.Fprintf(s, "return slink.Write(cmd.OutOrStdout(), _output, response)\n")
 		}
 	} else if def.Type == "procedure" && def.Input != nil {
 		fmt.Fprintf(s, "client := client.NewClient()\n")
@@ -253,7 +253,7 @@ func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def
 		if def.Output == nil {
 			fmt.Fprintf(s, "return nil\n")
 		} else {
-			fmt.Fprintf(s, "return common.Write(cmd.OutOrStdout(), _output, response)\n")
+			fmt.Fprintf(s, "return slink.Write(cmd.OutOrStdout(), _output, response)\n")
 		}
 	} else {
 		fmt.Fprintf(s, "return errors.New(\"unimplemented\")")
