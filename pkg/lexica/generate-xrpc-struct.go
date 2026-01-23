@@ -6,13 +6,13 @@ import (
 	"strings"
 )
 
-func (lexicon *Lexicon) generateStruct(s *strings.Builder, defname, description string, properties map[string]Property, required []string, isRecord bool) {
-	fmt.Fprintf(s, "// %s\n", description)
-	lexicon.renderStruct(s, defname, properties, required, isRecord)
-	lexicon.renderDependencies(s, defname, properties, required)
+func (lexicon *Lexicon) generateStructAndDependencies(s *strings.Builder, defname, description string, properties map[string]Property, required []string, isRecord bool) {
+	fmt.Fprintf(s, "const %s_Description = \"%s\"\n", defname, description)
+	lexicon.generateStruct(s, defname, properties, required, isRecord)
+	lexicon.generateDependencies(s, defname, properties, required)
 }
 
-func (lexicon *Lexicon) renderStruct(s *strings.Builder, defname string, properties map[string]Property, required []string, isRecord bool) {
+func (lexicon *Lexicon) generateStruct(s *strings.Builder, defname string, properties map[string]Property, required []string, isRecord bool) {
 	fmt.Fprintf(s, "type %s struct {\n", defname)
 	if isRecord {
 		fmt.Fprintf(s, "LexiconTypeID string `json:\"$type,omitempty\"`\n")
@@ -79,7 +79,7 @@ func (lexicon *Lexicon) renderStruct(s *strings.Builder, defname string, propert
 	fmt.Fprintf(s, "}\n\n")
 }
 
-func (lexicon *Lexicon) renderDependencies(s *strings.Builder, defname string, properties map[string]Property, required []string) {
+func (lexicon *Lexicon) generateDependencies(s *strings.Builder, defname string, properties map[string]Property, required []string) {
 	propertyNames := sortedPropertyNames(properties)
 	for _, propertyName := range propertyNames {
 		property := properties[propertyName]

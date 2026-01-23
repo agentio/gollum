@@ -13,6 +13,15 @@ func capitalize(s string) string {
 	return strings.ToUpper(s[0:1]) + s[1:]
 }
 
+func sortedDefNames(defs map[string]*Def) []string {
+	var defnames []string
+	for defname := range defs {
+		defnames = append(defnames, defname)
+	}
+	sort.Strings(defnames)
+	return defnames
+}
+
 func sortedPropertyNames(properties map[string]Property) []string {
 	var propnames []string
 	for propname := range properties {
@@ -30,6 +39,7 @@ func symbolForID(id string) string {
 	}
 	return s.String()
 }
+
 func writeFormattedFile(filename string, body string) error {
 	formatted, err := imports.Process(filename, []byte(body), nil)
 	if err != nil {

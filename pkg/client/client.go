@@ -51,19 +51,18 @@ func (c *Client) Do(
 	contentType string,
 	method string,
 	params map[string]any,
-	bodyobj any,
+	bodyvalue any,
 	out any,
 ) error {
 	var body io.Reader
-	if bodyobj != nil {
-		if rr, ok := bodyobj.(io.Reader); ok {
-			body = rr
+	if bodyvalue != nil {
+		if bodyreader, ok := bodyvalue.(io.Reader); ok {
+			body = bodyreader
 		} else {
-			b, err := json.Marshal(bodyobj)
+			b, err := json.Marshal(bodyvalue)
 			if err != nil {
 				return err
 			}
-
 			body = bytes.NewReader(b)
 		}
 	}
@@ -94,7 +93,7 @@ func (c *Client) Do(
 		return err
 	}
 
-	if bodyobj != nil && contentType != "" {
+	if bodyvalue != nil && contentType != "" {
 		req.Header.Set("Content-Type", contentType)
 	}
 	req.Header.Set("User-Agent", "slink")
@@ -139,23 +138,26 @@ func (c *Client) Do(
 	}
 
 	if resp.StatusCode != 200 {
-		return errorFromResponse(resp, b)
+		return xrpcErrorFromResponse(resp, b)
 	}
 
-	if out != nil {
-		bufferPointer, ok := out.(*[]byte)
-		if ok {
-			*bufferPointer = b
-			return nil
-		}
-		responseContentType := resp.Header.Get("Content-Type")
-		if strings.HasPrefix(responseContentType, "application/json") {
-			if err := json.Unmarshal(b, out); err != nil {
-				return fmt.Errorf("decoding xrpc response: %w", err)
-			}
-			return nil
-		}
+	if out == nil {
+		return nil
+	}
+
+	if outBytesPointer, ok := out.(*[]byte); ok {
+		*outBytesPointer = b
+		return nil
+	}
+
+	responseContentType := resp.Header.Get("Content-Type")
+	if !strings.HasPrefix(responseContentType, "application/json") {
 		return fmt.Errorf("unexpected content type: %s", responseContentType)
 	}
+
+	if err := json.Unmarshal(b, out); err != nil {
+		return fmt.Errorf("decoding xrpc response: %w", err)
+	}
 	return nil
+
 }

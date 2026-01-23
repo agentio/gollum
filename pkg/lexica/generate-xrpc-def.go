@@ -7,7 +7,8 @@ import (
 	"github.com/charmbracelet/log"
 )
 
-func (lexicon *Lexicon) generateDef(s *strings.Builder, def *Def, name string, prefix string) {
+func (lexicon *Lexicon) generateDef(s *strings.Builder, name string, def *Def) {
+	prefix := symbolForID(lexicon.Id)
 	var defname string
 	if name == "main" {
 		defname = prefix
@@ -20,12 +21,11 @@ func (lexicon *Lexicon) generateDef(s *strings.Builder, def *Def, name string, p
 	case "procedure":
 		lexicon.generateProcedure(s, defname, def)
 	case "object":
-		lexicon.generateStruct(s, defname, def.Description, def.Properties, def.Required, true)
+		lexicon.generateStructAndDependencies(s, defname, def.Description, def.Properties, def.Required, true)
 	case "string":
 		fmt.Fprintf(s, "type %s string\n", defname)
 	case "record":
-		fmt.Fprintf(s, "const %s_Description = \"%s\"\n", defname, def.Description)
-		lexicon.generateStruct(s, defname, def.Description, def.Record.Properties, def.Record.Required, true)
+		lexicon.generateStructAndDependencies(s, defname, def.Description, def.Record.Properties, def.Record.Required, true)
 	case "array":
 		if def.Items.Type == "union" {
 			uniontype := defname + "_Elem"

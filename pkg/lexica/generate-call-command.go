@@ -36,16 +36,6 @@ func (catalog *Catalog) GenerateCallCommands(root string) error {
 }
 
 func (lexicon *Lexicon) generateCallCommands(root string) {
-	allow := []string{
-		"com.atproto.admin.getInviteCodes",
-		"com.atproto.admin.updateAccountPassword",
-		"com.atproto.server.createInviteCode",
-		"com.atproto.server.getAccountInviteCodes",
-		"com.atproto.sync.listRepos",
-	}
-	if !slices.Contains(allow, lexicon.Id) {
-		//return
-	}
 	for defname, def := range lexicon.Defs {
 		switch def.Type {
 		case "query":
@@ -77,10 +67,9 @@ func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def
 	packageComment(s, packagename)
 	fmt.Fprintf(s, "package %s // %s\n\n", packagename, lexicon.Id)
 	fmt.Fprintf(s, "import \"github.com/spf13/cobra\"\n")
-	fmt.Fprintf(s, "import \"github.com/agentio/slink/gen/xrpc\"\n")
-	fmt.Fprintf(s, "import \"github.com/agentio/slink/pkg/slink\"\n")
 	fmt.Fprintf(s, "import \"github.com/agentio/slink/pkg/client\"\n")
-	fmt.Fprintf(s, "import \"github.com/agentio/slink/pkg/tool\"\n")
+	fmt.Fprintf(s, "import \"github.com/agentio/slink/pkg/slink\"\n")
+	fmt.Fprintf(s, "import \"github.com/agentio/slink/gen/xrpc\"\n")
 	fmt.Fprintf(s, "func Cmd() *cobra.Command {\n")
 	fmt.Fprintf(s, "var _loglevel string\n")
 	fmt.Fprintf(s, "var _output string\n")
@@ -118,10 +107,10 @@ func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def
 				if propertyValue.Items.Type == "string" {
 					fmt.Fprintf(s, "var %s []string\n", propertyName)
 				} else {
-					fmt.Fprintf(s, "var %s string // filename\n", propertyName)
+					fmt.Fprintf(s, "var %s string // (this should be a filename)\n", propertyName)
 				}
 			case "unknown", "ref", "union":
-				fmt.Fprintf(s, "var %s string // filename\n", propertyName)
+				fmt.Fprintf(s, "var %s string // (this should be a filename)\n", propertyName)
 			default:
 				fmt.Fprintf(s, "// FIXME var %s %+v\n", propertyName, propertyValue)
 			}
@@ -129,7 +118,7 @@ func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def
 	}
 	fmt.Fprintf(s, "cmd := &cobra.Command{\n")
 	fmt.Fprintf(s, "Use: \"%s\",\n", commandname)
-	fmt.Fprintf(s, "Short: slink.Truncate(xrpc.%s_Description),\n", handlerName)
+	fmt.Fprintf(s, "Short: slink.TruncateShort(xrpc.%s_Description),\n", handlerName)
 	fmt.Fprintf(s, "Long: xrpc.%s_Description,\n", handlerName)
 	fmt.Fprintf(s, "Args: cobra.NoArgs,\n")
 	fmt.Fprintf(s, "RunE: func(cmd *cobra.Command, args []string) error {\n")
@@ -191,19 +180,19 @@ func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def
 				switch propertyValue.Type {
 				case "string":
 					if !slices.Contains(def.Input.Schema.Required, propertyName) {
-						fmt.Fprintf(s, "%s: slink.StringPointerOrNil(%s),\n", capitalize(propertyName), propertyName)
+						fmt.Fprintf(s, "%s: slink.CastStringToPointer(%s),\n", capitalize(propertyName), propertyName)
 					} else {
 						fmt.Fprintf(s, "%s: %s,\n", capitalize(propertyName), propertyName)
 					}
 				case "integer":
 					if !slices.Contains(def.Input.Schema.Required, propertyName) {
-						fmt.Fprintf(s, "%s: slink.Int64PointerOrNil(%s),\n", capitalize(propertyName), propertyName)
+						fmt.Fprintf(s, "%s: slink.CastInt64ToPointer(%s),\n", capitalize(propertyName), propertyName)
 					} else {
 						fmt.Fprintf(s, "%s: %s,\n", capitalize(propertyName), propertyName)
 					}
 				case "boolean":
 					if !slices.Contains(def.Input.Schema.Required, propertyName) {
-						fmt.Fprintf(s, "%s: slink.BoolPointerOrNil(%s),\n", capitalize(propertyName), propertyName)
+						fmt.Fprintf(s, "%s: slink.CastBoolToPointer(%s),\n", capitalize(propertyName), propertyName)
 					} else {
 						fmt.Fprintf(s, "%s: %s,\n", capitalize(propertyName), propertyName)
 					}
@@ -212,20 +201,20 @@ func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def
 						fmt.Fprintf(s, "%s: %s,\n", capitalize(propertyName), propertyName)
 					} else {
 						itemstype := lexicon.resolveItemsType(defname+"_Input", propertyName, propertyValue.Items)
-						fmt.Fprintf(s, "%s: slink.CastIntoArrayType[xrpc.%s](%s_value),\n", capitalize(propertyName), itemstype[1:], propertyName)
+						fmt.Fprintf(s, "%s: slink.CastAnyToArray[xrpc.%s](%s_value),\n", capitalize(propertyName), itemstype[1:], propertyName)
 					}
 				case "unknown":
 					fmt.Fprintf(s, "%s: %s_value,\n", capitalize(propertyName), propertyName)
 				case "ref":
 					reftype := lexicon.resolveRefType(propertyValue.Ref)
 					if reftype[0] == '*' {
-						fmt.Fprintf(s, "%s: slink.CastIntoStructType[xrpc.%s](%s_value),\n", capitalize(propertyName), reftype[1:], propertyName)
+						fmt.Fprintf(s, "%s: slink.CastAnyToStruct[xrpc.%s](%s_value),\n", capitalize(propertyName), reftype[1:], propertyName)
 					} else {
-						fmt.Fprintf(s, "%s: slink.CastIntoArrayType[xrpc.%s](%s_value),\n", capitalize(propertyName), reftype[3:], propertyName)
+						fmt.Fprintf(s, "%s: slink.CastAnyToArray[xrpc.%s](%s_value),\n", capitalize(propertyName), reftype[3:], propertyName)
 					}
 				case "union":
 					uniontype := lexicon.resolveUnionFieldType(defname+"_Input", propertyName)
-					fmt.Fprintf(s, "%s: slink.CastIntoStructType[xrpc.%s](%s_value),\n", capitalize(propertyName), uniontype, propertyName)
+					fmt.Fprintf(s, "%s: slink.CastAnyToStruct[xrpc.%s](%s_value),\n", capitalize(propertyName), uniontype, propertyName)
 				default:
 				}
 			}

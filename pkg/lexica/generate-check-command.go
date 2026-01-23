@@ -76,7 +76,7 @@ func (lexicon *Lexicon) generateCheckCommandForDef(root, defname string, def *De
 	fmt.Fprintf(s, "func Cmd() *cobra.Command {\n")
 	fmt.Fprintf(s, "cmd := &cobra.Command{\n")
 	fmt.Fprintf(s, "Use: \"%s FILENAME\",\n", commandname)
-	fmt.Fprintf(s, "Short: slink.Truncate(xrpc.%s_Description),\n", handlerName)
+	fmt.Fprintf(s, "Short: slink.TruncateShort(xrpc.%s_Description),\n", handlerName)
 	fmt.Fprintf(s, "Long: xrpc.%s_Description,\n", handlerName)
 	fmt.Fprintf(s, "Args: cobra.ExactArgs(1),\n")
 	fmt.Fprintf(s, "RunE: func(cmd *cobra.Command, args []string) error {\n")

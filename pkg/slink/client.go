@@ -10,5 +10,5 @@ const (
 )
 
 type Client interface {
-	Do(context.Context, RequestType, string, string, map[string]any, any, any) error
+	Do(ctx context.Context, requestType RequestType, contentType string, xrpcMethod string, parameters map[string]any, input any, output any) error
 }

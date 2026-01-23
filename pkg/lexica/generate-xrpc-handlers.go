@@ -10,7 +10,7 @@ func (catalog *Catalog) GenerateXRPCHandlers(root string) error {
 	var wg sync.WaitGroup
 	for _, lexicon := range catalog.Lexicons {
 		wg.Go(func() {
-			lexicon.generateLexiconSourceFile(root)
+			lexicon.generateXRPCSourceFile(root)
 		})
 	}
 	wg.Wait()
