@@ -6,7 +6,7 @@ import (
 )
 
 func (lexicon *Lexicon) resolveUnionFieldType(defname, propname string) string {
-	return symbolForID(lexicon.Id) + capitalize(defname) + "_" + capitalize(propname)
+	return capitalize(defname) + "_" + capitalize(propname)
 }
 
 func (lexicon *Lexicon) resolveItemsType(defname, propname string, items *Items) string {
