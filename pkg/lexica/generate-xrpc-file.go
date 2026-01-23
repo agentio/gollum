@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/charmbracelet/log"
@@ -41,11 +42,21 @@ func (lexicon *Lexicon) generateFile(filename, packagename string) error {
 	fmt.Fprintf(s, "package %s // %s\n\n", packagename, lexicon.Id)
 	fmt.Fprintf(s, "import \"github.com/agentio/slink/pkg/slink\"\n\n")
 	prefix := symbolForID(lexicon.Id)
-	for name, def := range lexicon.Defs {
+	for _, name := range sortedDefNames(lexicon.Defs) {
+		def := lexicon.Defs[name]
 		lexicon.generateDef(s, def, name, prefix)
 	}
 	if true { // append lexicon source to generated file
 		lexicon.generateSourceComment(s)
 	}
 	return writeFormattedFile(filename, s.String())
+}
+
+func sortedDefNames(defs map[string]*Def) []string {
+	var defnames []string
+	for defname := range defs {
+		defnames = append(defnames, defname)
+	}
+	sort.Strings(defnames)
+	return defnames
 }
