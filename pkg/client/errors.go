@@ -1,53 +1,27 @@
 package client
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 )
 
-type ErrorWithMessage struct {
-	ErrStr  string `json:"error"`
-	Message string `json:"message"`
-}
-
-func (e *ErrorWithMessage) Error() string {
-	return fmt.Sprintf("%s: %s", e.ErrStr, e.Message)
-}
-
-type Error struct {
-	StatusCode int
-	Wrapped    error
-}
-
-func (e *Error) Error() string {
-	// Preserving "XRPC ERROR %d" prefix for compatibility - previously matching this string was the only way
-	// to obtain the status code.
-	if e.Wrapped == nil {
-		return fmt.Sprintf("XRPC ERROR %d", e.StatusCode)
-	}
-	return fmt.Sprintf("XRPC ERROR %d: %s", e.StatusCode, e.Wrapped)
-}
-
-func (e *Error) Unwrap() error {
-	if e.Wrapped == nil {
-		return nil
-	}
-	return e.Wrapped
-}
-
 type XRPCError struct {
-	ErrStr  string `json:"error"`
+	Code    int    `json:"code"`
+	Title   string `json:"error"`
 	Message string `json:"message"`
 }
 
-func (xe *XRPCError) Error() string {
-	return fmt.Sprintf("%s: %s", xe.ErrStr, xe.Message)
+func (e *XRPCError) Error() string {
+	return fmt.Sprintf("XRPC ERROR %d: %s (%s)", e.Code, e.Title, e.Message)
 }
 
-func errorFromHTTPResponse(resp *http.Response, err error) error {
-	r := &Error{
-		StatusCode: resp.StatusCode,
-		Wrapped:    err,
+func errorFromResponse(resp *http.Response, b []byte) error {
+	var xrpcError XRPCError
+	if err := json.Unmarshal(b, &xrpcError); err != nil {
+		xrpcError.Title = "failed to decode xrpc error message"
+		xrpcError.Message = err.Error()
 	}
-	return r
+	xrpcError.Code = resp.StatusCode
+	return &xrpcError
 }

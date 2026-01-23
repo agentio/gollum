@@ -19,6 +19,5 @@ func makeParams(p map[string]any) string {
 			params.Add(k, fmt.Sprint(v))
 		}
 	}
-
 	return params.Encode()
 }

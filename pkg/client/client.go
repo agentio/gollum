@@ -139,11 +139,7 @@ func (c *Client) Do(
 	}
 
 	if resp.StatusCode != 200 {
-		var xe XRPCError
-		if err := json.Unmarshal(b, &xe); err != nil {
-			return errorFromHTTPResponse(resp, fmt.Errorf("failed to decode xrpc error message: %w", err))
-		}
-		return errorFromHTTPResponse(resp, &xe)
+		return errorFromResponse(resp, b)
 	}
 
 	if out != nil {
