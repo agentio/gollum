@@ -3,10 +3,11 @@ package lexica
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"slices"
 	"strings"
+
+	"github.com/charmbracelet/log"
 )
 
 var _manifest *Manifest
@@ -15,7 +16,18 @@ type Manifest struct {
 	IDs []string `json:"ids"`
 }
 
-func ReadManifest(filename string) (*Manifest, error) {
+func BuildManifest(filename string) (*Manifest, error) {
+	m, err := readManifest(filename)
+	if err != nil {
+		return m, err
+	}
+	if err = m.expand(); err != nil {
+		return m, err
+	}
+	return m, nil
+}
+
+func readManifest(filename string) (*Manifest, error) {
 	b, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err
@@ -51,7 +63,7 @@ func ManifestIncludes(nsid, name string) bool {
 	return slices.Contains(_manifest.IDs, nsid+"#"+name)
 }
 
-func (manifest *Manifest) Expand() error {
+func (manifest *Manifest) expand() error {
 	for i := 0; i < len(manifest.IDs); i++ {
 		id := manifest.IDs[i]
 		nsid, name := parse(id)
@@ -63,7 +75,7 @@ func (manifest *Manifest) Expand() error {
 		if def == nil {
 			return fmt.Errorf("can't find def %s", id)
 		}
-		err := manifest.AddDependencies(name, l, def)
+		err := manifest.AddDependencies(l, def)
 		if err != nil {
 			return err
 		}
@@ -85,14 +97,12 @@ func (manifest *Manifest) addID(l *Lexicon, name string) {
 	}
 }
 
-func (manifest *Manifest) AddDependencies(name string, l *Lexicon, def *Def) error {
+func (manifest *Manifest) AddDependencies(l *Lexicon, def *Def) error {
 	switch def.Type {
 	case "permission-set", "string", "subscription", "token":
 		return nil // these types have no dependencies
-	case "query", "procedure":
-		return manifest.AddDependenciesForCallable(name, l, def)
-	case "object", "record":
-		return manifest.AddDependenciesForStruct(name, l, def)
+	case "query", "procedure", "object", "record":
+		return manifest.AddDependenciesForDef(l, def)
 	case "array":
 		return fmt.Errorf("unsupported def type %s", def.Type)
 	default:
@@ -100,36 +110,26 @@ func (manifest *Manifest) AddDependencies(name string, l *Lexicon, def *Def) err
 	}
 }
 
-func (manifest *Manifest) AddDependenciesForCallable(name string, l *Lexicon, def *Def) error {
+func (manifest *Manifest) AddDependenciesForDef(l *Lexicon, def *Def) error {
 	if def.Input != nil && def.Input.Encoding == "application/json" {
-		for paramName, paramValue := range def.Input.Schema.Properties {
-			switch paramValue.Type {
-			case "string", "integer", "boolean", "unknown", "bytes":
-			case "ref":
-				manifest.addID(l, paramValue.Ref)
-			default:
-				log.Printf("input %s %+v", paramName, paramValue)
-			}
-		}
+		manifest.AddDependenciesForProperties(l, def.Input.Schema.Properties)
 	}
 	if def.Output != nil && def.Output.Encoding == "application/json" {
-		for paramName, paramValue := range def.Output.Schema.Properties {
-			switch paramValue.Type {
-			case "string", "integer", "boolean", "unknown", "bytes":
-			case "ref":
-				manifest.addID(l, paramValue.Ref)
-			default:
-				log.Printf("output %s %+v", paramName, paramValue)
-			}
-		}
+		manifest.AddDependenciesForProperties(l, def.Output.Schema.Properties)
+	}
+	if def.Properties != nil {
+		manifest.AddDependenciesForProperties(l, def.Properties)
+	}
+	if def.Record != nil {
+		manifest.AddDependenciesForProperties(l, def.Record.Properties)
 	}
 	return nil
 }
 
-func (manifest *Manifest) AddDependenciesForStruct(name string, l *Lexicon, def *Def) error {
-	for propertyName, propertyValue := range def.Properties {
+func (manifest *Manifest) AddDependenciesForProperties(l *Lexicon, properties map[string]Property) error {
+	for propertyName, propertyValue := range properties {
 		switch propertyValue.Type {
-		case "string", "integer", "boolean", "unknown", "bytes":
+		case "string", "integer", "boolean", "unknown", "bytes", "blob":
 		case "union":
 			for _, refName := range propertyValue.Refs {
 				manifest.addID(l, refName)
@@ -144,11 +144,14 @@ func (manifest *Manifest) AddDependenciesForStruct(name string, l *Lexicon, def 
 				for _, refName := range propertyValue.Items.Refs {
 					manifest.addID(l, refName)
 				}
+			case "string":
 			default:
-				log.Printf("array items %+v", propertyValue.Items)
+				log.Warnf("array items %+v", propertyValue.Items)
 			}
+		case "object":
+			manifest.AddDependenciesForProperties(l, propertyValue.Properties)
 		default:
-			log.Printf("%s %+v", propertyName, propertyValue)
+			log.Warnf("%s %+v", propertyName, propertyValue)
 		}
 	}
 	return nil

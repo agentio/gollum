@@ -1,0 +1,9 @@
+{
+  "ids": [
+	"app.bsky.feed.post#main",
+	"com.atproto.repo.getRecord",
+	"com.atproto.repo.listRecords",
+	"com.atproto.sync.listRepos",
+	"com.atproto.server.createSession"
+  ]
+}

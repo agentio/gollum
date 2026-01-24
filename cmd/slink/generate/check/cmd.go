@@ -9,6 +9,7 @@ import (
 func Cmd() *cobra.Command {
 	var input string
 	var output string
+	var manifest string
 	var _loglevel string
 	var cmd = &cobra.Command{
 		Use:   "check",
@@ -21,6 +22,12 @@ func Cmd() *cobra.Command {
 			if err := catalog.Load(input, false /* skip lint */); err != nil {
 				return err
 			}
+			if manifest != "" {
+				_, err := lexica.BuildManifest(manifest)
+				if err != nil {
+					return err
+				}
+			}
 			if err := catalog.GenerateCheckCommands(output); err != nil {
 				return err
 			}
@@ -29,6 +36,7 @@ func Cmd() *cobra.Command {
 	}
 	cmd.Flags().StringVarP(&input, "input", "i", "lexicons", "input directory")
 	cmd.Flags().StringVarP(&output, "output", "o", "gen/check", "output directory")
-	cmd.Flags().StringVarP(&_loglevel, "log-level", "l", "info", "log level (debug, info, warn, error, fatal)")
+	cmd.Flags().StringVarP(&manifest, "manifest", "m", "", "manifest")
+	cmd.Flags().StringVarP(&_loglevel, "log-level", "l", "warn", "log level (debug, info, warn, error, fatal)")
 	return cmd
 }

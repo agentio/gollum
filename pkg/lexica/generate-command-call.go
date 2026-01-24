@@ -37,11 +37,13 @@ func (catalog *Catalog) GenerateCallCommands(root string) error {
 
 func (lexicon *Lexicon) generateCallCommands(root string) {
 	for defname, def := range lexicon.Defs {
-		switch def.Type {
-		case "query":
-			lexicon.generateCallCommandForDef(root, defname, def)
-		case "procedure":
-			lexicon.generateCallCommandForDef(root, defname, def)
+		if ManifestIncludes(lexicon.Id, defname) {
+			switch def.Type {
+			case "query":
+				lexicon.generateCallCommandForDef(root, defname, def)
+			case "procedure":
+				lexicon.generateCallCommandForDef(root, defname, def)
+			}
 		}
 	}
 }

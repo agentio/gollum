@@ -36,9 +36,11 @@ func (catalog *Catalog) GenerateCheckCommands(root string) error {
 
 func (lexicon *Lexicon) generateCheckCommands(root string) {
 	for defname, def := range lexicon.Defs {
-		switch def.Type {
-		case "record":
-			lexicon.generateCheckCommandForDef(root, defname, def)
+		if ManifestIncludes(lexicon.Id, defname) {
+			switch def.Type {
+			case "record":
+				lexicon.generateCheckCommandForDef(root, defname, def)
+			}
 		}
 	}
 }

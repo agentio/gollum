@@ -23,11 +23,8 @@ func Cmd() *cobra.Command {
 				return err
 			}
 			if manifest != "" {
-				m, err := lexica.ReadManifest(manifest)
+				_, err := lexica.BuildManifest(manifest)
 				if err != nil {
-					return err
-				}
-				if err = m.Expand(); err != nil {
 					return err
 				}
 			}

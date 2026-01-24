@@ -21,14 +21,11 @@ func Cmd() *cobra.Command {
 			if err := catalog.Load(input, false /* lint */); err != nil {
 				return err
 			}
-			manifest, err := lexica.ReadManifest(args[0])
+			m, err := lexica.BuildManifest(args[0])
 			if err != nil {
 				return err
 			}
-			if err = manifest.Expand(); err != nil {
-				return err
-			}
-			slink.Write(cmd.OutOrStdout(), "-", manifest)
+			slink.Write(cmd.OutOrStdout(), "-", m)
 			return nil
 		},
 	}
