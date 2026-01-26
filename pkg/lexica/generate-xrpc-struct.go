@@ -97,6 +97,82 @@ func (lexicon *Lexicon) generateDependencies(s *strings.Builder, defname string,
 }
 
 func (lexicon *Lexicon) generateUnion(s *strings.Builder, uniontype string, refs []string) {
+	uniontypeinner := uniontype + "_Inner"
+	fmt.Fprintf(s, "// %s is a union with these possible values:\n", uniontype)
+	for _, ref := range refs {
+		if ref == "#main" {
+			ref = lexicon.Id
+		}
+		if ref[0] == '#' {
+			ref = lexicon.Id + ref
+		}
+		fmt.Fprintf(s, "// - %s (%s)\n", lexicon.unionFieldElementType(ref), ref)
+	}
+	fmt.Fprintf(s, "type %s struct {\n", uniontype)
+	fmt.Fprintf(s, "Inner %s", uniontypeinner)
+	fmt.Fprintf(s, "}\n\n")
+
+	fmt.Fprintf(s, "type %s interface {\n", uniontypeinner)
+	fmt.Fprintf(s, "is%s()", uniontype)
+	fmt.Fprintf(s, "}\n\n")
+
+	for _, ref := range refs {
+		if ref == "#main" {
+			ref = lexicon.Id
+		}
+		if ref[0] == '#' {
+			ref = lexicon.Id + ref
+		}
+		wrappertype := lexicon.wrapperTypeName(uniontype, ref)
+		wrappedtype := lexicon.unionFieldType(ref)
+		fmt.Fprintf(s, "type %s struct {\n", wrappertype)
+		fmt.Fprintf(s, "Value %s\n", wrappedtype)
+		fmt.Fprintf(s, "}\n\n")
+		fmt.Fprintf(s, "func (t %s) is%s() {}\n\n", wrappertype, uniontype)
+	}
+
+	fmt.Fprintf(s, "func (u %s) MarshalJSON() ([]byte, error) {\n", uniontype)
+	fmt.Fprintf(s, "switch v := u.Inner.(type) {\n")
+	for _, ref := range refs {
+		if ref == "#main" {
+			ref = lexicon.Id
+		}
+		if ref[0] == '#' {
+			ref = lexicon.Id + ref
+		}
+		wrappertype := lexicon.wrapperTypeName(uniontype, ref)
+		fmt.Fprintf(s, "case %s:\n", wrappertype)
+		fmt.Fprintf(s, "return slink.MarshalWithType(\"%s\", v.Value)\n", ref)
+	}
+	fmt.Fprintf(s, "default:\n")
+	fmt.Fprintf(s, "	return nil, fmt.Errorf(\"unsupported type %%T\", v)\n")
+	fmt.Fprintf(s, "}\n")
+	fmt.Fprintf(s, "}\n")
+
+	fmt.Fprintf(s, "func (u *%s) UnmarshalJSON(data []byte) error {\n", uniontype)
+	fmt.Fprintf(s, "switch slink.LexiconTypeFromJSONBytes(data) {\n")
+	for _, ref := range refs {
+		if ref == "#main" {
+			ref = lexicon.Id
+		}
+		if ref[0] == '#' {
+			ref = lexicon.Id + ref
+		}
+		wrappertype := lexicon.wrapperTypeName(uniontype, ref)
+		fmt.Fprintf(s, "case \"%s\":\n", ref)
+		fmt.Fprintf(s, "var v %s\n", lexicon.unionFieldElementType(ref))
+		fmt.Fprintf(s, "if err := json.Unmarshal(data, &v); err != nil {return err}\n")
+		fmt.Fprintf(s, "u.Inner = %s{Value: &v}\n", wrappertype)
+		fmt.Fprintf(s, "return nil\n")
+	}
+	fmt.Fprintf(s, "default:\n")
+	fmt.Fprintf(s, "return nil\n")
+	fmt.Fprintf(s, "}\n")
+	fmt.Fprintf(s, "}\n\n")
+
+}
+
+func (lexicon *Lexicon) generateOldUnion(s *strings.Builder, uniontype string, refs []string) {
 	fmt.Fprintf(s, "// union type, only one field must be set\n")
 	fmt.Fprintf(s, "type %s struct {\n", uniontype)
 	for _, ref := range refs {
@@ -208,4 +284,44 @@ func (lexicon *Lexicon) unionFieldType(ref string) string {
 	} else {
 		return "/* FIXME defaulting on unparsable union field ref " + fmt.Sprintf("%+v", ref) + " */ string"
 	}
+}
+
+func (lexicon *Lexicon) unionFieldElementType(ref string) string {
+	parts := strings.Split(ref, "#")
+	if len(parts) == 2 || len(parts) == 1 {
+		var id string
+		var tag string
+		if len(parts) == 2 {
+			id = parts[0]
+			tag = parts[1]
+		} else {
+			id = parts[0]
+			tag = "main"
+		}
+		if id == "" {
+			id = lexicon.Id
+		}
+		var reftype string
+		reflexicon := LookupLexicon(id)
+		if reflexicon != nil {
+			refdef := reflexicon.Lookup(tag)
+			if refdef != nil {
+				reftype = refdef.Type
+			}
+		}
+		name := symbolForID(id)
+		if tag != "main" {
+			name += "_" + capitalize(tag)
+		}
+		if reftype == "array" {
+			return "[]" + name + "_Elem"
+		}
+		return name
+	} else {
+		return "/* FIXME defaulting on unparsable union field ref " + fmt.Sprintf("%+v", ref) + " */ string"
+	}
+}
+
+func (lexicon *Lexicon) wrapperTypeName(uniontype, ref string) string {
+	return uniontype + "__" + lexicon.unionFieldElementType(ref)
 }
