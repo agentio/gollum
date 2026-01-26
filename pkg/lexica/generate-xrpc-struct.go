@@ -6,13 +6,16 @@ import (
 	"strings"
 )
 
-func (lexicon *Lexicon) generateStructAndDependencies(s *strings.Builder, defname, description string, properties map[string]Property, required []string, isRecord bool) {
+func (lexicon *Lexicon) generateStructAndDependencies(s *strings.Builder, defname, description string, properties map[string]Property, required []string, isRecord bool, name string) {
 	fmt.Fprintf(s, "const %s_Description = \"%s\"\n", defname, description)
-	lexicon.generateStruct(s, defname, properties, required, isRecord)
+	lexicon.generateStruct(s, defname, properties, required, isRecord, name)
 	lexicon.generateDependencies(s, defname, properties, required)
 }
 
-func (lexicon *Lexicon) generateStruct(s *strings.Builder, defname string, properties map[string]Property, required []string, isRecord bool) {
+func (lexicon *Lexicon) generateStruct(s *strings.Builder, defname string, properties map[string]Property, required []string, isRecord bool, name string) {
+	if isRecord {
+		fmt.Fprintf(s, "// %s is a record with Lexicon type %s#%s\n", defname, lexicon.Id, name)
+	}
 	fmt.Fprintf(s, "type %s struct {\n", defname)
 	if isRecord {
 		fmt.Fprintf(s, "LexiconTypeID string `json:\"$type,omitempty\"`\n")
