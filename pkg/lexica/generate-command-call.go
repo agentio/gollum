@@ -250,7 +250,7 @@ func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def
 	}
 	fmt.Fprintf(s, "},\n")
 	fmt.Fprintf(s, "}\n")
-	fmt.Fprintf(s, "cmd.Flags().StringVarP(&_loglevel, \"loglevel\", \"l\", \"warn\", \"log level (debug, info, warn, error, fatal)\")\n")
+	fmt.Fprintf(s, "cmd.Flags().StringVarP(&_loglevel, \"log\", \"l\", \"warn\", \"log level (debug, info, warn, error, fatal)\")\n")
 	fmt.Fprintf(s, "cmd.Flags().StringVarP(&_output, \"output\", \"o\", \"\", \"output destination\")\n")
 	if def.Type == "query" && def.Parameters != nil {
 		for _, propertyName := range sortedPropertyNames(def.Parameters.Properties) {
