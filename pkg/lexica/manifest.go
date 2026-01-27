@@ -111,11 +111,21 @@ func (manifest *Manifest) AddDependencies(l *Lexicon, def *Def) error {
 }
 
 func (manifest *Manifest) AddDependenciesForDef(l *Lexicon, def *Def) error {
-	if def.Input != nil && def.Input.Encoding == "application/json" {
-		manifest.AddDependenciesForProperties(l, def.Input.Schema.Properties)
+	if def.Input != nil {
+		if def.Input.Encoding == "application/json" {
+			manifest.AddDependenciesForProperties(l, def.Input.Schema.Properties)
+		}
+		if def.Input.Schema.Ref != "" {
+			manifest.addID(l, def.Input.Schema.Ref)
+		}
 	}
-	if def.Output != nil && def.Output.Encoding == "application/json" {
-		manifest.AddDependenciesForProperties(l, def.Output.Schema.Properties)
+	if def.Output != nil {
+		if def.Output.Encoding == "application/json" {
+			manifest.AddDependenciesForProperties(l, def.Output.Schema.Properties)
+		}
+		if def.Output.Schema.Ref != "" {
+			manifest.addID(l, def.Output.Schema.Ref)
+		}
 	}
 	if def.Properties != nil {
 		manifest.AddDependenciesForProperties(l, def.Properties)
