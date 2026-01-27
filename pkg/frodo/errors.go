@@ -1,4 +1,4 @@
-package client
+package frodo
 
 import (
 	"encoding/json"

@@ -68,7 +68,7 @@ func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def
 	packageComment(s, packagename)
 	fmt.Fprintf(s, "package %s // %s\n\n", packagename, lexicon.Id)
 	fmt.Fprintf(s, "import \"github.com/spf13/cobra\"\n")
-	fmt.Fprintf(s, "import \"github.com/agentio/slink/pkg/client\"\n")
+	fmt.Fprintf(s, "import \"github.com/agentio/slink/pkg/frodo\"\n")
 	fmt.Fprintf(s, "import \"github.com/agentio/slink/pkg/slink\"\n")
 	fmt.Fprintf(s, "import \"github.com/agentio/slink/gen/xrpc\"\n")
 	fmt.Fprintf(s, "func Cmd() *cobra.Command {\n")
@@ -125,7 +125,7 @@ func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def
 	fmt.Fprintf(s, "RunE: func(cmd *cobra.Command, args []string) error {\n")
 	fmt.Fprintf(s, "if err := slink.SetLogLevel(_loglevel); err != nil {return err}\n")
 	if def.Type == "query" {
-		fmt.Fprintf(s, "client := client.NewClient()\n")
+		fmt.Fprintf(s, "client := frodo.NewClient()\n")
 		fmt.Fprintf(s, "response, err := xrpc.%s(\n", handlerName)
 		fmt.Fprintf(s, "cmd.Context(),\n")
 		fmt.Fprintf(s, "client,\n")
@@ -164,7 +164,7 @@ func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def
 				}
 			}
 		}
-		fmt.Fprintf(s, "client := client.NewClient()\n")
+		fmt.Fprintf(s, "client := frodo.NewClient()\n")
 		resultIfNeeded := ""
 		assignment := "="
 		if def.Output != nil {
@@ -229,7 +229,7 @@ func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def
 			fmt.Fprintf(s, "return slink.Write(cmd.OutOrStdout(), _output, response)\n")
 		}
 	} else if def.Type == "procedure" && def.Input != nil {
-		fmt.Fprintf(s, "client := client.NewClient()\n")
+		fmt.Fprintf(s, "client := frodo.NewClient()\n")
 		resultIfNeeded := ""
 		if def.Output != nil {
 			resultIfNeeded = "response, "
