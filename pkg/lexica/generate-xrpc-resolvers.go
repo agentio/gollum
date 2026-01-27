@@ -26,6 +26,16 @@ func (lexicon *Lexicon) resolveItemsType(defname, propname string, items *Items)
 	return "/* FIXME defaulting on unsupported items type: " + items.Type + " */ string"
 }
 
+func (lexicon *Lexicon) resolveRef(ref string) string {
+	if ref == "#main" {
+		return lexicon.Id
+	}
+	if ref[0] == '#' {
+		return lexicon.Id + ref
+	}
+	return ref
+}
+
 func (lexicon *Lexicon) resolveRefType(ref string) string {
 	if ref[0] == '#' {
 		typename := symbolForID(lexicon.Id) + "_" + capitalize(ref[1:])

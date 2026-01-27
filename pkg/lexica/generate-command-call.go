@@ -61,6 +61,7 @@ func (lexicon *Lexicon) generateCallCommandForDef(root, defname string, def *Def
 	lastpart := parts[len(parts)-1]
 	packagename := strings.ToLower(lastpart)
 	commandname := strcase.ToKebab(lastpart)
+	commandname = strings.ReplaceAll(commandname, "-v-", "-v")
 	handlerName := symbolForID(lexicon.Id)
 
 	s := &strings.Builder{}

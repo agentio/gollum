@@ -29,36 +29,7 @@ func (lexicon *Lexicon) generateDef(s *strings.Builder, name string, def *Def) {
 	case "array":
 		if def.Items.Type == "union" {
 			uniontype := defname + "_Elem"
-			fmt.Fprintf(s, "type %s_Elem struct {\n", defname)
-			for _, ref := range def.Items.Refs {
-				fieldname := lexicon.unionFieldName(ref)
-				fieldtype := lexicon.unionFieldType(ref)
-				fmt.Fprintf(s, "%s %s\n", fieldname, fieldtype)
-			}
-			fmt.Fprintf(s, "}\n\n")
-			fmt.Fprintf(s, "func (m *%s) UnmarshalJSON(data []byte) error {\n", uniontype)
-			fmt.Fprintf(s, "recordType := slink.LexiconTypeFromJSONBytes(data)\n")
-			fmt.Fprintf(s, "switch recordType {\n")
-			for _, ref := range def.Items.Refs {
-				fieldname := lexicon.unionFieldName(ref)
-				fieldtype := lexicon.unionFieldType(ref)[1:] // strip leading *
-				fmt.Fprintf(s, "case \"%s%s\":\n", lexicon.Id, ref)
-				fmt.Fprintf(s, "m.%s = &%s{}\n", fieldname, fieldtype)
-				fmt.Fprintf(s, "json.Unmarshal(data, m.%s)\n", fieldname)
-
-			}
-			fmt.Fprintf(s, "}\n")
-			fmt.Fprintf(s, "return nil\n")
-			fmt.Fprintf(s, "}\n\n")
-			fmt.Fprintf(s, "func (m %s) MarshalJSON() ([]byte, error) {\n", uniontype)
-			for _, ref := range def.Items.Refs {
-				fieldname := lexicon.unionFieldName(ref)
-				fmt.Fprintf(s, "if m.%s != nil {\n", fieldname)
-				fmt.Fprintf(s, "return json.Marshal(m.%s)\n", fieldname)
-				fmt.Fprintf(s, "} else ")
-			}
-			fmt.Fprintf(s, "{ return []byte(\"{}\"), nil }\n")
-			fmt.Fprintf(s, "}\n\n")
+			lexicon.generateUnion(s, uniontype, def.Items.Refs)
 		} else {
 			fmt.Fprintf(s, "// FIXME: ungenerated array %+v\n", def)
 		}
