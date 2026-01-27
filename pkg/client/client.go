@@ -19,6 +19,8 @@ type Client struct {
 	Host          string
 	Authorization string
 	ATProtoProxy  string
+	ProxySession  string
+	UserDid       string
 }
 
 func NewClient() *Client {
@@ -31,10 +33,18 @@ func NewClient() *Client {
 	}
 }
 
+func (c *Client) SetSessionHeaders(r *http.Request) *Client {
+	c.ProxySession = r.Header.Get("proxy-session")
+	c.UserDid = r.Header.Get("user-did")
+	return c
+}
+
 type ClientOptions struct {
 	Host          string
 	Authorization string
 	ATProtoProxy  string
+	ProxySession  string
+	UserDid       string
 }
 
 func NewClientWithOptions(options ClientOptions) *Client {
@@ -42,6 +52,8 @@ func NewClientWithOptions(options ClientOptions) *Client {
 		Host:          options.Host,
 		Authorization: options.Authorization,
 		ATProtoProxy:  options.ATProtoProxy,
+		ProxySession:  options.ProxySession,
+		UserDid:       options.UserDid,
 	}
 }
 
@@ -114,6 +126,24 @@ func (c *Client) Do(
 	if atprotoproxy != "" {
 		req.Header.Set("atproto-proxy", atprotoproxy)
 		log.Infof("atproto-proxy: %s", atprotoproxy)
+	}
+
+	proxysession := c.ProxySession
+	if proxysession == "" {
+		proxysession = os.Getenv("SLINK_PROXYSESSION")
+	}
+	if proxysession != "" {
+		req.Header.Set("proxy-session", proxysession)
+		log.Infof("proxy-session: %s", proxysession)
+	}
+
+	userdid := c.UserDid
+	if userdid == "" {
+		userdid = os.Getenv("SLINK_USERDID")
+	}
+	if userdid != "" {
+		req.Header.Set("user-did", userdid)
+		log.Infof("user-did: %s", userdid)
 	}
 
 	client := sidecar.NewClient(sidecar.ClientOptions{
