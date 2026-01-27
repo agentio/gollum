@@ -27,7 +27,7 @@ func LexiconTypeFromJSONBytes(data []byte) string {
 	return record.LexiconTypeID
 }
 
-func MarshalWithType(t string, v any) ([]byte, error) {
+func MarshalWithLexiconType(t string, v any) ([]byte, error) {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return nil, err
