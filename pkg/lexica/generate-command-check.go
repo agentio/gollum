@@ -86,7 +86,6 @@ func (lexicon *Lexicon) generateCheckCommandForDef(root, defname string, def *De
 	fmt.Fprintf(s, "if untyped == nil {return errors.New(\"no data\")}\n")
 	fmt.Fprintf(s, "m, ok := (*untyped).(map[string]any)\n")
 	fmt.Fprintf(s, "if ok {m[\"createdAt\"] = slink.Now()}\n")
-	fmt.Fprintf(s, "if err != nil {return err}\n")
 	fmt.Fprintf(s, "b, err := json.Marshal(untyped)\n")
 	fmt.Fprintf(s, "if err != nil {return err}\n")
 	fmt.Fprintf(s, "var record xrpc.%s\n", handlerName)
