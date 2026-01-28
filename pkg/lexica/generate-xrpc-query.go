@@ -28,7 +28,7 @@ func (lexicon *Lexicon) generateQuery(s *strings.Builder, defname string, def *D
 		fmt.Fprintf(s, "var output %s_Output\n", defname)
 		fmt.Fprintf(s, "params := map[string]any{\n")
 		if paramsok {
-			for parameterName := range def.Parameters.Properties {
+			for _, parameterName := range sortedPropertyNames(def.Parameters.Properties) {
 				fmt.Fprintf(s, "\"%s\":%s,\n", parameterName, parameterName)
 			}
 		}
@@ -48,7 +48,7 @@ func (lexicon *Lexicon) generateQuery(s *strings.Builder, defname string, def *D
 		fmt.Fprintf(s, "func %s(ctx context.Context, c slink.Client%s) ([]byte, error) {\n", defname, params)
 		fmt.Fprintf(s, "params := map[string]any{\n")
 		if paramsok {
-			for parameterName := range def.Parameters.Properties {
+			for _, parameterName := range sortedPropertyNames(def.Parameters.Properties) {
 				fmt.Fprintf(s, "\"%s\":%s,\n", parameterName, parameterName)
 			}
 		}
