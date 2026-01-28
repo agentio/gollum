@@ -28,7 +28,7 @@ func cmd() *cobra.Command {
 				`A tool for working with the AT Protocol.`,
 				``,
 				`Environment Variables:`,
-				`  SLINK_HOST sets the target host (e.g. "http://localhost:5050").`,
+				`  SLINK_HOST sets the target host (e.g. "https://public.api.bsky.app").`,
 				`  SLINK_AUTH sets the authorization header (e.g. "Bearer XXXX").`,
 				`  SLINK_ATPROTOPROXY sets the atproto-proxy header.`,
 			}, "\n"),

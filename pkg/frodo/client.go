@@ -26,7 +26,7 @@ type Client struct {
 func NewClient() *Client {
 	host := os.Getenv("SLINK_HOST")
 	if host == "" {
-		host = "http://localhost:5050"
+		host = "https://public.api.bsky.app"
 	}
 	return &Client{
 		Host: host,
