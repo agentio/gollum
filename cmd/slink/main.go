@@ -31,6 +31,8 @@ func cmd() *cobra.Command {
 				`  SLINK_HOST sets the target host (e.g. "https://public.api.bsky.app").`,
 				`  SLINK_AUTH sets the authorization header (e.g. "Bearer XXXX").`,
 				`  SLINK_ATPROTOPROXY sets the atproto-proxy header.`,
+				`  SLINK_PROXYSESSION sets the proxy-session header (used by IO).`,
+				`  SLINK_USERDID sets the user-did header (used by IO).`,
 			}, "\n"),
 	}
 	cmd.AddCommand(call.Cmd())
