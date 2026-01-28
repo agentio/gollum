@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 type XRPCError struct {
@@ -20,7 +21,7 @@ func xrpcErrorFromResponse(resp *http.Response, b []byte) error {
 	var xrpcError XRPCError
 	if err := json.Unmarshal(b, &xrpcError); err != nil {
 		xrpcError.Title = "failed to decode xrpc error message"
-		xrpcError.Message = err.Error()
+		xrpcError.Message = strings.TrimSpace(string(b))
 	}
 	xrpcError.Code = resp.StatusCode
 	return &xrpcError
