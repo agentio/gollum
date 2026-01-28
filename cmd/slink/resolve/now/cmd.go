@@ -10,7 +10,7 @@ import (
 func Cmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "now",
-		Short: "Print the current time in ATProto timestamp format",
+		Short: "Get the current time in ATProto timestamp format",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			fmt.Fprintf(cmd.OutOrStdout(), "%s\n", slink.Now())
 			return nil

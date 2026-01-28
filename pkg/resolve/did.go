@@ -7,6 +7,8 @@ import (
 	"io"
 	"net/http"
 	"strings"
+
+	"github.com/charmbracelet/log"
 )
 
 type DidDocument struct {
@@ -51,6 +53,7 @@ func DidBytes(ctx context.Context, did string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	log.Debugf("%s", string(b))
 	return b, nil
 }
 
