@@ -11,18 +11,18 @@ import (
 func Cmd() *cobra.Command {
 	var loglevel string
 	cmd := &cobra.Command{
-		Use:   "did DID",
-		Short: "Fetch the DID document for a DID",
+		Use:   "did HANDLE",
+		Short: "Lookup the DID for a handle",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := slink.SetLogLevel(loglevel); err != nil {
 				return err
 			}
-			b, err := resolve.DidBytes(cmd.Context(), args[0])
+			did, err := resolve.Handle(cmd.Context(), args[0])
 			if err != nil {
 				return err
 			}
-			fmt.Fprintf(cmd.OutOrStdout(), "%s\n", string(b))
+			fmt.Fprintf(cmd.OutOrStdout(), "%s\n", did)
 			return nil
 		},
 	}

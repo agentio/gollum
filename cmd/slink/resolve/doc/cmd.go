@@ -1,4 +1,4 @@
-package handle
+package doc
 
 import (
 	"fmt"
@@ -11,18 +11,18 @@ import (
 func Cmd() *cobra.Command {
 	var loglevel string
 	cmd := &cobra.Command{
-		Use:   "handle HANDLE",
-		Short: "Lookup the DID for a handle",
+		Use:   "doc DID",
+		Short: "Fetch the document for a DID",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := slink.SetLogLevel(loglevel); err != nil {
 				return err
 			}
-			did, err := resolve.Handle(cmd.Context(), args[0])
+			b, err := resolve.DidBytes(cmd.Context(), args[0])
 			if err != nil {
 				return err
 			}
-			fmt.Fprintf(cmd.OutOrStdout(), "%s\n", did)
+			fmt.Fprintf(cmd.OutOrStdout(), "%s\n", string(b))
 			return nil
 		},
 	}

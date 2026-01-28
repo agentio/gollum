@@ -13,7 +13,7 @@ func Cmd() *cobra.Command {
 	var loglevel string
 	cmd := &cobra.Command{
 		Use:   "pds HANDLE",
-		Short: "Determine the PDS host for a handle",
+		Short: "Lookup the PDS host for a handle",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := slink.SetLogLevel(loglevel); err != nil {
