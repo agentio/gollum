@@ -33,8 +33,10 @@ It's this easy to use `slink` to call XRPC APIs:
 ```
 
 You just need to specify the host to be called with the `SLINK_HOST` environment variable (be sure to include the `https://` or `http://` prefix).
+
+You can also use the `slink resolve pds` subcommand to look up the host of any handle:
 ```
-export SLINK_HOST=$YOUR_PDS_URL
+export SLINK_HOST=$(slink resolve pds agent.io)
 ```
 
 With that, you can use `slink` to make unauthenticated calls.
