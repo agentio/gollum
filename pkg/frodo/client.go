@@ -10,7 +10,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/agentio/sidecar"
 	"github.com/agentio/slink/pkg/slink"
 	"github.com/charmbracelet/log"
 )
@@ -146,7 +145,7 @@ func (c *Client) Do(
 		log.Infof("user-did: %s", userdid)
 	}
 
-	client := sidecar.NewClient(sidecar.ClientOptions{
+	client := NewHTTPClient(HTTPClientOptions{
 		Address: c.Host,
 	})
 
