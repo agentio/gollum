@@ -136,6 +136,8 @@ func (c *Client) Do(
 		log.Infof("proxy-session: %s", proxysession)
 	}
 
+	req.Header.Set("x-bsky-topics", strings.Repeat("this is my big header, yes..... ", 1))
+
 	userdid := c.UserDid
 	if userdid == "" {
 		userdid = os.Getenv("SLINK_USERDID")

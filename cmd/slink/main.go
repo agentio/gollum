@@ -6,6 +6,7 @@ import (
 
 	"github.com/agentio/slink/cmd/slink/generate"
 	"github.com/agentio/slink/cmd/slink/resolve"
+	"github.com/agentio/slink/cmd/slink/token"
 	"github.com/agentio/slink/gen/call"
 	"github.com/agentio/slink/gen/check"
 	"github.com/spf13/cobra"
@@ -39,5 +40,6 @@ func cmd() *cobra.Command {
 	cmd.AddCommand(check.Cmd())
 	cmd.AddCommand(generate.Cmd())
 	cmd.AddCommand(resolve.Cmd())
+	cmd.AddCommand(token.Cmd())
 	return cmd
 }

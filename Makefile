@@ -7,7 +7,7 @@ bootstrap:
 	go run ./cmd/bootstrap check
 
 slink:
-	go install ./cmd/slink
+	go install -tags jwx_es256k ./cmd/slink
 
 manifest:
 	go run ./cmd/bootstrap lint
