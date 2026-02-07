@@ -1,4 +1,4 @@
-package frodo
+package froda
 
 import (
 	"encoding/json"
