@@ -14,6 +14,7 @@ import (
 	"github.com/charmbracelet/log"
 )
 
+// Client contains configurable settings for the client.
 type Client struct {
 	Host          string
 	Authorization string
@@ -22,6 +23,7 @@ type Client struct {
 	UserDid       string
 }
 
+// NewClient creates a new client that can be configured directly or with environment variables.
 func NewClient() *Client {
 	host := os.Getenv("SLINK_HOST")
 	if host == "" {
@@ -32,12 +34,15 @@ func NewClient() *Client {
 	}
 }
 
+// SetSessionHeaders configures a client with headers sent with a request.
+// This can be used to read caller identity sent by an authenticating proxy.
 func (c *Client) SetSessionHeaders(r *http.Request) *Client {
 	c.ProxySession = r.Header.Get("proxy-session")
 	c.UserDid = r.Header.Get("user-did")
 	return c
 }
 
+// ClientOptions contains values that can be passed to [NewClientWithOptions].
 type ClientOptions struct {
 	Host          string
 	Authorization string
@@ -46,6 +51,7 @@ type ClientOptions struct {
 	UserDid       string
 }
 
+// NewClientWithOptions creates a client using a user-specified set of options.
 func NewClientWithOptions(options ClientOptions) *Client {
 	return &Client{
 		Host:          options.Host,
@@ -56,6 +62,7 @@ func NewClientWithOptions(options ClientOptions) *Client {
 	}
 }
 
+// Do performs an HTTP request using XRPC conventions.
 func (c *Client) Do(
 	ctx context.Context,
 	kind slink.RequestType,
@@ -107,7 +114,7 @@ func (c *Client) Do(
 	if bodyvalue != nil && contentType != "" {
 		req.Header.Set("Content-Type", contentType)
 	}
-	req.Header.Set("User-Agent", "slink")
+	req.Header.Set("User-Agent", "froda (https://pkg.go.dev/github.com/agentio/slink/pkg/froda)")
 
 	authorization := c.Authorization
 	if authorization == "" {
@@ -147,7 +154,7 @@ func (c *Client) Do(
 		log.Infof("user-did: %s", userdid)
 	}
 
-	client := NewHTTPClient(HTTPClientOptions{
+	client := newHTTPClient(httpClientOptions{
 		Address: c.Host,
 	})
 
@@ -190,5 +197,4 @@ func (c *Client) Do(
 		return fmt.Errorf("decoding xrpc response: %w", err)
 	}
 	return nil
-
 }

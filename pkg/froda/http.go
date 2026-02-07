@@ -9,12 +9,12 @@ import (
 	"time"
 )
 
-type HTTPClient struct {
+type httpClient struct {
 	Host       string
 	HttpClient *http.Client
 }
 
-type HTTPClientOptions struct {
+type httpClientOptions struct {
 	Address  string
 	Insecure bool
 	Headers  []string
@@ -22,11 +22,11 @@ type HTTPClientOptions struct {
 
 // NewClient creates a client representation from an address.
 // Addresses must be in the format "HOSTNAME:PORT" or "unix:@SOCKET".
-// Connections to port 443 use TLS. All others are cleartext (h2c).
-func NewHTTPClient(options HTTPClientOptions) *HTTPClient {
+// Connections to port 443 use TLS. All others are cleartext (http1 or h2c).
+func newHTTPClient(options httpClientOptions) *httpClient {
 	// Expect TLS on port 443 and use the default HTTP client.
 	if strings.HasSuffix(options.Address, ":443") {
-		return (&HTTPClient{
+		return (&httpClient{
 			Host: "https://" + options.Address,
 			HttpClient: &http.Client{
 				Transport: &http.Transport{
@@ -42,7 +42,7 @@ func NewHTTPClient(options HTTPClientOptions) *HTTPClient {
 	// If required, create a client that can call unix sockets.
 	if strings.HasPrefix(options.Address, "unix:") {
 		address := strings.TrimPrefix(options.Address, "unix:")
-		return (&HTTPClient{
+		return (&httpClient{
 			Host: "http://socket", // The name "socket" is arbitrary.
 			HttpClient: &http.Client{
 				Transport: &http.Transport{
@@ -55,7 +55,7 @@ func NewHTTPClient(options HTTPClientOptions) *HTTPClient {
 		})
 	}
 	// Create a client for networked h2c connections.
-	return (&HTTPClient{
+	return (&httpClient{
 		Host: "http://" + options.Address,
 		HttpClient: &http.Client{
 			Transport: &http.Transport{

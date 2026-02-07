@@ -7,12 +7,14 @@ import (
 	"strings"
 )
 
+// XRPCError represents errors returned from XRPC services.
 type XRPCError struct {
 	Code    int    `json:"code"`
 	Title   string `json:"error"`
 	Message string `json:"message"`
 }
 
+// Error returns a string representation of an XRPCError.
 func (e *XRPCError) Error() string {
 	return fmt.Sprintf("XRPC ERROR %d: %s (%s)", e.Code, e.Title, e.Message)
 }
