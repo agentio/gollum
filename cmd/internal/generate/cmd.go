@@ -1,11 +1,11 @@
 package generate
 
 import (
-	"github.com/agentio/slink/cmd/slink/generate/call"
-	"github.com/agentio/slink/cmd/slink/generate/check"
-	"github.com/agentio/slink/cmd/slink/generate/lint"
-	"github.com/agentio/slink/cmd/slink/generate/manifest"
-	"github.com/agentio/slink/cmd/slink/generate/xrpc"
+	"github.com/agentio/slink/cmd/internal/generate/call"
+	"github.com/agentio/slink/cmd/internal/generate/check"
+	"github.com/agentio/slink/cmd/internal/generate/lint"
+	"github.com/agentio/slink/cmd/internal/generate/manifest"
+	"github.com/agentio/slink/cmd/internal/generate/xrpc"
 	"github.com/spf13/cobra"
 )
 

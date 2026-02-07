@@ -1,12 +1,13 @@
+// The slink command calls APIs described with Lexicon.
 package main
 
 import (
 	"os"
 	"strings"
 
-	"github.com/agentio/slink/cmd/slink/generate"
-	"github.com/agentio/slink/cmd/slink/resolve"
-	"github.com/agentio/slink/cmd/slink/token"
+	"github.com/agentio/slink/cmd/internal/generate"
+	"github.com/agentio/slink/cmd/internal/resolve"
+	"github.com/agentio/slink/cmd/internal/token"
 	"github.com/agentio/slink/gen/call"
 	"github.com/agentio/slink/gen/check"
 	"github.com/spf13/cobra"

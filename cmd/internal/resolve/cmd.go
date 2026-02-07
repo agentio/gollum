@@ -1,10 +1,10 @@
 package resolve
 
 import (
-	"github.com/agentio/slink/cmd/slink/resolve/did"
-	"github.com/agentio/slink/cmd/slink/resolve/doc"
-	"github.com/agentio/slink/cmd/slink/resolve/now"
-	"github.com/agentio/slink/cmd/slink/resolve/pds"
+	"github.com/agentio/slink/cmd/internal/resolve/did"
+	"github.com/agentio/slink/cmd/internal/resolve/doc"
+	"github.com/agentio/slink/cmd/internal/resolve/now"
+	"github.com/agentio/slink/cmd/internal/resolve/pds"
 	"github.com/spf13/cobra"
 )
 

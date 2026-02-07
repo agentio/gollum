@@ -1,12 +1,13 @@
+// The bootstrap command contains subcommands that can be used to regenerate slink.
 package main
 
 import (
 	"os"
 
-	"github.com/agentio/slink/cmd/slink/generate/call"
-	"github.com/agentio/slink/cmd/slink/generate/check"
-	"github.com/agentio/slink/cmd/slink/generate/lint"
-	"github.com/agentio/slink/cmd/slink/generate/xrpc"
+	"github.com/agentio/slink/cmd/internal/generate/call"
+	"github.com/agentio/slink/cmd/internal/generate/check"
+	"github.com/agentio/slink/cmd/internal/generate/lint"
+	"github.com/agentio/slink/cmd/internal/generate/xrpc"
 	"github.com/spf13/cobra"
 )
 

@@ -1,8 +1,8 @@
 package token
 
 import (
-	"github.com/agentio/slink/cmd/slink/token/generate"
-	"github.com/agentio/slink/cmd/slink/token/verify"
+	"github.com/agentio/slink/cmd/internal/token/generate"
+	"github.com/agentio/slink/cmd/internal/token/verify"
 	"github.com/spf13/cobra"
 )
 
