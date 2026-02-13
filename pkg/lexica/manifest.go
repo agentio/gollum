@@ -104,9 +104,9 @@ func (manifest *Manifest) AddDependencies(l *Lexicon, def *Def) error {
 	case "query", "procedure", "object", "record":
 		return manifest.AddDependenciesForDef(l, def)
 	case "array":
-		return fmt.Errorf("unsupported def type %s", def.Type)
+		return manifest.AddDependenciesForArray(l, def)
 	default:
-		return fmt.Errorf("unsupported def type %s", def.Type)
+		return fmt.Errorf("add dependencies: unsupported def type %s", def.Type)
 	}
 }
 
@@ -163,6 +163,13 @@ func (manifest *Manifest) AddDependenciesForProperties(l *Lexicon, properties ma
 		default:
 			log.Warnf("%s %+v", propertyName, propertyValue)
 		}
+	}
+	return nil
+}
+
+func (manifest *Manifest) AddDependenciesForArray(l *Lexicon, def *Def) error {
+	for _, item := range def.Items.Refs {
+		manifest.addID(l, item)
 	}
 	return nil
 }
