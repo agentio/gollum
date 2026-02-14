@@ -39,7 +39,7 @@ func (lexicon *Lexicon) generateDef(s *strings.Builder, name string, def *Def) {
 	case "permission-set":
 		fmt.Fprintf(s, "// CHECKME skipping permission set %s\n", defname)
 	case "subscription":
-		fmt.Fprintf(s, "// CHECKME skipping subscription %s\n", defname)
+		lexicon.generateSubscribe(s, defname, def)
 	default:
 		log.Warnf("skipping %s.%s (type %s)", lexicon.Id, name, def.Type)
 	}

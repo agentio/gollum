@@ -99,10 +99,12 @@ func (manifest *Manifest) addID(l *Lexicon, name string) {
 
 func (manifest *Manifest) AddDependencies(l *Lexicon, def *Def) error {
 	switch def.Type {
-	case "permission-set", "string", "subscription", "token":
+	case "permission-set", "string", "token":
 		return nil // these types have no dependencies
 	case "query", "procedure", "object", "record":
 		return manifest.AddDependenciesForDef(l, def)
+	case "subscription":
+		return manifest.AddDependenciesForSubscription(l, def)
 	case "array":
 		return manifest.AddDependenciesForArray(l, def)
 	default:
@@ -139,7 +141,7 @@ func (manifest *Manifest) AddDependenciesForDef(l *Lexicon, def *Def) error {
 func (manifest *Manifest) AddDependenciesForProperties(l *Lexicon, properties map[string]Property) error {
 	for propertyName, propertyValue := range properties {
 		switch propertyValue.Type {
-		case "string", "integer", "boolean", "unknown", "bytes", "blob":
+		case "string", "integer", "boolean", "unknown", "bytes", "blob", "cid-link":
 		case "union":
 			for _, refName := range propertyValue.Refs {
 				manifest.addID(l, refName)
@@ -154,7 +156,7 @@ func (manifest *Manifest) AddDependenciesForProperties(l *Lexicon, properties ma
 				for _, refName := range propertyValue.Items.Refs {
 					manifest.addID(l, refName)
 				}
-			case "string":
+			case "string", "cid-link":
 			default:
 				log.Warnf("array items %+v", propertyValue.Items)
 			}
@@ -170,6 +172,17 @@ func (manifest *Manifest) AddDependenciesForProperties(l *Lexicon, properties ma
 func (manifest *Manifest) AddDependenciesForArray(l *Lexicon, def *Def) error {
 	for _, item := range def.Items.Refs {
 		manifest.addID(l, item)
+	}
+	return nil
+}
+
+func (manifest *Manifest) AddDependenciesForSubscription(l *Lexicon, def *Def) error {
+	if def.Message != nil {
+		if def.Message.Schema.Type == "union" {
+			for _, refName := range def.Message.Schema.Refs {
+				manifest.addID(l, refName)
+			}
+		}
 	}
 	return nil
 }

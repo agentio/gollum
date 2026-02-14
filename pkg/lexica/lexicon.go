@@ -31,6 +31,9 @@ type Def struct {
 
 	// record
 	Record *Schema `json:"record,omitempty"`
+
+	// subscription
+	Message *Message `json:"message,omitempty"`
 }
 
 type Parameters struct {
@@ -48,9 +51,15 @@ type Input struct {
 	Schema   Schema `json:"schema"`
 }
 
+type Message struct {
+	Description string `json:"description"`
+	Schema      Schema `json:"schema"`
+}
+
 type Schema struct {
 	Type       string              `json:"type"`
 	Ref        string              `json:"ref,omitempty"`
+	Refs       []string            `json:"refs,omitempty"`
 	Required   []string            `json:"required,omitempty"`
 	Properties map[string]Property `json:"properties,omitempty"`
 }
