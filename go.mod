@@ -4,6 +4,7 @@ go 1.25.1
 
 require (
 	github.com/charmbracelet/log v0.4.2
+	github.com/coder/websocket v1.8.14
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0
 	github.com/google/uuid v1.6.0
 	github.com/iancoleman/strcase v0.3.0
