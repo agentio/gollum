@@ -13,24 +13,23 @@ func (lexicon *Lexicon) generateSubscribe(s *strings.Builder, defname string, de
 		if def.Parameters != nil && def.Parameters.Type == "params" {
 			params, paramsok = parseQueryParameters(def.Parameters)
 		}
-		fmt.Fprintf(s, "type %s_Handler func(m *%s_Message ) error\n\n", defname, defname)
+		fmt.Fprintf(s, "// The handler is passed a reader that returns bytes.\n")
+		fmt.Fprintf(s, "// Use this with your favorite CBOR decoder.\n")
+		fmt.Fprintf(s, "type %s_Handler func(m io.Reader) error\n\n", defname)
 		params += fmt.Sprintf(", fn %s_Handler", defname)
 		fmt.Fprintf(s, "// %s\n", def.Description)
 		fmt.Fprintf(s, "func %s(ctx context.Context, c slink.Client%s) (error) {\n", defname, params)
-		fmt.Fprintf(s, "log.Error(\"FIXME: %s doesn't work yet\")\n", defname)
-		fmt.Fprintf(s, "params := map[string]any{\n")
+		fmt.Fprintf(s, "params := map[string]any{}\n")
 		if paramsok {
 			for _, parameterName := range sortedPropertyNames(def.Parameters.Properties) {
-				fmt.Fprintf(s, "\"%s\":%s,\n", parameterName, parameterName)
+				if parameterName == "cursor" {
+					fmt.Fprintf(s, "if %s >= 0 {params[\"%s\"] = %s}\n", parameterName, parameterName, parameterName)
+				} else {
+					fmt.Fprintf(s, "params[\"%s\"] = %s,\n", parameterName, parameterName)
+				}
 			}
 		}
-		fmt.Fprintf(s, "}\n")
-		fmt.Fprintf(s, "var output []byte\n")
-		fmt.Fprintf(s, "if err := c.Do(ctx, slink.Query, \"\", \"%s\", params, nil, &output); err != nil {\n", lexicon.Id)
-		fmt.Fprintf(s, "return err\n")
-		fmt.Fprintf(s, "}\n")
-		fmt.Fprintf(s, "_ = output\n")
-		fmt.Fprintf(s, "return nil\n")
+		fmt.Fprintf(s, "return c.Subscribe(ctx, \"%s\", params, fn)\n", lexicon.Id)
 		fmt.Fprintf(s, "}\n\n")
 		lexicon.generateUnion(s, defname+"_Message", def.Message.Schema.Refs)
 	} else {

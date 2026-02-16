@@ -203,12 +203,9 @@ func (c *Client) Subscribe(
 	ctx context.Context,
 	method string,
 	params map[string]any,
-	callback func(b bytes.Buffer) error,
+	callback func(b io.Reader) error,
 ) error {
 	var paramStr string
-	if params["cursor"].(int64) < 0 {
-		delete(params, "cursor")
-	}
 	if len(params) > 0 {
 		paramStr = "?" + makeParams(params)
 	}
@@ -278,6 +275,6 @@ func (c *Client) Subscribe(
 		if err != nil {
 			return err
 		}
-		callback(b)
+		callback(&b)
 	}
 }

@@ -1,8 +1,8 @@
 package slink
 
 import (
-	"bytes"
 	"context"
+	"io"
 )
 
 type RequestType int
@@ -24,6 +24,6 @@ type Client interface {
 	Subscribe(ctx context.Context,
 		xrpcMethod string,
 		params map[string]any,
-		callback func(b bytes.Buffer) error,
+		callback func(b io.Reader) error,
 	) error
 }
