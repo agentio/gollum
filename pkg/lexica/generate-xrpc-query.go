@@ -45,6 +45,7 @@ func (lexicon *Lexicon) generateQuery(s *strings.Builder, defname string, def *D
 			params, paramsok = parseQueryParameters(def.Parameters)
 		}
 		fmt.Fprintf(s, "// %s\n", def.Description)
+		fmt.Fprintf(s, "// Returns []byte containing %s.\n", def.Output.Encoding)
 		fmt.Fprintf(s, "func %s(ctx context.Context, c slink.Client%s) ([]byte, error) {\n", defname, params)
 		fmt.Fprintf(s, "params := map[string]any{\n")
 		if paramsok {
