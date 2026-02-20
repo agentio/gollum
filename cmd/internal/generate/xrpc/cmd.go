@@ -7,7 +7,7 @@ import (
 )
 
 func Cmd() *cobra.Command {
-	var input string
+	var inputs []string
 	var output string
 	var manifest string
 	var _loglevel string
@@ -19,8 +19,10 @@ func Cmd() *cobra.Command {
 				return err
 			}
 			catalog := lexica.NewCatalog()
-			if err := catalog.Load(input, false /* skip lint */); err != nil {
-				return err
+			for _, input := range inputs {
+				if err := catalog.Load(input, false /* skip lint */); err != nil {
+					return err
+				}
 			}
 			if manifest != "" {
 				_, err := lexica.BuildManifest(manifest)
@@ -34,7 +36,7 @@ func Cmd() *cobra.Command {
 			return nil
 		},
 	}
-	cmd.Flags().StringVarP(&input, "input", "i", "lexicons", "input directory")
+	cmd.Flags().StringArrayVarP(&inputs, "input", "i", []string{"lexicons"}, "input directory")
 	cmd.Flags().StringVarP(&output, "output", "o", "gen/xrpc", "output directory")
 	cmd.Flags().StringVarP(&manifest, "manifest", "m", "", "manifest")
 	cmd.Flags().StringVarP(&_loglevel, "log", "l", "warn", "log level (debug, info, warn, error, fatal)")

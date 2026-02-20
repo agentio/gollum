@@ -7,7 +7,7 @@ import (
 )
 
 func Cmd() *cobra.Command {
-	var input string
+	var inputs []string
 	var _loglevel string
 	var cmd = &cobra.Command{
 		Use:   "manifest MANIFEST",
@@ -18,8 +18,10 @@ func Cmd() *cobra.Command {
 				return err
 			}
 			catalog := lexica.NewCatalog()
-			if err := catalog.Load(input, false /* lint */); err != nil {
-				return err
+			for _, input := range inputs {
+				if err := catalog.Load(input, false /* skip lint */); err != nil {
+					return err
+				}
 			}
 			m, err := lexica.BuildManifest(args[0])
 			if err != nil {
@@ -29,7 +31,7 @@ func Cmd() *cobra.Command {
 			return nil
 		},
 	}
-	cmd.Flags().StringVarP(&input, "input", "i", "lexicons", "input directory")
+	cmd.Flags().StringArrayVarP(&inputs, "input", "i", []string{"lexicons"}, "input directory")
 	cmd.Flags().StringVarP(&_loglevel, "log", "l", "warn", "log level (debug, info, warn, error, fatal)")
 	return cmd
 }
