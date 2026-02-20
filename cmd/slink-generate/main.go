@@ -19,7 +19,8 @@ func main() {
 
 func cmd() *cobra.Command {
 	var cmd = &cobra.Command{
-		Use: "slink-generate",
+		Use:   "slink-generate",
+		Short: "The code generation subcommands of slink.",
 	}
 	cmd.AddCommand(lint.Cmd())
 	cmd.AddCommand(call.Cmd())
