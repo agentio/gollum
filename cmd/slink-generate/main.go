@@ -1,4 +1,4 @@
-// The bootstrap command contains subcommands that can be used to regenerate slink.
+// The slink-generate command contains subcommands that can be used to regenerate slink.
 package main
 
 import (
@@ -19,7 +19,7 @@ func main() {
 
 func cmd() *cobra.Command {
 	var cmd = &cobra.Command{
-		Use: "bootstrap",
+		Use: "slink-generate",
 	}
 	cmd.AddCommand(lint.Cmd())
 	cmd.AddCommand(call.Cmd())
